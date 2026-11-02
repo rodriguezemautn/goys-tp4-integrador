@@ -21,3 +21,9 @@ credentials*
 *.bak
 *.log
 *.rsc.bak
+
+
+.venv/
+__pycache__/
+*.pyc
+/demo/mcp/tunnel-client.exe

@@ -37,6 +37,17 @@ Ambos participan en la revisión del trabajo, el registro de avances y la defens
 | 27/10/2026 | Se configuró OSPFv2 en área 0 con Router ID explícitos, interfaces pasivas y costos que favorecen R1–R3. Se verificaron dos vecinos FULL por router, rutas aprendidas y comunicación entre PC y SRV en ambos sentidos. Se documentó F3 y se incorporaron cinco capturas. | Facundo | 695761c |
 | 28/10/2026 | Se configuró y documentó la seguridad de EMPRESA: cuentas y permisos, restricciones de gestión, servicios e interfaces sin uso deshabilitados, filtrado IPv4, bloqueo de entrada y tránsito IPv6 y autenticación OSPF SHA256. Se verificaron tráfico permitido y bloqueado, rechazo de escritura, prueba OSPF con clave incorrecta y recuperación, y acceso al puerto SSH desde orígenes autorizado y no autorizado. Se incorporaron 18 capturas y se documentaron las limitaciones. | Facundo | 64592db |
 | 28/10/2026 | Se preparó GEMELO como copia de EMPRESA, con identidades, IP y MAC de gestión y credenciales propias. Se repararon las referencias de interfaces tras cambiar las MAC. Se verificaron ejecución simultánea, acceso SSH, vecinos OSPF Full y tráfico permitido y bloqueado. Se documentó F5 con siete capturas y la comprobación de discos activos distintos en R1. | Facundo | 6795726 |
+| 28/10/2026 | Se implementó el inventario fijo, la carga local de credenciales y las conexiones SSH de lectura con verificación de clave de host, identidad y MAC de gestión. | Facundo | 595127e, 3c5c83d |
+| 28/10/2026 | Se incorporaron consultas predefinidas, su publicación mediante FastMCP y una prueba de integración del protocolo y sus restricciones iniciales. | Facundo | 7ec2c01, c4b976d, 7dd7700 |
+| 29/10/2026 | Se implementó una comparación de las reglas forward del escenario entre EMPRESA-R1 y GEMELO-R1 y se verificó su llamada mediante MCP. Esta herramienta fue retirada posteriormente al adoptar herramientas generales. | Facundo | 095b12d, af94b30 |
+| 29/10/2026 | Se habilitaron conexiones administrativas exclusivamente en GEMELO. Se verificaron las conexiones con netadmin y el rechazo local de EMPRESA como destino administrativo. | Facundo | da60d23 |
+| 29/10/2026 | Se implementaron y probaron acciones específicas para actualizar y corregir la regla de falla en GEMELO. Esta implementación fue reemplazada posteriormente para evitar un diagnóstico limitado a una solución predefinida. | Facundo | 74c4eb2 |
+| 29/10/2026 | Se reemplazaron las consultas y acciones específicas por comandos generales: consultas con mcp_ro en ambos entornos y ejecución administrativa con netadmin exclusivamente en GEMELO. Se verificó la separación de destinos mediante MCP. | Facundo | 7e7c780 |
+| 29/10/2026 | Se incorporó acceso mediante MCP a las consolas de GEMELO-PC y GEMELO-SRV. Se verificaron consultas a ambos extremos, rechazo de destinos no permitidos, comunicación PC → SRV y bloqueo hacia la loopback protegida. | Facundo | 8c2549d |
+| 29/10/2026 | Se implementó iniciar.py para configurar, diagnosticar e iniciar Secure MCP Tunnel. Se corrigió el tratamiento de rutas Windows y se comprobaron llamadas desde ChatGPT al servidor del repositorio. | Facundo | 6272e95 |
+| 29/10/2026 | Se incorporaron y ajustaron instrucciones de actualización, diagnóstico, validación e informes de cierre en Markdown dentro del chat. Se verificó la entrega de las instrucciones mediante la inicialización MCP y se realizaron ensayos desde ChatGPT. | Facundo | ef3da51, 4565d39, 955f52c, 3213e37, a614da7 |
+| 29/10/2026 | Se documentó F6 con las herramientas definitivas, separación de accesos, consolas, arranque, verificaciones y limitaciones. Se actualizaron los requisitos de reproducción en demo/README.md. | Facundo | 85b0f0c |
+| 29/10/2026 | Se documentó F7: introducción manual del bloqueo en EMPRESA, reproducción en GEMELO, diagnóstico mediante pings y contadores, deshabilitación de la regla únicamente en GEMELO y recuperación de respuestas. Quedó pendiente registrar la conservación del bloqueo hacia la loopback después de la corrección. | Facundo | c38d0af |
 
 Las pruebas previas se registran retrospectivamente. Completar sus fechas y referencias a commits cuando se disponga de esos datos.
 
@@ -50,7 +61,11 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 - [x] Mantener EMPRESA con acceso de lectura para la IA.
 - [x] Permitir pruebas de corrección únicamente en GEMELO.
 - [x] Preparar e iniciar los proyectos manualmente.
-- [x] Excluir la sincronización automática del gemelo.
+- [x] Excluir la sincronización continua en segundo plano.
+- [x] Permitir actualizar GEMELO mediante la IA a solicitud del usuario o para reproducir el problema investigado, conservando las diferencias intencionales entre entornos.
+- [x] Utilizar herramientas generales para investigar y administrar GEMELO, sin incorporar una solución predefinida para la falla.
+- [x] Automatizar el acceso a las consolas VPCS de GEMELO mediante MCP.
+- [x] Incorporar instrucciones para presentar informes de intervención en el chat, sin agregar escritura de informes en el equipo local.
 - [x] Entregar una recomendación sin aplicar cambios automáticamente sobre EMPRESA.
 
 ### Pendientes
@@ -69,10 +84,16 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 - [x] Verificar permisos, filtrado y autenticación OSPF mediante pruebas positivas y negativas.
 - [x] Preparar GEMELO y verificar su independencia y equivalencia para el escenario definido.
 - [x] Documentar F5 e incorporar sus capturas.
-- [ ] Aplicar y verificar los permisos definitivos de la integración: lectura en EMPRESA y modificaciones controladas en GEMELO.
-- [ ] Implementar las herramientas MCP definitivas.
-- [ ] Preparar una falla reproducible de firewall.
-- [ ] Verificar diagnóstico, corrección en GEMELO y conservación de los bloqueos requeridos.
+- [x] Aplicar y verificar la separación de acceso: lectura en EMPRESA y administración en GEMELO.
+- [x] Implementar y verificar las herramientas MCP definitivas para routers y consolas VPCS.
+- [x] Configurar el arranque mediante Secure MCP Tunnel y comprobar la integración desde ChatGPT.
+- [x] Documentar F6 y actualizar los requisitos de red y acceso.
+- [x] Preparar y ensayar una falla reproducible de firewall.
+- [x] Verificar el diagnóstico mediante configuración, pings y contadores, y la recuperación de conectividad después de corregir únicamente GEMELO.
+- [x] Documentar el escenario y los resultados observados en F7.
+- [ ] Registrar explícitamente la conservación del bloqueo hacia la loopback protegida después de la corrección.
+- [ ] Preparar un .env.example sin secretos y completar las instrucciones de instalación del MCP.
+- [ ] Validar la reproducción completa en otra computadora.
 - [ ] Ejecutar al menos tres pruebas completas y registrar resultados.
 - [ ] Preparar capturas y grabación de respaldo.
 - [ ] Investigar y seleccionar las referencias bibliográficas.
@@ -82,10 +103,13 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 
 ## 📝 Notas
 
-- La conexión MCP con un router ya fue comprobada como prueba de concepto. Esto no significa que la demo completa esté implementada.
-- El gemelo se prepara manualmente y reproduce únicamente el escenario definido. Su equivalencia debe comprobarse antes de las pruebas.
-- El escenario propuesto consiste en una regla incorrecta de firewall que bloquea ICMP entre dos hosts.
-- Las pruebas desde VPCS serán manuales y se contrastarán con los contadores del firewall.
+- La integración MCP está implementada y fue utilizada desde ChatGPT para consultar EMPRESA, administrar GEMELO y operar sus consolas VPCS.
+- Ambos proyectos se preparan e inician manualmente. La actualización de configuraciones en GEMELO puede realizarse mediante la IA, conservando las diferencias intencionales de gestión, identidades, MAC y credenciales.
+- No se implementó sincronización continua. Una actualización o comparación parcial no demuestra equivalencia completa de ambos escenarios.
+- El escenario ensayado consiste en una regla de firewall que bloquea ICMP entre PC y SRV. Las herramientas generales no contienen una función específica para identificarla o corregirla.
+- Las pruebas desde VPCS pueden ejecutarse mediante MCP y contrastarse con los contadores del firewall.
+- La corrección se prueba exclusivamente en GEMELO. Su aplicación en EMPRESA queda a cargo del administrador.
+- Los informes se presentan en el chat mediante instrucciones del servidor. Su formato y completitud se evalúan durante los ensayos; no están garantizados por una plantilla ejecutada desde el código.
 - La interacción con ChatGPT mediante el túnel requiere Internet. Se preparará una grabación local como respaldo.
 - No se subirán contraseñas, claves, imágenes de máquinas virtuales ni archivos pesados al repositorio.
 - Cada integrante registrará sus aportes reales y realizará commits con su propia identidad.
