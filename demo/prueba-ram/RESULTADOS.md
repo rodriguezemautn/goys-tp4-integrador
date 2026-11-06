@@ -62,6 +62,12 @@ Problemas propios de la réplica, que no aplican a las VMs:
 | Navegador con Grafana | ~0,3–0,5 GB | ~0,3–0,5 GB |
 | **Total** | **~6,9–8,5 GB** | **~8,0–9,6 GB** |
 
+## Cambios respecto del traspaso
+
+| Cambio | Por qué |
+|---|---|
+| El firewall del CHR acepta SSH desde 10.10.10.11 por ether2 | `backup.yml` corre en el server y exporta la configuración con un usuario de solo lectura |
+
 ## Medición en la laptop
 
 Pendiente: `windows\medir-ram.ps1 -Minutos 10` con todo levantado.

@@ -1,0 +1,141 @@
+---
+# Vuelve el clúster al estado de un backup. Por defecto usa el más nuevo; también se puede elegir.
+# Uso: /vagrant/ansible/run.sh restore.yml -e confirmar=si [-e archivo=k3s-AAAAMMDD-HHMMSS.tar.gz.enc]
+- name: Restaurar el clúster desde un backup
+  hosts: servers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Pedir confirmación
+      ansible.builtin.assert:
+        that:
+          - confirmar | default('no') == 'si'
+        fail_msg: "Esto reemplaza el estado del clúster. Para seguir, agregá -e confirmar=si"
+
+    - name: Buscar los backups del clúster
+      ansible.builtin.find:
+        paths: "{{ backup_dir }}"
+        patterns: k3s-*.tar.gz.enc
+      register: restore_guardados
+
+    - name: Cortar si no hay backups
+      ansible.builtin.assert:
+        that:
+          - restore_guardados.files | length > 0
+        fail_msg: "No hay backups en demo/backups/"
+
+    - name: Elegir el backup
+      ansible.builtin.set_fact:
+        restore_archivo: >-
+          {{ (backup_dir ~ '/' ~ archivo) if archivo is defined
+             else (restore_guardados.files | map(attribute='path') | sort | last) }}
+        restore_fecha: "{{ now(fmt='%Y%m%d-%H%M%S') }}"
+
+    - name: Crear una carpeta de trabajo
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: restore-
+      register: restore_tmp
+
+    - name: Restaurar
+      block:
+        - name: Descifrar el backup
+          ansible.builtin.command:
+            argv:
+              - openssl
+              - enc
+              - -d
+              - -aes-256-cbc
+              - -pbkdf2
+              - -pass
+              - "file:{{ backup_clave_cifrado }}"
+              - -in
+              - "{{ restore_archivo }}"
+              - -out
+              - "{{ restore_tmp.path }}/k3s.tar.gz"
+          changed_when: false
+
+        - name: Abrir el paquete
+          ansible.builtin.unarchive:
+            src: "{{ restore_tmp.path }}/k3s.tar.gz"
+            dest: "{{ restore_tmp.path }}"
+            remote_src: true
+
+        - name: Revisar la integridad de la base antes de tocar nada
+          ansible.builtin.command:
+            argv:
+              - python3
+              - -c
+              - >-
+                import sqlite3, sys;
+                r = sqlite3.connect(sys.argv[1]).execute('PRAGMA integrity_check').fetchone()[0];
+                sys.exit(0 if r == 'ok' else r)
+              - "{{ restore_tmp.path }}/state.db"
+          changed_when: false
+
+        - name: Detener k3s
+          ansible.builtin.systemd_service:
+            name: k3s
+            state: stopped
+
+        - name: Apartar la base actual
+          ansible.builtin.command:
+            cmd: mv {{ k3s_db_dir }} {{ k3s_db_dir }}.antes-{{ restore_fecha }}
+            removes: "{{ k3s_db_dir }}"
+
+        - name: Crear la carpeta de la base
+          ansible.builtin.file:
+            path: "{{ k3s_db_dir }}"
+            state: directory
+            owner: root
+            group: root
+            mode: "0700"
+
+        - name: Poner la base del backup
+          ansible.builtin.copy:
+            src: "{{ restore_tmp.path }}/state.db"
+            dest: "{{ k3s_db_dir }}/state.db"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0600"
+
+        - name: Poner el token del backup
+          ansible.builtin.copy:
+            src: "{{ restore_tmp.path }}/token"
+            dest: "{{ k3s_token_archivo }}"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0600"
+          no_log: true
+      always:
+        - name: Borrar la carpeta de trabajo
+          ansible.builtin.file:
+            path: "{{ restore_tmp.path }}"
+            state: absent
+
+        - name: Levantar k3s
+          ansible.builtin.systemd_service:
+            name: k3s
+            state: started
+
+    - name: Esperar a que el nodo esté Ready
+      ansible.builtin.command:
+        argv:
+          - k3s
+          - kubectl
+          - get
+          - node
+          - "{{ inventory_hostname }}"
+          - -o
+          - jsonpath={.status.conditions[?(@.type=="Ready")].status}
+      register: restore_nodo
+      until: restore_nodo.stdout == "True"
+      retries: 60
+      delay: 5
+      changed_when: false
+
+    - name: Informar el resultado
+      ansible.builtin.debug:
+        msg: "Restaurado {{ restore_archivo | basename }}. La base anterior quedó en {{ k3s_db_dir }}.antes-{{ restore_fecha }}"

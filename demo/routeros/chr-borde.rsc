@@ -30,6 +30,7 @@ add chain=input connection-state=established,related action=accept comment="sesi
 add chain=input connection-state=invalid action=drop
 add chain=input in-interface=ether2 src-address=10.10.10.0/24 protocol=tcp dst-port=179 action=accept comment="BGP desde el cluster"
 add chain=input in-interface=ether1 src-address=192.168.56.1 protocol=tcp dst-port=22,8291 action=accept comment="SSH y Winbox desde la laptop"
+add chain=input in-interface=ether2 src-address=10.10.10.11 protocol=tcp dst-port=22 action=accept comment="SSH del usuario backup desde el nodo de control"
 add chain=input action=drop comment="resto"
 add chain=forward connection-state=established,related action=accept comment="sesiones ya abiertas"
 add chain=forward connection-state=invalid action=drop

@@ -32,3 +32,5 @@ demo/ansible/group_vars/all/vault.yml
 *.vdi
 *.vdi.zip
 *.zip
+demo/backups/*
+!demo/backups/.gitkeep

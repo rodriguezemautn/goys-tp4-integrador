@@ -36,6 +36,15 @@ comun_paquetes:
   - curl
   - tcpdump
 
+# Backups: quedan en la carpeta compartida con el host, sin secretos a la vista y fuera de git.
+backup_dir: "{{ playbook_dir }}/../backups"
+backup_conservar: 5
+backup_chr_usuario: backup
+backup_clave_ssh: /home/vagrant/.ssh/lab_ed25519
+backup_clave_cifrado: /home/vagrant/.vault_pass
+k3s_db_dir: /var/lib/rancher/k3s/server/db
+k3s_token_archivo: /var/lib/rancher/k3s/server/token
+
 # El día de la Feria no se baja nada: todo queda en el containerd de cada nodo.
 imagenes_precarga:
   - quay.io/metallb/controller:v0.15.2

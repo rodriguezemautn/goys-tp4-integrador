@@ -11,7 +11,7 @@ perfil = ENV.fetch("PERFIL_RAM", "chico")
 abort "PERFIL_RAM debe ser chico o normal (vino: #{perfil})" unless PERFILES.key?(perfil)
 
 clave = File.join(__dir__, ".claves", "lab_ed25519.pub")
-abort "Falta #{clave}: corré windows\\preparar-laptop.ps1 primero" unless File.exist?(clave)
+abort "Falta #{clave}: corré primero el script de preparación (mac/ o windows/)" unless File.exist?(clave)
 
 NODOS = [
   { nombre: "k3s-server", ip: "10.10.10.11", cpus: 2, rol: :server },
