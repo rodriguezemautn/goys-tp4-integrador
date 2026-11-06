@@ -1,0 +1,7 @@
+# Para validar con `kubectl kustomize`. Para desplegar, deploy.yml aplica primero
+# metallb-native.yaml, espera al webhook y después bgp.yaml: de una sola vez fallaría.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - metallb-native.yaml
+  - bgp.yaml

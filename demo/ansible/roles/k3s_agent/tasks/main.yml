@@ -1,0 +1,57 @@
+---
+- name: Crear el directorio de configuración
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Escribir la configuración de k3s
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  register: k3s_agent_config
+
+- name: Bajar el instalador de k3s
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /usr/local/share/instalar-k3s.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Instalar k3s
+  ansible.builtin.command:
+    cmd: /usr/local/share/instalar-k3s.sh agent
+    creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  register: k3s_agent_instalar
+
+- name: Reiniciar k3s si cambió la configuración
+  ansible.builtin.systemd_service:
+    name: k3s-agent
+    state: restarted
+  when: k3s_agent_config is changed and k3s_agent_instalar is not changed
+
+- name: Esperar a que el nodo esté Ready
+  ansible.builtin.command:
+    argv:
+      - k3s
+      - kubectl
+      - get
+      - node
+      - "{{ inventory_hostname }}"
+      - -o
+      - jsonpath={.status.conditions[?(@.type=="Ready")].status}
+  delegate_to: k3s-server
+  register: k3s_agent_nodo
+  until: k3s_agent_nodo.stdout == "True"
+  retries: 60
+  delay: 5
+  changed_when: false

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata: {name: node-exporter, namespace: monitoring, labels: {app: node-exporter}}
+spec:
+  selector: {matchLabels: {app: node-exporter}}
+  template:
+    metadata: {labels: {app: node-exporter}}
+    spec:
+      hostNetwork: true
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter:v1.12.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --web.listen-address=:9100
+            - --collector.disable-defaults
+            - --collector.cpu
+            - --collector.meminfo
+            - --collector.netdev
+            - --collector.loadavg
+            - --collector.uname
+          ports:
+            - {name: metrics, containerPort: 9100, hostPort: 9100}
+          resources: {requests: {cpu: 10m, memory: 16Mi}, limits: {memory: 32Mi}}
+          # Solo /proc y /sys: el disco del nodo no hace falta.
+          volumeMounts:
+            - {name: proc, mountPath: /host/proc, readOnly: true}
+            - {name: sys, mountPath: /host/sys, readOnly: true}
+      volumes:
+        - name: proc
+          hostPath: {path: /proc}
+        - name: sys
+          hostPath: {path: /sys}

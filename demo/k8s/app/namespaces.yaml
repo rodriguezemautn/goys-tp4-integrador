@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata: {name: web}
+---
+apiVersion: v1
+kind: Namespace
+metadata: {name: datos}
+---
+# Sin servicios: es el origen "de afuera" en las pruebas de segmentación.
+apiVersion: v1
+kind: Namespace
+metadata: {name: otros}

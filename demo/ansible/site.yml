@@ -1,0 +1,55 @@
+---
+- name: Controlar los secretos
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Cortar si siguen los valores de ejemplo
+      ansible.builtin.assert:
+        that:
+          - "'CAMBIAR' not in k3s_token"
+          - "'CAMBIAR' not in bgp_md5"
+          - "'CAMBIAR' not in grafana_admin"
+        fail_msg: "Falta vault.yml o tiene los valores de ejemplo"
+      run_once: true
+
+- name: Preparar todos los nodos
+  hosts: k3s
+  become: true
+  roles:
+    - comun
+
+- name: Instalar el server de k3s
+  hosts: servers
+  become: true
+  roles:
+    - k3s_server
+
+- name: Instalar los agents de k3s
+  hosts: agents
+  become: true
+  roles:
+    - k3s_agent
+
+- name: Precargar imágenes para la demo offline
+  hosts: k3s
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Ver qué imágenes ya están
+      ansible.builtin.command: k3s crictl inspecti -q {{ item }}
+      loop: "{{ imagenes_precarga }}"
+      register: precarga_inspect
+      changed_when: false
+      failed_when: false
+
+    - name: Bajar las que faltan
+      ansible.builtin.command: k3s crictl pull {{ item.item }}
+      loop: "{{ precarga_inspect.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when: item.rc != 0
+      register: precarga_pull
+      changed_when: true
+      retries: 3
+      delay: 10
+      until: precarga_pull is succeeded
