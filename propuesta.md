@@ -105,7 +105,9 @@ La topología jerárquica del TP3 se mantiene **sin cambios de diseño**. Sobre 
 
 **Ante una falla** (heredado del TP3). Si cae el master VRRP de una LAN, el otro router de distribución toma la IP virtual. Si se corta un enlace interno, OSPF recalcula por el CORE restante o por el enlace CORE-1–CORE-2. Si se cae un proveedor, el EDGE sale por el otro.
 
-**Ante un ataque** (nuevo). El INTRUSO lanza un escaneo con `nmap` contra la IP pública del EDGE. El detector de escaneos de RouterOS (*port scan detection*, `psd`) pondera cada intento de conexión según el puerto. Cuando un mismo origen supera el umbral, su IP entra en la lista `bloqueados` durante dos minutos, y una regla en la tabla `raw` descarta todo su tráfico **antes** del seguimiento de conexiones, para que el ataque no consuma recursos del router. Los proveedores están en una lista de confianza que queda fuera de la detección.
+**Ante un ataque** (nuevo). El INTRUSO lanza un escaneo con `nmap` contra la IP pública del EDGE. El detector de escaneos de RouterOS (*port scan detection*, `psd`) pondera cada intento de conexión según el puerto. Cuando un mismo origen supera el umbral, su IP entra en la lista `bloqueados` durante dos minutos, y una regla en la tabla `raw` descarta todo su tráfico **antes** del seguimiento de conexiones, para que el ataque no consuma recursos del router. Los proveedores y la red de gestión están en una lista de confianza que queda fuera de la detección: así un falso positivo no corta BGP, y una prueba con `nmap` desde la estación no la deja bloqueada a ella misma.
+
+La regla de detección tiene que ir **antes** de la regla final del TP3 que descarta todo lo no permitido en `input` («input: todo lo demas»); si se agregara al final, el escaneo se descartaría antes de llegar a ella.
 
 Boceto de las reglas (los valores se ajustan en las pruebas):
 
@@ -113,11 +115,13 @@ Boceto de las reglas (los valores se ajustan en las pruebas):
 /ip firewall address-list
 add list=confianza address=203.0.113.1 comment="ISP-1"
 add list=confianza address=203.0.113.5 comment="ISP-2"
+add list=confianza address=10.20.0.0/24 comment="red de gestion"
 
 /ip firewall filter
 add chain=input protocol=tcp psd=21,3s,3,1 src-address-list=!confianza \
     action=add-src-to-address-list address-list=bloqueados \
-    address-list-timeout=2m comment="defensa: detecta escaneo"
+    address-list-timeout=2m comment="defensa: detecta escaneo" \
+    place-before=[find comment="input: todo lo demas"]
 
 /ip firewall raw
 add chain=prerouting src-address-list=bloqueados action=drop \
@@ -168,7 +172,7 @@ Conservamos todas las defensas del TP3 y agregamos las de este proyecto. Cada me
 | Intento de administrar un router | SSH y Winbox solo desde gestión | SSH desde un proveedor: ni siquiera pide contraseña | TP3 |
 | Abuso del acceso de monitoreo | API-SSL habilitada solo desde `10.20.0.101`, con usuario de solo lectura | Conexión a la API desde otra IP: rechazada | **TP4** |
 | Reconocimiento por escaneo | Detector `psd` + bloqueo de 2 minutos | El origen aparece en `bloqueados` y su ping deja de responder | **TP4** |
-| Bloquear a un proveedor por error | Lista `confianza` excluida de la detección | Las sesiones BGP siguen establecidas durante el ataque | **TP4** |
+| Bloquear a un proveedor o a la estación por error | Lista `confianza` (proveedores y red de gestión) excluida de la detección | Las sesiones BGP y el monitoreo siguen funcionando durante el ataque | **TP4** |
 | Filtración de credenciales | Ansible Vault y archivo `.env` fuera de Git | El repositorio no contiene secretos | **TP4** |
 
 ---
