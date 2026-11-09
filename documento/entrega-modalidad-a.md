@@ -201,7 +201,7 @@ Se ejecutó la suite de pruebas mediante el script automatizado [`demo/simular_a
 
 ```text
 ======================================================================
-       🛡️  DEMO INTERACTIVA: SOC/NOC AUTÓNOMO CON GROQ LLM           
+         DEMO INTERACTIVA: SOC/NOC AUTÓNOMO CON GROQ LLM           
               Feria de Redes — UTN FRLP (GOYS TP4)                   
 ======================================================================
 [Ataque 1: Inyección SQL]

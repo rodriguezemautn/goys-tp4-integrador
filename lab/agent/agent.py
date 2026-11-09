@@ -137,7 +137,7 @@ def ban_ip(ip, reason="Comportamiento anómalo detectado"):
     cmd_docker = f"iptables -I DOCKER-USER 1 -s {ip} -j DROP"
     try:
         subprocess.run(cmd_forward, shell=True, check=True)
-        subprocess.run(cmd_docker, shell=True, check=True)
+        subprocess.run(cmd_docker, shell=True, stderr=subprocess.DEVNULL)
         BLOCKED_IPS.add(ip)
         print(f"[REMEDIACIÓN ACTIVA] IP {ip} aislada con éxito en FORWARD y DOCKER-USER.")
         return True
@@ -185,6 +185,9 @@ class TelemetryHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         elif self.path == "/reset":
+            for ip in list(BLOCKED_IPS):
+                subprocess.run(f"iptables -D FORWARD -s {ip} -j DROP", shell=True, stderr=subprocess.DEVNULL)
+                subprocess.run(f"iptables -D DOCKER-USER -s {ip} -j DROP", shell=True, stderr=subprocess.DEVNULL)
             BLOCKED_IPS.clear()
             body = b'{"status": "reset_successful"}'
             self.send_response(200)

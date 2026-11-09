@@ -76,15 +76,23 @@ test_sqli() {
     exec_curl "/?id=1%20UNION%20SELECT%20null,username,password%20FROM%20users" > /dev/null 2>&1
     echo -e "  ${YELLOW}⚠️  Ataque enviado al sensor Suricata IDS.${NC}"
     echo -e "  Esperando análisis del Agente Groq LLM y aplicación de regla iptables..."
-    sleep 2
+    
+    BLOCKED=false
+    for attempt in {1..8}; do
+        sleep 0.8
+        STATUS=$(exec_curl_status "/")
+        if [ "$STATUS" != "200" ]; then
+            BLOCKED=true
+            break
+        fi
+    done
 
     echo ""
     echo -e "${BLUE}▶ [3/3] Verificando estado del atacante (Remediación Activa)...${NC}"
-    STATUS=$(exec_curl_status "/")
-    if [ "$STATUS" == "200" ]; then
-        echo -e "  ${RED}❌ FALLO DE MITIGACIÓN: El atacante todavía puede acceder al servidor.${NC}"
-    else
+    if [ "$BLOCKED" = true ]; then
         echo -e "  ${GREEN}✅ ÉXITO TOTAL: IP del atacante BLOQUEADA en firewall (Drop/Timeout).${NC}"
+    else
+        echo -e "  ${RED}❌ FALLO DE MITIGACIÓN: El atacante todavía puede acceder al servidor (HTTP $STATUS).${NC}"
     fi
     echo ""
 }
@@ -93,13 +101,21 @@ test_recon() {
     echo -e "${YELLOW}▶ [Ataque Reconocimiento] Escáner automatizado con User-Agent sospechoso (sqlmap)...${NC}"
     exec_curl "/" "-A 'sqlmap/1.8.2#stable'" > /dev/null 2>&1
     echo -e "  Ataque enviado con User-Agent 'sqlmap'. Esperando remediación..."
-    sleep 2
+    
+    BLOCKED=false
+    for attempt in {1..8}; do
+        sleep 0.8
+        STATUS=$(exec_curl_status "/")
+        if [ "$STATUS" != "200" ]; then
+            BLOCKED=true
+            break
+        fi
+    done
 
-    STATUS=$(exec_curl_status "/")
-    if [ "$STATUS" == "200" ]; then
-        echo -e "  ${RED}❌ FALLO: No se bloqueó el escáner.${NC}"
-    else
+    if [ "$BLOCKED" = true ]; then
         echo -e "  ${GREEN}✅ ÉXITO: Escáner neutralizado y bloqueado en firewall.${NC}"
+    else
+        echo -e "  ${RED}❌ FALLO: No se bloqueó el escáner (HTTP $STATUS).${NC}"
     fi
     echo ""
 }
@@ -108,13 +124,21 @@ test_path_traversal() {
     echo -e "${YELLOW}▶ [Ataque LFI] Intento de acceso a archivo del sistema (/etc/passwd)...${NC}"
     exec_curl "/admin/view?file=/etc/passwd" > /dev/null 2>&1
     echo -e "  Payload enviado. Esperando dictamen de la IA..."
-    sleep 2
+    
+    BLOCKED=false
+    for attempt in {1..8}; do
+        sleep 0.8
+        STATUS=$(exec_curl_status "/")
+        if [ "$STATUS" != "200" ]; then
+            BLOCKED=true
+            break
+        fi
+    done
 
-    STATUS=$(exec_curl_status "/")
-    if [ "$STATUS" == "200" ]; then
-        echo -e "  ${RED}❌ FALLO: No se bloqueó el path traversal.${NC}"
-    else
+    if [ "$BLOCKED" = true ]; then
         echo -e "  ${GREEN}✅ ÉXITO: Atacante bloqueado por intento de acceso indebido.${NC}"
+    else
+        echo -e "  ${RED}❌ FALLO: No se bloqueó el path traversal (HTTP $STATUS).${NC}"
     fi
     echo ""
 }
@@ -131,9 +155,8 @@ check_telemetry() {
 
 reset_firewall() {
     echo -e "${YELLOW}▶ Reseteando reglas de filtrado en FORWARD y DOCKER-USER...${NC}"
-    sudo iptables -F FORWARD 2>/dev/null
-    sudo iptables -F DOCKER-USER 2>/dev/null
-    sudo iptables -A DOCKER-USER -j RETURN 2>/dev/null
+    sudo iptables -D FORWARD -s 172.28.0.99 -j DROP 2>/dev/null
+    sudo iptables -D DOCKER-USER -s 172.28.0.99 -j DROP 2>/dev/null
     curl -s http://localhost:8000/reset > /dev/null 2>&1
     echo -e "${GREEN}✅ Firewall y telemetría reseteados. Todas las IPs pueden acceder nuevamente.${NC}"
     echo ""
