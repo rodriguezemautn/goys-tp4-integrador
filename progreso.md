@@ -54,6 +54,6 @@
 
 ## Notas Técnicas y Decisiones de Arquitectura
 
-1. **Uso de Groq:** Se seleccionó Groq (`llama-3.1-8b-instant`) por su latencia de inferencia ultra reducida (~150 ms), requisito indispensable para que una remediación activa a nivel de red sea efectiva antes de que el ataque cause impacto.
+1. **Uso de Groq:** Se seleccionó Groq (`qwen/qwen3.8-27b`) por su latencia de inferencia ultra reducida (~150 ms) y soporte robusto de salida JSON estructurada, requisito indispensable para que una remediación activa a nivel de red sea efectiva antes de que el ataque cause impacto.
 2. **Resiliencia en Vivo (Feria):** El agente cuenta con un modo de contingencia heurística local automático. Si el WiFi de la feria llega a fallar, el agente sigue bloqueando los ataques basándose en las firmas de Suricata sin interrumpir la demo.
 3. **Cadena iptables `DOCKER-USER`:** Se decidió insertar las reglas de bloqueo en `DOCKER-USER` para asegurar que el kernel descarte los paquetes maliciosos antes de que el subsistema NAT de Docker los reenvíe a los contenedores.

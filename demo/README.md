@@ -1,6 +1,6 @@
 # Guía de Demostración en Vivo — NOC/SOC Autónomo (GOYS TP4)
 
-> **Feria de Redes 2026** · Gestión Operativa y Seguridad en Redes · UTN FR La Plata  
+> **Feria de Redes 2026** · Gestión Operativa y Seguridad en Redes
 > Esta guía explica paso a paso cómo levantar el laboratorio, cómo disponer las pantallas y cómo defender la demo frente a los profesores y jurados.
 
 ---
