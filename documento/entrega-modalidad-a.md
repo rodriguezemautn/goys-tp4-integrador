@@ -3,18 +3,18 @@
 **Universidad Tecnológica Nacional** — Facultad Regional La Plata  
 **Carrera:** Ingeniería en Sistemas de Información  
 **Cátedra:** Gestión Operativa y Seguridad en Redes  
-**Trabajo Práctico N.º 4** — Proyecto Integrador  
+**Trabajo Práctico N.º 4** — Integrador  
 **Modalidad:** A — Proyecto de Desarrollo  
 **Grupo:** Grupo 10  
 
 **Integrantes:**
-- Alvite, Damián
+- Alvite, Damian
 - Capre, Rodrigo
 - Di Grappa, Emiliano
-- Elizalde, Benjamín
+- Elizalde, Benjamin
 - Moscuzza, Vicente
 
-**Docentes:** Ing. Osvaldo Falabella · Ing. Emanuel Rodríguez  
+**Docentes:** Osvaldo Falabella · Emanuel Rodriguez Rodriguez  
 **Fecha de entrega:** 17 de noviembre de 2026  
 
 ---
@@ -262,4 +262,4 @@ El desarrollo de este Trabajo Práctico Integrador permitió verificar la articu
 2. **Groq Inc.** (2026). *Groq Cloud API Documentation and Model Catalog*. Recuperado de https://console.groq.com/docs
 3. **Docker Inc.** (2026). *Docker Networking Architecture & Packet Filtering Guidelines*. Recuperado de https://docs.docker.com/engine/network/
 4. **National Institute of Standards and Technology (NIST).** (2012). *Computer Security Incident Handling Guide* (NIST Special Publication 800-61 Rev. 2). U.S. Department of Commerce.
-5. **Cátedra GOYS — UTN FR La Plata.** (2026). *Guías de Trabajos Prácticos y material de cátedra*.
+5. **Cátedra GOYS — UTN FRLP.** (2026). *Guías de Trabajos Prácticos y material de cátedra*.
