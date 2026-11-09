@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Web Institucional — UTN FRLP GOYS</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-green: #22c55e;
+            --accent-blue: #38bdf8;
+            --accent-red: #ef4444;
+            --border-color: #334155;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .badge {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: var(--accent-green);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2rem;
+            color: #ffffff;
+        }
+        p.subtitle {
+            color: #94a3b8;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 15px;
+        }
+        .status-item {
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .status-item .label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        .status-item .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+        .status-item.ok .value {
+            color: var(--accent-green);
+        }
+        .endpoints code {
+            display: block;
+            background: #0f172a;
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: #cbd5e1;
+            font-family: monospace;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="badge">● SISTEMA OPERATIVO Y RESILIENTE</span>
+            <h1>Servidor Víctima / Target Web</h1>
+            <p class="subtitle">TP4 Integrador — Gestión Operativa y Seguridad en Redes (UTN FRLP)</p>
+        </div>
+
+        <div class="card">
+            <h2>Telemetría en Vivo de la Aplicación</h2>
+            <div class="status-grid">
+                <div class="status-item ok">
+                    <div class="label">ESTADO DE SERVICIO</div>
+                    <div class="value">200 OK</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">PROTECCIÓN SOC/IDS</div>
+                    <div class="value">Suricata 8.0 Activo</div>
+                </div>
+                <div class="status-item ok">
+                    <div class="label">CEREBRO AIOps</div>
+                    <div class="value">Groq LLM Guardian</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Endpoints de Prueba para la Demo</h2>
+            <div class="endpoints">
+                <p><strong>Tráfico Legítimo:</strong></p>
+                <code>GET /</code>
+                <code>GET /api/status</code>
+                <p style="margin-top: 15px;"><strong>Vectores de Ataque Simulados (para activar el Agente):</strong></p>
+                <code>GET /?id=1 UNION SELECT null,username,password FROM users</code>
+                <code>GET /login?user=admin' OR '1'='1</code>
+                <code>GET /admin/backup.tar.gz?path=../../etc/passwd</code>
+                <code>User-Agent: sqlmap/1.8#stable</code>
+            </div>
+        </div>
+
+        <footer>
+            Feria de Redes 2026 — Plataforma Integrada NOC/SOC con Remediación Agéntica Automatizada
+        </footer>
+    </div>
+</body>
+</html>
