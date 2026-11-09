@@ -14,4 +14,4 @@ alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Escaneo automatizado dete
 alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de Path Traversal (/etc/passwd)"; content:"/etc/passwd"; nocase; classtype:web-application-attack; sid:1000004; rev:2;)
 
 # 4. Ráfaga anómala de conexiones TCP SYN (Sospecha de DoS / Port Scan)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Ráfaga de conexiones sospechosas (Posible DoS)"; flags:S; threshold:type both, track by_src, count 10, seconds 3; classtype:attempted-dos; sid:1000005; rev:3;)
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Ráfaga de conexiones sospechosas (Posible DoS)"; flow:to_server; flags:S; threshold:type both, track by_src, count 10, seconds 3; classtype:attempted-dos; sid:1000005; rev:4;)

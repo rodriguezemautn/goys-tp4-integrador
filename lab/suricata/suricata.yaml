@@ -35,8 +35,6 @@ rule-files:
 
 af-packet:
   - interface: br-monitored
-    cluster-id: 99
-    cluster-type: cluster_flow
     defrag: yes
 
 app-layer:
