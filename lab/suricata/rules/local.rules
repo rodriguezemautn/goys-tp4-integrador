@@ -1,0 +1,17 @@
+# ==============================================================================
+# Reglas Locales del Sensor IDS/SOC - TP4 GOYS
+# ==============================================================================
+
+# 1. Inyección SQL (SQLi) - Detecta tanto UNION SELECT como variantes URL-encoded o parámetros
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de SQL Injection (UNION SELECT)"; content:"UNION"; nocase; content:"SELECT"; nocase; classtype:web-application-attack; sid:1000001; rev:3;)
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de SQL Injection clasico (OR 1=1)"; content:"1%27=%271"; nocase; classtype:web-application-attack; sid:1000002; rev:2;)
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de SQL Injection clasico (OR 1=1 raw)"; content:"' OR '1'='1"; nocase; classtype:web-application-attack; sid:1000006; rev:1;)
+
+# 2. Escáneres automáticos de vulnerabilidades / User-Agent malicioso
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Escaneo automatizado detectado (sqlmap/nikto/nmap)"; content:"User-Agent|3a|"; nocase; pcre:"/(sqlmap|nikto|nmap|gobuster|acunetix)/i"; classtype:attempted-recon; sid:1000003; rev:2;)
+
+# 3. Path Traversal / LFI
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de Path Traversal (/etc/passwd)"; content:"/etc/passwd"; nocase; classtype:web-application-attack; sid:1000004; rev:2;)
+
+# 4. Ráfaga anómala de conexiones TCP SYN (Sospecha de DoS / Port Scan)
+alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Ráfaga de conexiones sospechosas (Posible DoS)"; flow:to_server; flags:S; threshold:type both, track by_src, count 10, seconds 3; classtype:attempted-dos; sid:1000005; rev:4;)
