@@ -1,0 +1,100 @@
+services:
+  # 1. Servidor Web de prueba (Objetivo/Víctima en DMZ)
+  web:
+    image: nginx:alpine
+    container_name: web_target
+    networks:
+      monitored_net:
+        ipv4_address: 172.28.0.10
+    ports:
+      - "8080:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+  # 2. Sensor IDS / SOC: Suricata inspeccionando el bridge virtual
+  suricata:
+    image: jasonish/suricata:latest
+    container_name: soc_suricata
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_NICE
+    volumes:
+      - ./suricata/suricata.yaml:/etc/suricata/suricata.yaml
+      - ./suricata/rules:/var/lib/suricata/rules
+      - ./suricata/logs:/var/log/suricata
+    command: -i br-monitored -v
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  # 3. Agente Autónomo (AIOps / SecOps con Groq LLM)
+  agent:
+    build: ./agent
+    container_name: aiops_agent
+    privileged: true
+    network_mode: "host"
+    environment:
+      - LOG_FILE=/var/log/suricata/eve.json
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-qwen/qwen3.8-27b}
+      - VICTIM_IP=172.28.0.10
+    volumes:
+      - ./suricata/logs:/var/log/suricata:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - suricata
+    restart: unless-stopped
+
+  # 4. Servidor de Métricas NOC: Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: noc_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      monitored_net:
+        ipv4_address: 172.28.0.20
+    restart: unless-stopped
+
+  # 5. Observabilidad NOC: Grafana
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: noc_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      monitored_net:
+        ipv4_address: 172.28.0.30
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # 6. Nodo Atacante (Dentro de la red monitoreada con IP 172.28.0.99)
+  attacker:
+    image: alpine/curl:latest
+    container_name: demo_attacker
+    networks:
+      monitored_net:
+        ipv4_address: 172.28.0.99
+    entrypoint: ["tail", "-f", "/dev/null"]
+    restart: unless-stopped
+
+networks:
+  monitored_net:
+    name: br-monitored
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-monitored
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
