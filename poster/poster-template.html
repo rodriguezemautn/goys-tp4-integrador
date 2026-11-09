@@ -257,8 +257,8 @@
     <!-- ══════════ HEADER ══════════ -->
     <div class="header">
       <span class="tag">GOYS 2026 · FERIA DE REDES · MODALIDAD A</span>
-      <h1>Plataforma Integrada NOC/SOC Autónoma</h1>
-      <h2>Detección IDS (Suricata) + Remediación Agéntica (Groq LLM) + Observabilidad (Grafana)</h2>
+      <h1>Plataforma Integrada NOC/SOC</h1>
+      <h2>Detección con Suricata IDS · Análisis con Groq LLM · Mitigación con iptables · Observabilidad en Grafana</h2>
       <p class="group-info">
         <strong>Gestión Operativa y Seguridad en Redes</strong> &mdash; UTN Facultad Regional La Plata<br>
         Docentes: <strong>Ing. Osvaldo Falabella</strong> &middot; <strong>Ing. Emanuel Rodríguez</strong>
@@ -269,18 +269,18 @@
     <div class="content">
       <!-- 1. Introducción y Objetivos -->
       <div class="section intro">
-        <h3>🎯 Problema y Objetivos del Proyecto</h3>
+        <h3>Problema y Objetivos del Proyecto</h3>
         <p>
-          <strong>El Problema:</strong> En operaciones de TI tradicionales, el <strong>NOC</strong> (monitoreo de métricas y rendimiento) y el <strong>SOC</strong> (detección de intrusiones) operan como silos desconectados. Ante un ciberataque, la respuesta manual de un analista puede demorar minutos u horas, degradando la disponibilidad del servicio.
+          <strong>El Problema:</strong> En operaciones de TI tradicionales, el <strong>NOC</strong> (monitoreo de métricas y rendimiento) y el <strong>SOC</strong> (detección de intrusiones) operan como áreas desconectadas. Ante un ciberataque, la respuesta manual de un analista puede demorar minutos u horas, degradando la disponibilidad del servicio.
         </p>
         <p>
-          <strong>La Solución AIOps:</strong> Implementamos un entorno totalmente automatizado donde el sensor IDS inspecciona el tráfico de red en tiempo real, genera eventos estructurados y activa un <strong>agente de remediación autónomo</strong> potenciado por un LLM (Groq API). El agente contextualiza la amenaza en milisegundos y aísla la IP agresora a nivel de firewall del kernel Linux (<code>iptables</code>), neutralizando el ataque de inmediato mientras los clientes válidos siguen operando sin interrupción.
+          <strong>Solución Implementada:</strong> Diseñamos un laboratorio contenerizado donde Suricata IDS inspecciona el tráfico de red en tiempo real sobre el bridge virtual. Ante una alerta, un agente en Python clasifica el evento con asistencia de un LLM (Groq API) o heurística local y aplica reglas <code>DROP</code> inmediatas en el kernel Linux (<code>iptables FORWARD</code>), neutralizando el ataque de forma automatizada sin degradar el acceso a los clientes legítimos.
         </p>
       </div>
 
       <!-- 2. Arquitectura de Red -->
       <div class="section diagram">
-        <h3>🌐 Arquitectura y Topología de Red</h3>
+        <h3>Arquitectura y Topología de Red</h3>
         <p>Ecosistema contenerizado en Docker Compose con inspección en el bridge virtual:</p>
         <div class="arch-box">
 ┌──────────────────────────────────────────────────────────────┐
@@ -301,20 +301,20 @@
                                                │ eve.json
                                                ▼
 ┌──────────────────────────────┐ ┌─────────────────────────────┐
-│ OBSERVABILIDAD NOC (Grafana) │ │ CEREBRO AGÉNTICO AIOps      │
-│ Prometheus (172.28.0.20:9090)│ │ Python Worker + Groq Cloud  │
-│ Dashboard Grafana (:3000)    │◄┼ Inferencia LLM & Aislamiento│
+│ OBSERVABILIDAD NOC (Grafana) │ │ AGENTE DE RESPUESTA (Python)│
+│ Prometheus (172.28.0.20:9090)│ │ Integración Groq LLM        │
+│ Dashboard Grafana (:3000)    │◄┼ Clasificación & Aislamiento │
 └──────────────────────────────┘ └─────────────────────────────┘
         </div>
       </div>
 
       <!-- 3. Metodología y Herramientas -->
       <div class="section methodology">
-        <h3>⚙️ Stack Tecnológico e Integración</h3>
+        <h3>Stack Tecnológico e Integración</h3>
         <ul>
           <li><strong>SOC / Detección:</strong> Suricata 8.0 en modo IDS sniffer sobre la interfaz virtual <code>br-monitored</code> con telemetría en <code>eve.json</code>.</li>
-          <li><strong>Cerebro AIOps:</strong> Worker en Python 3.11 con Groq SDK (modelo 27B) que realiza razonamiento contextual del payload con salida JSON estructurada.</li>
-          <li><strong>Remediación Perimetral:</strong> Inyección dinámica de directivas <code>DROP</code> en las cadenas <code>FORWARD</code> y <code>DOCKER-USER</code> de <code>iptables</code>.</li>
+          <li><strong>Módulo de Respuesta:</strong> Script en Python 3.11 con Groq SDK (modelo 27B) que realiza análisis contextual del payload con salida JSON estructurada.</li>
+          <li><strong>Remediación Perimetral:</strong> Inyección dinámica de directivas <code>DROP</code> en la cadena <code>FORWARD</code> de <code>iptables</code>.</li>
           <li><strong>NOC / Observabilidad:</strong> Servidor Prometheus y Grafana con aprovisionamiento automático de dashboards y telemetría en tiempo real.</li>
           <li><strong>Alta Resiliencia:</strong> Modo de contingencia heurística local offline en caso de cortes de internet durante la feria.</li>
         </ul>
@@ -322,7 +322,7 @@
 
       <!-- 4. Resultados y Métricas -->
       <div class="section results">
-        <h3>📊 Resultados Experimentales y Validación de la Demo</h3>
+        <h3>Resultados Experimentales y Validación de la Demo</h3>
         
         <div class="kpi-grid">
           <div class="kpi-card green">
@@ -338,21 +338,21 @@
             <div class="lbl">Tráfico Hostil Post-Ban</div>
           </div>
           <div class="kpi-card">
-            <div class="val">~1.8s</div>
+            <div class="val">~800ms</div>
             <div class="lbl">Latencia Groq LLM</div>
           </div>
         </div>
 
         <div class="results-grid">
           <div>
-            <p><strong>Evidencia del Ciclo Autónomo de Remediación (Log del Agente):</strong></p>
+            <p><strong>Registro de Ejecución (Log del Agente de Respuesta):</strong></p>
             <div class="card-terminal">
-<span class="alert">🚨 [ALERTA SOC]</span> Firma: 'ALERTA SOC - Intento de SQL Injection (UNION SELECT)'
-<span class="ai">🧠 [AIOps Groq]</span> Consultando modelo para análisis contextual...
-<span class="ai">🤖 [DICTAMEN LLM]</span> Decisión: <strong>BLOCK</strong> | Severidad: HIGH | Latencia: 1840ms
-<span class="ai">📝 [JUSTIFICACIÓN]</span> "Intento activo de explotación SQLi en el endpoint web. Se justifica el bloqueo preventivo del host origen."
-<span class="ban">⚡ [REMEDIACIÓN ACTIVA]</span> Neutralizando amenaza. Bloqueando IP: 172.28.0.99
-<span class="ban">✅ [ESTADO FIREWALL]</span> Regla DROP inyectada en FORWARD y DOCKER-USER.
+<span class="alert">[ALERTA SOC]</span> Firma: 'ALERTA SOC - Intento de SQL Injection (UNION SELECT)'
+<span class="ai">[ANÁLISIS LLM]</span> Consultando modelo para análisis contextual...
+<span class="ai">[DICTAMEN LLM]</span> Decisión: <strong>BLOCK</strong> | Severidad: HIGH | Latencia: 886ms
+<span class="ai">[JUSTIFICACIÓN]</span> "Intento de explotación SQLi en endpoint web. Se bloquea el host origen."
+<span class="ban">[REMEDIACIÓN ACTIVA]</span> Bloqueando IP: 172.28.0.99 en iptables FORWARD.
+<span class="ban">[ESTADO FIREWALL]</span> Regla DROP inyectada en kernel Linux.
             </div>
           </div>
 
@@ -371,9 +371,8 @@
     <!-- ══════════ FOOTER ══════════ -->
     <div class="footer">
       <div class="info">
-        <span><strong>Gestión Operativa y Seguridad en Redes (GOYS)</strong> &mdash; UTN FR La Plata</span>
+        <span><strong>Gestión Operativa y Seguridad en Redes</strong> &mdash; UTN FRLP</span>
         <span>Código fuente y laboratorio disponible en el repositorio de la cátedra</span>
-        <span>Demostración en vivo presentada en la <strong>Feria de Redes 2026</strong></span>
       </div>
       <div class="qr-box">
         QR CÓDIGO<br>REPOSITORIO<br>GITHUB

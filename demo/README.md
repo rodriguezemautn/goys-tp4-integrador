@@ -1,4 +1,4 @@
-# Guía de Demostración en Vivo — NOC/SOC Autónomo (GOYS TP4)
+# Guía de Demostración en Vivo — Plataforma Integrada NOC/SOC (GOYS TP4)
 
 > **Feria de Redes 2026** · Gestión Operativa y Seguridad en Redes
 > Esta guía explica paso a paso cómo levantar el laboratorio, cómo disponer las pantallas y cómo defender la demo frente a los profesores y jurados.
@@ -7,13 +7,13 @@
 
 ## 1. ¿Qué demuestra este proyecto?
 
-Este laboratorio demuestra la convergencia real entre **NOC** (monitoreo de infraestructura), **SOC** (detección de intrusiones) y **AIOps/SecOps** (respuesta agéntica automatizada con LLM):
+Este laboratorio demuestra la convergencia entre **NOC** (monitoreo de infraestructura y disponibilidad), **SOC** (detección de intrusiones en tiempo real) y **Automatización de Respuesta** (SecOps con LLM de apoyo y reglas en kernel):
 
 1. **Monitoreo Continuo:** El portal web corporativo opera con métricas estables (NOC en verde).
-2. **Detección en Tiempo Real:** El sensor IDS (**Suricata 8.0**) inspecciona el tráfico de red y detecta un intento de ataque web (inyección SQL, escaneo automatizado o path traversal).
-3. **Decisión Agéntica con IA:** Un agente en Python toma la firma de Suricata, consulta la **API de Groq**, analiza el contexto técnico y emite una sentencia estructurada (`BLOCK`) con justificación técnica en milisegundos.
-4. **Remediación Activa:** El agente inyecta reglas `DROP` dinámicas en el firewall del kernel (`iptables FORWARD` y `DOCKER-USER`).
-5. **Resiliencia Operativa:** El atacante queda completamente neutralizado (0 bps / Timeout), mientras que los clientes legítimos continúan navegando el sitio web normalmente con código HTTP 200 OK.
+2. **Detección en Tiempo Real:** El sensor IDS (**Suricata 8.0**) inspecciona el tráfico de red del bridge virtual y detecta intentos de ataque web (inyección SQL, escaneo automatizado o path traversal).
+3. **Análisis Contextual con LLM:** Un script en Python toma el evento estructurado de Suricata, consulta la **API de Groq** (`qwen/qwen3.8-27b`), clasifica la gravedad técnica y emite una sentencia estructurada (`BLOCK`) con justificación técnica.
+4. **Respuesta Activa:** El agente aplica reglas `DROP` inmediatas en el firewall del kernel (`iptables FORWARD` y `DOCKER-USER`).
+5. **Aislamiento Comprobado:** El atacante queda bloqueado (0 bps / Timeout), mientras que los clientes legítimos continúan navegando el sitio web normalmente con código HTTP 200 OK.
 6. **Observabilidad:** El panel de **Grafana** y **Prometheus** refleja el incidente y la contención en tiempo real.
 
 ---
@@ -68,7 +68,7 @@ Para lograr el **máximo impacto visual** en la estación de la feria, armen 3 v
 └─────────────────────────────────┴─────────────────────────────────┘
 ```
 
-> 💡 **Nota sobre las URLs:**  
+> **Nota sobre las URLs:**  
 > Si estás accediendo desde el navegador de tu computadora anfitriona (Windows/Mac) a través de la VM, reemplazá `localhost` por la IP de la VM (por ejemplo `http://192.168.133.130:3000`).
 
 ---

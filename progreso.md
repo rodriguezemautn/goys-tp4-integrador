@@ -1,4 +1,4 @@
-# Bitácora del grupo — TP4
+# Progreso del grupo 10 — TP4
 
 > Registro del avance continuo: tareas realizadas por cada integrante, decisiones técnicas y estado de los entregables para la Feria de Redes (17/11).
 
@@ -19,8 +19,8 @@
 ## Proyecto
 
 - **Modalidad:** A — Proyecto de Desarrollo
-- **Tema:** Plataforma Integrada NOC/SOC con Remediación Agéntica Automatizada (AIOps / SecOps) y Observabilidad en Tiempo Real.
-- **Problema/Objetivo:** Resolver la desconexión típica entre el monitoreo de infraestructura (NOC) y la respuesta ante incidentes de ciberseguridad (SOC). Implementamos una arquitectura contenerizada donde Suricata IDS inspecciona el tráfico de red, emite telemetría estructurada (JSON) hacia un agente autónomo potenciado por un LLM (Groq API) que evalúa el contexto en milisegundos y ejecuta contramedidas de red dinámicas (iptables `DOCKER-USER`), reflejando la neutralización del ataque en Grafana en tiempo real.
+- **Tema:** Plataforma Integrada NOC/SOC con Respuesta Automatizada ante Incidentes y Observabilidad en Tiempo Real.
+- **Problema/Objetivo:** Resolver la desconexión típica entre el monitoreo de infraestructura (NOC) y la respuesta ante incidentes de ciberseguridad (SOC). Implementamos una arquitectura contenerizada donde Suricata IDS inspecciona el tráfico de red del bridge virtual, emite telemetría estructurada (JSON) hacia un agente en Python que clasifica el contexto con soporte de LLM (Groq API) o heurística local y ejecuta contramedidas dinámicas en el firewall del kernel (`iptables FORWARD`), reflejando la contención del ataque en Grafana en tiempo real.
 
 ---
 
@@ -28,15 +28,15 @@
 
 | Fecha | Qué se hizo | Quién / Rol | Estado |
 | :--- | :--- | :--- | :--- |
-| 08/11 | Aprobación de la propuesta por el docente y creación de estructura inicial de directorios | Todo el equipo | Hecho |
-| 09/11 | Creación de topología Docker Compose y configuración de bridge virtual `br-monitored` | Integrante 1 | Hecho |
-| 09/11 | Confección de página institucional de prueba en Nginx (`lab/web/index.html`) | Integrante 1 | Hecho |
-| 09/11 | Creación de `suricata.yaml` y validación de sintaxis con Suricata 8.0 | Integrante 2 | Hecho |
-| 09/11 | Definición de firmas en `local.rules` (SQLi, escáneres, path traversal, DoS) | Integrante 2 | Hecho |
-| 09/11 | Corrección de dependencias (`requirements.txt` con SDK `groq`) | Integrante 3 | Hecho |
-| 09/11 | Desarrollo de `agent.py` con Groq LLM, latencia <200ms, fallback y servidor HTTP de telemetría | Integrante 3 | Hecho |
-| 09/11 | Aprovisionamiento de Prometheus y Dashboard de Grafana (`noc_soc_dashboard.json`) | Integrante 4 | Hecho |
-| 09/11 | Creación de script interactivo de demostración en vivo (`demo/simular_ataque.sh`) | Integrante 5 | Hecho |
+| 06/11 | Aprobación de la propuesta por el docente y creación de estructura inicial de directorios | Todo el equipo | Hecho |
+| 09/11 | Creación de topología Docker Compose y configuración de bridge virtual `br-monitored` | Alvite Damian | Hecho |
+| 09/11 | Confección de página institucional de prueba en Nginx (`lab/web/index.html`) | Alvite Damian | Hecho |
+| 09/11 | Creación de `suricata.yaml` y validación de sintaxis con Suricata 8.0 | Capre Rodrigo | Hecho |
+| 09/11 | Definición de firmas en `local.rules` (SQLi, escáneres, path traversal, DoS) | Capre Rodrigo | Hecho |
+| 09/11 | Corrección de dependencias (`requirements.txt` con SDK `groq`) | Moscuzza Vicente | Hecho |
+| 09/11 | Desarrollo de `agent.py` con Groq LLM, latencia <200ms, fallback y servidor HTTP de telemetría | Moscuzza Vicente | Hecho |
+| 09/11 | Aprovisionamiento de Prometheus y Dashboard de Grafana (`noc_soc_dashboard.json`) | Di Grappa Emiliano | Hecho |
+| 09/11 | Creación de script interactivo de demostración en vivo (`demo/simular_ataque.sh`) | Elizalde Benjamin | Hecho |
 
 ---
 
