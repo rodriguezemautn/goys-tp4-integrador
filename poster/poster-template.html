@@ -3,26 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Póster A1 — GOYS 2026</title>
+  <title>Póster A1 — Plataforma Integrada NOC/SOC Autónoma (GOYS 2026)</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --primary: #1a365d;
-      --primary-light: #2b6cb0;
-      --accent: #3182ce;
-      --bg-section: #f7fafc;
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent-blue: #0284c7;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --bg-section: #f8fafc;
       --bg-card: #ffffff;
-      --text: #2d3748;
-      --text-light: #718096;
-      --border: #e2e8f0;
-      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #cbd5e1;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       color: var(--text);
-      line-height: 1.5;
+      line-height: 1.45;
+      background: #e2e8f0;
     }
 
     @page {
@@ -31,9 +35,8 @@
     }
 
     @media print {
-      body { margin: 0; padding: 0; }
-      .poster { box-shadow: none; border-radius: 0; }
-      .placeholder { border: 1px dashed var(--border); background: #fdfdfd; }
+      body { margin: 0; padding: 0; background: #fff; }
+      .poster { box-shadow: none; border-radius: 0; width: 594mm; height: 841mm; }
     }
 
     .poster {
@@ -41,45 +44,53 @@
       height: 841mm;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      overflow: hidden;
       background: #ffffff;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-      border-radius: 4px;
+      margin: 0 auto;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
 
     /* ── HEADER ── */
     .header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0369a1 100%);
       color: #ffffff;
-      padding: 32mm 36mm 24mm;
+      padding: 24mm 32mm 18mm;
       text-align: center;
+      border-bottom: 4mm solid #0284c7;
+    }
+
+    .header .tag {
+      display: inline-block;
+      background: rgba(14, 165, 233, 0.2);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 2mm 8mm;
+      border-radius: 999px;
+      font-size: 16pt;
+      font-weight: 700;
+      letter-spacing: 1.5pt;
+      text-transform: uppercase;
+      margin-bottom: 4mm;
     }
 
     .header h1 {
-      font-size: 22pt;
-      font-weight: 400;
-      letter-spacing: 1pt;
-      text-transform: uppercase;
-      margin-bottom: 6mm;
-      opacity: 0.9;
+      font-size: 38pt;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 4mm;
+      color: #ffffff;
     }
 
     .header h2 {
-      font-size: 48pt;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 8mm;
+      font-size: 24pt;
+      font-weight: 400;
+      color: #94a3b8;
+      margin-bottom: 6mm;
     }
 
     .header .group-info {
-      font-size: 26pt;
-      font-weight: 300;
-      opacity: 0.85;
-    }
-
-    .header .group-info strong {
-      font-weight: 600;
-      opacity: 1;
+      font-size: 18pt;
+      color: #cbd5e1;
     }
 
     /* ── CONTENT GRID ── */
@@ -87,174 +98,157 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto auto;
-      gap: 8mm;
-      padding: 12mm 36mm;
+      gap: 6mm;
+      padding: 8mm 28mm;
       flex: 1;
     }
 
     .section {
       background: var(--bg-section);
-      border-radius: 6mm;
-      padding: 10mm 12mm;
+      border-radius: 4mm;
+      padding: 7mm 9mm;
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
     }
 
     .section h3 {
-      font-size: 28pt;
+      font-size: 22pt;
       font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 6mm;
-      padding-bottom: 3mm;
-      border-bottom: 3px solid var(--accent);
+      color: #0f172a;
+      margin-bottom: 4mm;
+      padding-bottom: 2mm;
+      border-bottom: 3px solid var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 3mm;
     }
 
     .section p {
-      font-size: 20pt;
-      line-height: 1.6;
+      font-size: 15pt;
+      line-height: 1.45;
       color: var(--text);
+      margin-bottom: 2mm;
     }
 
     .section ul {
-      font-size: 20pt;
-      padding-left: 8mm;
-      margin-top: 3mm;
+      font-size: 14pt;
+      padding-left: 6mm;
+      margin-top: 2mm;
     }
 
     .section ul li {
       margin-bottom: 2mm;
     }
 
-    /* ── FULL-WIDTH SECTIONS ── */
-    .section-full {
-      grid-column: 1 / -1;
-    }
-
-    /* ── PLACEHOLDERS ── */
-    .placeholder {
-      background: #edf2f7;
-      border: 2px dashed var(--border);
-      border-radius: 4mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 80mm;
-      font-size: 22pt;
-      color: var(--text-light);
-      text-align: center;
-      padding: 6mm;
-      margin-top: 4mm;
-    }
-
-    .placeholder-sm {
-      min-height: 50mm;
-    }
-
-    .placeholder-label {
-      font-style: italic;
-    }
-
-    .placeholder-icon {
-      font-size: 48pt;
-      margin-bottom: 3mm;
-    }
-
-    /* ── INTRO (full width at top) ── */
     .intro { grid-column: 1 / -1; }
-
-    /* ── DIAGRAM left, METHODOLOGY right ── */
     .diagram { grid-column: 1 / 2; }
     .methodology { grid-column: 2 / 3; }
-
-    /* ── RESULTS full width ── */
     .results { grid-column: 1 / -1; }
 
-    /* ── TWO-COLUMN RESULTS ── */
+    /* ── ARCHITECTURE BOX ── */
+    .arch-box {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 3mm;
+      padding: 5mm;
+      font-family: monospace;
+      font-size: 12pt;
+      line-height: 1.4;
+      border: 1px solid #334155;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4mm;
+      margin-top: 3mm;
+    }
+
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 3mm;
+      padding: 4mm;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-card .val {
+      font-size: 28pt;
+      font-weight: 800;
+      color: var(--accent-blue);
+      margin-bottom: 1mm;
+    }
+
+    .kpi-card.green .val { color: var(--accent-green); }
+    .kpi-card.red .val { color: var(--accent-red); }
+    .kpi-card.purple .val { color: var(--accent-purple); }
+
+    .kpi-card .lbl {
+      font-size: 12pt;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+
     .results-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6mm;
-      margin-top: 4mm;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 5mm;
+      margin-top: 3mm;
     }
 
-    .result-item {
-      background: var(--bg-card);
-      border-radius: 4mm;
-      padding: 6mm;
-      border: 1px solid var(--border);
+    .card-terminal {
+      background: #0f172a;
+      color: #22c55e;
+      border-radius: 3mm;
+      padding: 4mm;
+      font-family: monospace;
+      font-size: 11pt;
+      line-height: 1.35;
+      border: 1px solid #334155;
     }
 
-    .result-item h4 {
-      font-size: 22pt;
-      color: var(--primary);
-      margin-bottom: 3mm;
-    }
+    .card-terminal .alert { color: #f87171; }
+    .card-terminal .ai { color: #38bdf8; }
+    .card-terminal .ban { color: #fbbf24; }
 
     /* ── FOOTER ── */
     .footer {
-      background: var(--primary);
+      background: #0f172a;
       color: #ffffff;
-      padding: 10mm 36mm;
+      padding: 8mm 32mm;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 18pt;
-    }
-
-    .footer .qr-placeholder {
-      width: 40mm;
-      height: 40mm;
-      background: #ffffff;
-      border-radius: 3mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10pt;
-      color: var(--text-light);
-      text-align: center;
-      padding: 2mm;
-      flex-shrink: 0;
+      border-top: 3mm solid var(--accent-blue);
     }
 
     .footer .info {
+      font-size: 15pt;
       display: flex;
       flex-direction: column;
       gap: 1mm;
     }
 
     .footer .info a {
-      color: #90cdf4;
+      color: #38bdf8;
       text-decoration: none;
     }
 
-    .footer .info a:hover {
-      text-decoration: underline;
-    }
-
-    /* ── REPONSIVE (screen preview) ── */
-    @media screen and (max-width: 1200px) {
-      body { padding: 12px; }
-      .poster {
-        width: 100%;
-        height: auto;
-        min-height: 900px;
-      }
-      .header { padding: 24px 28px 18px; }
-      .header h1 { font-size: 14px; }
-      .header h2 { font-size: 28px; }
-      .header .group-info { font-size: 16px; }
-      .content {
-        padding: 12px 20px;
-        gap: 12px;
-        grid-template-columns: 1fr;
-      }
-      .content .section { grid-column: 1 !important; }
-      .section h3 { font-size: 18px; }
-      .section p, .section ul { font-size: 14px; }
-      .placeholder { min-height: 60px; font-size: 14px; }
-      .results-grid { grid-template-columns: 1fr; }
-      .footer { padding: 12px 20px; font-size: 12px; flex-wrap: wrap; gap: 12px; }
-      .footer .qr-placeholder { width: 60px; height: 60px; }
+    .footer .qr-box {
+      width: 32mm;
+      height: 32mm;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 2mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9pt;
+      font-weight: bold;
+      text-align: center;
+      padding: 2mm;
     }
   </style>
 </head>
@@ -262,87 +256,113 @@
   <div class="poster">
     <!-- ══════════ HEADER ══════════ -->
     <div class="header">
-      <h1>GOYS 2026 — Redes, Gestión y Operación</h1>
-      <h2>Título del proyecto</h2>
+      <span class="tag">GOYS 2026 · FERIA DE REDES · MODALIDAD A</span>
+      <h1>Plataforma Integrada NOC/SOC Autónoma</h1>
+      <h2>Detección IDS (Suricata) + Remediación Agéntica (Groq LLM) + Observabilidad (Grafana)</h2>
       <p class="group-info">
-        Grupo <strong>[nombre del grupo]</strong> &mdash;
-        <strong>[Apellido, Nombre]</strong> &middot;
-        <strong>[Apellido, Nombre]</strong> &middot;
-        <strong>[Apellido, Nombre]</strong>
+        <strong>Gestión Operativa y Seguridad en Redes</strong> &mdash; UTN Facultad Regional La Plata<br>
+        Docentes: <strong>Ing. Osvaldo Falabella</strong> &middot; <strong>Ing. Emanuel Rodríguez</strong>
       </p>
     </div>
 
     <!-- ══════════ CONTENT ══════════ -->
     <div class="content">
-      <!-- Introducción / Objetivos — full width -->
+      <!-- 1. Introducción y Objetivos -->
       <div class="section intro">
-        <h3>Introducción y Objetivos</h3>
+        <h3>🎯 Problema y Objetivos del Proyecto</h3>
         <p>
-          <strong>Problema:</strong> [Describí en 2-3 líneas el problema que resuelve tu proyecto.]
+          <strong>El Problema:</strong> En operaciones de TI tradicionales, el <strong>NOC</strong> (monitoreo de métricas y rendimiento) y el <strong>SOC</strong> (detección de intrusiones) operan como silos desconectados. Ante un ciberataque, la respuesta manual de un analista puede demorar minutos u horas, degradando la disponibilidad del servicio.
         </p>
         <p>
-          <strong>Objetivo:</strong> [Qué se propuso el grupo, cuál es el alcance del trabajo.]
-        </p>
-        <p>
-          <strong>Contexto:</strong> [Materia, tecnología principal, ámbito de aplicación.]
+          <strong>La Solución AIOps:</strong> Implementamos un entorno totalmente automatizado donde el sensor IDS inspecciona el tráfico de red en tiempo real, genera eventos estructurados y activa un <strong>agente de remediación autónomo</strong> potenciado por un LLM (Groq API). El agente contextualiza la amenaza en milisegundos y aísla la IP agresora a nivel de firewall del kernel Linux (<code>iptables</code>), neutralizando el ataque de inmediato mientras los clientes válidos siguen operando sin interrupción.
         </p>
       </div>
 
-      <!-- Diagrama / Arquitectura — left column -->
+      <!-- 2. Arquitectura de Red -->
       <div class="section diagram">
-        <h3>Arquitectura de Red</h3>
-        <div class="placeholder">
-          <div>
-            <div class="placeholder-icon">🌐</div>
-            <div class="placeholder-label">Diagrama de red</div>
-            <div style="font-size:16pt; margin-top:2mm;">
-              Reemplazá esto con tu topología<br>
-              (Draw.io / Excalidraw / screenshot)
-            </div>
-          </div>
+        <h3>🌐 Arquitectura y Topología de Red</h3>
+        <p>Ecosistema contenerizado en Docker Compose con inspección en el bridge virtual:</p>
+        <div class="arch-box">
+┌──────────────────────────────────────────────────────────────┐
+│  NODO ATACANTE (172.28.0.99)  ───►  CLIENTES LEGÍTIMOS       │
+└──────────────────────────────┬───────────────────────────────┘
+                               │  Vectores: SQLi, Escaneos
+                               ▼
+┌──────────────────────────────────────────────────────────────┐
+│  KERNEL LINUX: Bridge 'br-monitored' (172.28.0.0/16)         │
+│  Reglas de Filtrado Activo: iptables FORWARD / DOCKER-USER   │
+└──────────────┬───────────────────────────────┬───────────────┘
+               │ (Tráfico enrutado)            │ (Modo sniffer)
+               ▼                               ▼
+┌──────────────────────────────┐ ┌─────────────────────────────┐
+│ SERVIDOR VÍCTIMA (Nginx)     │ │ SENSOR SOC (Suricata 8.0)   │
+│ 172.28.0.10:80 (Portal Web)  │ │ Detección por firmas locales│
+└──────────────────────────────┘ └─────────────┬───────────────┘
+                                               │ eve.json
+                                               ▼
+┌──────────────────────────────┐ ┌─────────────────────────────┐
+│ OBSERVABILIDAD NOC (Grafana) │ │ CEREBRO AGÉNTICO AIOps      │
+│ Prometheus (172.28.0.20:9090)│ │ Python Worker + Groq Cloud  │
+│ Dashboard Grafana (:3000)    │◄┼ Inferencia LLM & Aislamiento│
+└──────────────────────────────┘ └─────────────────────────────┘
         </div>
       </div>
 
-      <!-- Metodología / Herramientas — right column -->
+      <!-- 3. Metodología y Herramientas -->
       <div class="section methodology">
-        <h3>Metodología y Herramientas</h3>
+        <h3>⚙️ Stack Tecnológico e Integración</h3>
         <ul>
-          <li><strong>Simulación / Laboratorio:</strong> [GNS3, Eve-NG, físicos, etc.]</li>
-          <li><strong>Tecnologías:</strong> [Docker, K3s, VXLAN, BGP, Ansible, etc.]</li>
-          <li><strong>Herramientas de verificación:</strong> [ping, traceroute, Wireshark, iperf, etc.]</li>
-          <li><strong>Proceso:</strong> [Resumen de cómo trabajaron — diseño, implementación, prueba]</li>
+          <li><strong>SOC / Detección:</strong> Suricata 8.0 en modo IDS sniffer sobre la interfaz virtual <code>br-monitored</code> con telemetría en <code>eve.json</code>.</li>
+          <li><strong>Cerebro AIOps:</strong> Worker en Python 3.11 con Groq SDK (modelo 27B) que realiza razonamiento contextual del payload con salida JSON estructurada.</li>
+          <li><strong>Remediación Perimetral:</strong> Inyección dinámica de directivas <code>DROP</code> en las cadenas <code>FORWARD</code> y <code>DOCKER-USER</code> de <code>iptables</code>.</li>
+          <li><strong>NOC / Observabilidad:</strong> Servidor Prometheus y Grafana con aprovisionamiento automático de dashboards y telemetría en tiempo real.</li>
+          <li><strong>Alta Resiliencia:</strong> Modo de contingencia heurística local offline en caso de cortes de internet durante la feria.</li>
         </ul>
-        <div class="placeholder placeholder-sm" style="margin-top:6mm;">
-          <div>
-            <div class="placeholder-icon">⚙️</div>
-            <div class="placeholder-label">Captura de laboratorio funcionando</div>
-          </div>
-        </div>
       </div>
 
-      <!-- Resultados — full width -->
+      <!-- 4. Resultados y Métricas -->
       <div class="section results">
-        <h3>Resultados</h3>
-        <p style="margin-bottom:4mm;">
-          [Resumen de los hallazgos principales. Qué funcionó, qué métricas se obtuvieron,
-          comparativas si las hay.]
-        </p>
+        <h3>📊 Resultados Experimentales y Validación de la Demo</h3>
+        
+        <div class="kpi-grid">
+          <div class="kpi-card green">
+            <div class="val">100%</div>
+            <div class="lbl">Disponibilidad Víctima</div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="val">&lt; 2.0s</div>
+            <div class="lbl">Tiempo de Mitigación</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="val">0 bps</div>
+            <div class="lbl">Tráfico Hostil Post-Ban</div>
+          </div>
+          <div class="kpi-card">
+            <div class="val">~1.8s</div>
+            <div class="lbl">Latencia Groq LLM</div>
+          </div>
+        </div>
+
         <div class="results-grid">
-          <div class="result-item">
-            <h4>📊 Capturas / Tablas</h4>
-            <div class="placeholder placeholder-sm">
-              <div>
-                <div class="placeholder-label">Captura Wireshark / iperf / tabla de resultados</div>
-              </div>
+          <div>
+            <p><strong>Evidencia del Ciclo Autónomo de Remediación (Log del Agente):</strong></p>
+            <div class="card-terminal">
+<span class="alert">🚨 [ALERTA SOC]</span> Firma: 'ALERTA SOC - Intento de SQL Injection (UNION SELECT)'
+<span class="ai">🧠 [AIOps Groq]</span> Consultando modelo para análisis contextual...
+<span class="ai">🤖 [DICTAMEN LLM]</span> Decisión: <strong>BLOCK</strong> | Severidad: HIGH | Latencia: 1840ms
+<span class="ai">📝 [JUSTIFICACIÓN]</span> "Intento activo de explotación SQLi en el endpoint web. Se justifica el bloqueo preventivo del host origen."
+<span class="ban">⚡ [REMEDIACIÓN ACTIVA]</span> Neutralizando amenaza. Bloqueando IP: 172.28.0.99
+<span class="ban">✅ [ESTADO FIREWALL]</span> Regla DROP inyectada en FORWARD y DOCKER-USER.
             </div>
           </div>
-          <div class="result-item">
-            <h4>📈 Métricas</h4>
-            <div class="placeholder placeholder-sm">
-              <div>
-                <div class="placeholder-label">Gráfico de throughput / latencia / convergencia</div>
-              </div>
-            </div>
+
+          <div>
+            <p><strong>Comprobación del Filtrado en Tiempo Real:</strong></p>
+            <ul>
+              <li><strong>Atacante (172.28.0.99):</strong> Las peticiones posteriores son descartadas de inmediato a nivel de kernel (Timeout / Drop total).</li>
+              <li><strong>Clientes Válidos:</strong> El portal institucional web (Nginx) responde continuamente con código <strong>HTTP 200 OK</strong> sin degradación.</li>
+              <li><strong>Consola NOC:</strong> Grafana incrementa el contador de amenazas neutralizadas y traza el evento en la línea de tiempo.</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -351,12 +371,12 @@
     <!-- ══════════ FOOTER ══════════ -->
     <div class="footer">
       <div class="info">
-        <span><strong>GOYS 2026</strong> — Universidad Tecnológica Nacional</span>
-        <span>Repositorio: <a href="#">github.com/[org]/[proyecto]</a></span>
-        <span>📧 [mail del grupo] &middot; 📄 Documento completo en el repo</span>
+        <span><strong>Gestión Operativa y Seguridad en Redes (GOYS)</strong> &mdash; UTN FR La Plata</span>
+        <span>Código fuente y laboratorio disponible en el repositorio de la cátedra</span>
+        <span>Demostración en vivo presentada en la <strong>Feria de Redes 2026</strong></span>
       </div>
-      <div class="qr-placeholder">
-        QR al<br>repositorio
+      <div class="qr-box">
+        QR CÓDIGO<br>REPOSITORIO<br>GITHUB
       </div>
     </div>
   </div>
