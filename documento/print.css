@@ -1,0 +1,131 @@
+@page {
+  size: A4 portrait;
+  margin: 2.0cm 2.0cm 2.0cm 2.0cm;
+  @bottom-center {
+    content: "Página " counter(page);
+    font-family: Arial, "Liberation Sans", sans-serif;
+    font-size: 8.5pt;
+    color: #64748b;
+  }
+}
+
+body {
+  font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+  font-size: 10pt;
+  line-height: 1.38;
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+}
+
+header#title-block-header {
+  display: none;
+}
+
+h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  color: #0f172a;
+  line-height: 1.25;
+  margin-top: 0.4cm;
+  margin-bottom: 0.5cm;
+  border-bottom: 2pt solid #0284c7;
+  padding-bottom: 0.25cm;
+}
+
+h2 {
+  font-size: 12pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin-top: 0.7cm;
+  margin-bottom: 0.25cm;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 0.15cm;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 10.5pt;
+  font-weight: bold;
+  color: #1e293b;
+  margin-top: 0.5cm;
+  margin-bottom: 0.2cm;
+  page-break-after: avoid;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 0.25cm;
+  text-align: justify;
+}
+
+ul, ol {
+  margin-top: 0;
+  margin-bottom: 0.25cm;
+  padding-left: 0.5cm;
+}
+
+li {
+  margin-bottom: 0.08cm;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.25cm;
+  margin-bottom: 0.35cm;
+  font-size: 8.5pt;
+  page-break-inside: avoid;
+}
+
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 4.5pt 6.5pt;
+  text-align: left;
+}
+
+th {
+  background-color: #f1f5f9;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
+pre {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 5pt 7pt;
+  font-family: "Liberation Mono", "Courier New", monospace;
+  font-size: 7.5pt;
+  line-height: 1.22;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 0.2cm;
+  margin-bottom: 0.35cm;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: "Liberation Mono", "Courier New", monospace;
+  font-size: 8pt;
+  background-color: #f1f5f9;
+  padding: 1pt 3pt;
+  border-radius: 3px;
+  color: #0369a1;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 0.5cm 0;
+}

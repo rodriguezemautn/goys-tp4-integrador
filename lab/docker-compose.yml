@@ -42,6 +42,7 @@ services:
       - GROQ_MODEL=${GROQ_MODEL:-qwen/qwen3.8-27b}
       - VICTIM_IP=172.28.0.10
     volumes:
+      - ./agent:/app
       - ./suricata/logs:/var/log/suricata:ro
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
