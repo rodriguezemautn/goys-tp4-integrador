@@ -1,0 +1,60 @@
+%YAML 1.1
+---
+suricata-version: "8.0"
+
+vars:
+  address-groups:
+    HOME_NET: "[172.28.0.0/16]"
+    EXTERNAL_NET: "!$HOME_NET"
+    HTTP_SERVERS: "$HOME_NET"
+
+default-log-dir: /var/log/suricata
+
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+      append: yes
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert:
+            payload: yes
+            payload-buffer-size: 4kb
+            packet: yes
+            http-body: yes
+            tagged-packets: yes
+        - http:
+            extended: yes
+
+default-rule-path: /var/lib/suricata/rules
+rule-files:
+  - local.rules
+
+af-packet:
+  - interface: br-monitored
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+
+app-layer:
+  protocols:
+    http:
+      enabled: yes
+      libhtp:
+         default-config:
+           personality: IDS
+           request-body-limit: 100kb
+           response-body-limit: 100kb
+
+logging:
+  default-log-level: notice
+  outputs:
+    - console:
+        enabled: yes
+    - file:
+        enabled: yes
+        level: info
+        filename: suricata.log
