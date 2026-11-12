@@ -1,0 +1,6 @@
+# Scripts y configs que corren en Linux (estacion, routers): siempre con fin de linea LF,
+# aunque se clonen en Windows con core.autocrlf=true.
+*.sh    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.rsc   text eol=lf

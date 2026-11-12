@@ -1,0 +1,19 @@
+# Placa del laboratorio de la estacion (enp0s3 = adaptador 1 de VirtualBox,
+# cableado por GNS3 a SW-SERVERS). IP fija en la LAN SERVERS, que es la red de
+# gestion del TP3. Sin ruta por defecto: Internet sale por enp0s8 (NAT de
+# VirtualBox). Solo las redes del laboratorio van por el gateway VRRP 10.20.0.1.
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      dhcp6: false
+      optional: true            # sin cable (GNS3 apagado) no demora el arranque
+      addresses: [10.20.0.101/24]
+      routes:
+        - { to: 10.0.0.0/24,     via: 10.20.0.1 }   # enlaces internos (EDGE, CORE, DIST)
+        - { to: 10.10.0.0/24,    via: 10.20.0.1 }   # LAN USERS
+        - { to: 10.255.255.0/24, via: 10.20.0.1 }   # loopbacks de los routers
+        - { to: 203.0.113.0/24,  via: 10.20.0.1 }   # red publica del EDGE y del INTRUSO
+        - { to: 198.51.100.0/24, via: 10.20.0.1 }   # loopbacks de los ISP ("Internet")
+        - { to: 192.0.2.0/24,    via: 10.20.0.1 }   # destino de prueba de los drills
