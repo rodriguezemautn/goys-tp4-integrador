@@ -45,10 +45,10 @@
 - [x] Configuración y validación del entorno Docker Compose base
 - [x] Agente de remediación conectado a Groq API con fallback offline
 - [x] Aprovisionamiento de dashboards en Grafana
-- [ ] Colocar la `GROQ_API_KEY` en `lab/.env` y validar remediación en vivo
-- [ ] Redacción final del documento técnico en `documento/entrega-modalidad-a.md`
-- [ ] Diseño final e impresión del póster en formato A1 en `poster/`
-- [ ] Ensayo general de la demo previa al 17/11
+- [x] Colocar la `GROQ_API_KEY` en `lab/.env` y validar remediación en vivo
+- [x] Redacción final del documento técnico en `documento/entrega-modalidad-a.md`
+- [x] Diseño final e impresión del póster en formato A1 en `poster/`
+- [x] Ensayo general de la demo previa al 17/11
 
 ---
 
