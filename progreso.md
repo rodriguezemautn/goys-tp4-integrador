@@ -31,6 +31,9 @@ Ambos participan en la revisión del trabajo, el registro de avances y la defens
 | 26/10/2026 | Se propuso distribuir las responsabilidades: Facundo desarrolla la demo y aporta evidencias, mientras que Irineo prepara la investigación, el artículo y el póster. | Ambos | e1015cd  |
 | 26/10/2026 | Se decidió excluir la sincronización automática del gemelo y el control de proyectos y nodos mediante la IA para reducir la complejidad. | Facundo | e1015cd |
 | 27/10/2026 | Se configuró la identidad de Git y se agregaron en documento/fuentes.md las 10 fuentes iniciales con la cobertura de requisitos del artículo. | Irineo | d720509 |
+| 27/10/2026 | Se reunieron y verificaron 9 fuentes (artículos científicos, RFC, Internet-Draft del IRTF, documentación oficial y guía de seguridad) y se registraron en documento/fuentes.md con su cobertura de requisitos. | Irineo | f215580 |
+| 27/10/2026 | Se descartó una fuente comunitaria (servidor MCP para GNS3) por no tener autor ni fecha verificables y para ajustar la extensión del artículo; se actualizó fuentes.md. | Irineo | f215580 |
+| 27/10/2026 | Se redactó en Word online el borrador del artículo de modalidad B (resumen, secciones 1 a 5 y referencias en APA 7). Pendiente: Figura 1 y actualización de la sección 3.4. | Irineo | Todavía no subido al repo |
 | 27/10/2026 | Se creó demo/DesarrolloDemo.md y se documentó la Fase 0: topología, cableado, direccionamiento previsto, decisiones de diseño, seguridad y criterios de validación. Se definieron las fases restantes de implementación. | Facundo | 360a5e4 |
 | 27/10/2026 | Se documentó la Fase 1 en demo/DesarrolloDemo.md y se incorporaron capturas de topología, identidades, IP estáticas, DHCP deshabilitado y acceso SSH. Se verificó que las direcciones de gestión quedan fuera del pool DHCP de VMnet1. | Facundo | bf59f3d |
 | 27/10/2026 | Se configuraron las LAN, los enlaces internos, las loopbacks y las VPCS de EMPRESA. Se verificaron los tres enlaces entre routers en ambos sentidos y el acceso de cada host a su gateway, sin pérdidas en las pruebas. Se documentó F2 y se incorporaron ocho capturas. | Facundo | 19820b3 |
@@ -96,7 +99,7 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 - [ ] Validar la reproducción completa en otra computadora.
 - [ ] Ejecutar al menos tres pruebas completas y registrar resultados.
 - [ ] Preparar capturas y grabación de respaldo.
-- [ ] Investigar y seleccionar las referencias bibliográficas.
+- [x] Investigar y seleccionar las referencias bibliográficas.
 - [ ] Redactar y revisar el artículo de modalidad B.
 - [ ] Diseñar y revisar el póster A1.
 - [ ] Completar el checklist oficial y ensayar la presentación.

@@ -41,14 +41,7 @@
 - **Tipo:** documentación técnica oficial.
 - **Respalda:** la API del servidor GNS3 3.0.6 está documentada en una interfaz interactiva que expone el propio servidor. Exige autenticación con usuario y contraseña, y entrega un token de acceso.
 
-## 6. gns3-mcp-server (proyecto comunitario)
-
-- **Enlace:** https://glama.ai/mcp/servers/@Wael-Rd/gns3-mcp-server/blob/a4d4aa4a099848b84ab4274d9830595a294d4eb5/README.md
-- **Tipo:** proyecto de terceros, licencia MIT. Autor no indicado y sin fecha de publicación.
-- **Respalda:** servidor MCP que permite a clientes de IA crear, configurar y gestionar simulaciones en GNS3, con más de 40 herramientas (la página dice también 42) para proyectos, nodos, enlaces, consola, plantillas, snapshots y captura de paquetes. Declara autenticación y SSL por variables de entorno.
-- **Límite:** no describe modelo de permisos, controles de acceso ni registro de auditoría.
-
-## 7. Large Language Models for Zero Touch Network Configuration Management
+## 6. Large Language Models for Zero Touch Network Configuration Management
 
 - **Autores:** Lira, O. G., Caicedo, O. M., da Fonseca, N. L. S.
 - **Fecha:** agosto 2024.
@@ -57,7 +50,7 @@
 - **Respalda:** LLM-NetCFG ejecuta un modelo local (Zephyr-7B) que convierte intenciones en configuraciones, las verifica con un verificador basado en Batfish y coordina los pasos con un orquestador. Sobre 90 intenciones clasificó correctamente el 92,2%. Las intenciones complejas necesitaron varios ciclos de verificación y tardaron más de 10 minutos.
 - **Límites:** los autores describen como alucinación las clasificaciones erróneas, que pueden reducir la verificación a una revisión de sintaxis. Señalan que los LLM son opacos y difíciles de explicar.
 
-## 8. How Helpful is LLM Assistance in Network Operations? A Case Study at a Large Demonstration Network
+## 7. How Helpful is LLM Assistance in Network Operations? A Case Study at a Large Demonstration Network
 
 - **Autores:** Nakamura, R., Eguchi, K. (Universidad de Tokio).
 - **Fecha:** mayo 2026.
@@ -66,7 +59,7 @@
 - **Respalda:** el estudio se realizó entre el 31 de mayo y el 13 de junio de 2025. 105 ingenieros usaron un chatbot con GPT-4.1, recuperación de documentos, control por CLI de 69 equipos y acceso de solo lectura a tickets, en ShowNet (Interop Tokyo 2025). El 68,1% de 389 respuestas evaluadas fue positivo y el 85,1% de los comandos CLI se ejecutó sin errores de sintaxis.
 - **Límites:** generó configuraciones erróneas en plataformas con CLI poco documentada, como suponer IOS XE en un equipo IOS XR. Tuvo dificultades en diagnósticos de varios pasos e inventó respuestas a preguntas sin respuesta. El estudio es de una red temporal, por lo que es difícil de reproducir.
 
-## 9. TwiNet: Connecting Real World Networks to their Digital Twins Through a Live Bidirectional Link
+## 8. TwiNet: Connecting Real World Networks to their Digital Twins Through a Live Bidirectional Link
 
 - **Autores:** Robinson, C. P., Lacava, A., Johari, P., Cuomo, F., Melodia, T.
 - **Fecha:** 2024, IEEE GLOBECOM 2024.
@@ -76,7 +69,7 @@
 - **Límites:** la sincronización depende del retardo de red, que sube con el tamaño de la carga (unos 48 ms para 1 MB). Los modelos entrenados con datos del gemelo perdieron cerca de un 2,5% de precisión con datos reales.
 - **Alcance:** el caso es de redes inalámbricas, no de redes IP empresariales.
 
-## 10. OWASP Top 10 for LLM Applications 2025 — LLM06: Excessive Agency
+## 9. OWASP Top 10 for LLM Applications 2025 — LLM06: Excessive Agency
 
 - **Autor:** OWASP Gen AI Security Project.
 - **Fecha:** edición 2025.
@@ -86,14 +79,14 @@
 
 ## Cobertura de requisitos
 
-- **Cantidad:** 10 referencias, sobre el mínimo de 6.
-- **Paper:** fuentes 3, 7, 8 y 9.
+- **Cantidad:** 9 referencias, sobre el mínimo de 6.
+- **Paper:** fuentes 3, 6, 7 y 8.
 - **Documentación técnica oficial:** fuentes 2 y 5.
 - **RFC:** fuente 4 (RFC 9315).
-- **Trabajos de los últimos tres años:** fuentes 1, 2, 3, 7, 8, 9 y 10.
-- **Gemelo digital y diferencia con emulación:** fuentes 1 y 9.
-- **Automatización y observabilidad:** fuentes 4 y 8.
-- **IA y MCP:** fuentes 2, 3, 6, 7 y 8.
-- **Limitaciones (sincronización, fidelidad, errores de IA):** fuentes 4, 7, 8 y 9.
-- **Seguridad:** mínimo privilegio y aprobación humana, fuentes 2 y 10. Protección de credenciales, fuentes 2 y 6. Registro de operaciones, fuente 10.
+- **Trabajos de los últimos tres años:** fuentes 1, 2, 3, 6, 7, 8 y 9.
+- **Gemelo digital y diferencia con emulación:** fuentes 1 y 8.
+- **Automatización y observabilidad:** fuentes 4 y 7.
+- **IA y MCP:** fuentes 2, 3, 6 y 7.
+- **Limitaciones (sincronización, fidelidad, errores de IA):** fuentes 4, 6, 7 y 8.
+- **Seguridad:** mínimo privilegio y aprobación humana, fuentes 2 y 9. Protección de credenciales, fuente 2. Registro de operaciones, fuente 9.
 - **Aislamiento entre entornos:** lo aporta el diseño del proyecto (lectura en EMPRESA, cambios y pruebas en GEMELO) y se presenta como propuesta del grupo, no como resultado de la literatura.
