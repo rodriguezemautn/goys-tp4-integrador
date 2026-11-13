@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Póster A1 — Detección y Respuesta Automatizada NOC/SOC (GOYS 2026)</title>
+  <title>Póster A1 Horizontal — Plataforma NOC/SOC Autónoma (GOYS 2026)</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* Paleta estricta de 3 colores:
+    /* Paleta de 3 colores:
        1. Azul Oscuro UTN: #0f2942
        2. Azul Acento: #0284c7
-       3. Neutro Claro: #ffffff y #f8fafc
+       3. Neutro Claro: #ffffff / #f8fafc
        Tipografía única: sans-serif del sistema
     */
     :root {
@@ -31,11 +31,11 @@
       padding: 15px;
     }
 
-    /* Contenedor del póster en dimensiones exactas A1 */
+    /* Contenedor exacto A1 horizontal (841 x 594 mm) */
     .poster {
-      width: 594mm;
-      height: 841mm;
-      max-height: 841mm;
+      width: 841mm;
+      height: 594mm;
+      max-height: 594mm;
       background: #ffffff;
       box-shadow: 0 15px 35px rgba(0,0,0,0.25);
       display: flex;
@@ -46,29 +46,19 @@
     }
 
     @page {
-      size: A1 portrait;
+      size: A1 landscape;
       margin: 0;
     }
 
     @media print {
-      body {
-        padding: 0;
-        background: none;
-      }
-      .poster {
-        box-shadow: none;
-        width: 594mm;
-        height: 841mm;
-      }
-      .no-print {
-        display: none !important;
-      }
+      body { padding: 0; background: none; }
+      .poster { box-shadow: none; width: 841mm; height: 594mm; }
+      .no-print { display: none !important; }
     }
 
-    /* Barra de control para visualización en pantalla */
     .preview-bar {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1400px;
       background: var(--c-primary);
       color: #ffffff;
       padding: 12px 24px;
@@ -88,175 +78,141 @@
       border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
 
-    /* ── 1. ENCABEZADO (Visible desde 3m) ── */
+    /* ── 1. ENCABEZADO HORIZONTAL ── */
     .header {
       background: var(--c-primary);
       color: #ffffff;
-      padding: 16mm 22mm 14mm;
-      border-bottom: 5mm solid var(--c-accent);
+      padding: 12mm 20mm 10mm;
+      border-bottom: 4mm solid var(--c-accent);
     }
 
-    .header-subtag {
-      font-size: 26pt;
-      font-weight: 700;
-      letter-spacing: 1.5pt;
-      color: #93c5fd;
-      text-transform: uppercase;
-      margin-bottom: 3mm;
+    .header-title-row {
       display: flex;
       justify-content: space-between;
-    }
-
-    .header h1 {
-      font-size: 50pt;
-      font-weight: 800;
-      line-height: 1.15;
-      color: #ffffff;
-      margin-bottom: 3mm;
-    }
-
-    .header h2 {
-      font-size: 28pt;
-      font-weight: 400;
-      line-height: 1.25;
-      color: #cbd5e1;
+      align-items: center;
+      gap: 16mm;
       margin-bottom: 5mm;
     }
 
+    .header h1 {
+      font-size: 54pt;
+      font-weight: 800;
+      line-height: 1.08;
+      color: #ffffff;
+    }
+
+    .header-logo {
+      height: 24mm;
+      width: auto;
+      display: block;
+      flex-shrink: 0;
+    }
+
     .header-meta {
-      border-top: 1.5mm solid var(--c-accent);
-      padding-top: 4mm;
+      border-top: 1.2mm solid var(--c-accent);
+      padding-top: 3mm;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 24pt;
       color: #e2e8f0;
+      gap: 10mm;
     }
 
-    .header-meta strong {
-      color: #ffffff;
-    }
+    .header-meta strong { color: #ffffff; }
 
-    /* ── 2. CUERPO PRINCIPAL (2 Columnas simétricas) ── */
+    /* ── 2. CUERPO PRINCIPAL (3 Columnas horizontales) ── */
     .content {
-      padding: 8mm 20mm;
+      padding: 8mm 18mm;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.02fr 1.48fr 1.1fr;
       gap: 8mm;
       flex: 1;
+      align-content: stretch;
     }
 
     .col {
       display: flex;
       flex-direction: column;
-      gap: 6mm;
+      gap: 7mm;
     }
 
-    /* Bloques de sección */
     .section-card {
       background: var(--c-card);
       border: 1.5mm solid var(--c-border);
-      border-radius: 4mm;
-      padding: 6mm 8mm;
+      border-radius: 4.5mm;
+      padding: 6.5mm 8mm;
       display: flex;
       flex-direction: column;
-      gap: 3mm;
+      gap: 4mm;
+    }
+
+    .section-card.grow {
+      flex: 1;
     }
 
     .section-card h3 {
-      font-size: 32pt;
+      font-size: 30pt;
       font-weight: 800;
       color: var(--c-primary);
       border-bottom: 2mm solid var(--c-accent);
-      padding-bottom: 2mm;
-      margin-bottom: 1mm;
+      padding-bottom: 2.5mm;
       text-transform: uppercase;
       letter-spacing: 0.5pt;
     }
 
-    .section-card p {
-      font-size: 24pt;
-      line-height: 1.35;
-      color: var(--c-primary);
-      text-align: justify;
-    }
-
-    .section-card ul {
-      font-size: 24pt;
-      line-height: 1.35;
-      padding-left: 8mm;
-      color: var(--c-primary);
-    }
-
-    .section-card ul li {
-      margin-bottom: 2.5mm;
-    }
-
-    /* ── DIAGRAMA DE RED VISUAL (Tarjetas 24pt) ── */
-    .topo-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 3.5mm;
-      margin-top: 2mm;
-    }
-
-    .topo-row {
-      display: flex;
-      gap: 3.5mm;
-    }
-
-    .topo-card {
-      flex: 1;
-      background: var(--c-neutral);
-      border: 1.5mm solid var(--c-border);
-      border-radius: 3mm;
-      padding: 3mm;
-      text-align: center;
-      font-size: 24pt;
-      line-height: 1.25;
-    }
-
-    .topo-card.bridge {
-      background: var(--c-primary);
-      color: #ffffff;
-      border-color: var(--c-primary);
-      font-weight: 700;
-      padding: 4mm 3mm;
-    }
-
-    .topo-card .card-head {
-      font-weight: 800;
+    .section-card ul,
+    .section-card ol {
       font-size: 25pt;
-      margin-bottom: 1mm;
+      line-height: 1.44;
+      padding-left: 9mm;
+      color: var(--c-primary);
     }
 
-    .topo-card .card-ip {
-      font-size: 24pt;
-      color: var(--c-accent);
-      font-weight: 600;
+    .section-card li {
+      margin-bottom: 5mm;
     }
 
-    .topo-card.bridge .card-ip {
-      color: #93c5fd;
+    .section-card li:last-child {
+      margin-bottom: 0;
     }
 
-    /* ── TABLA DE RESULTADOS (Fuente >= 24pt) ── */
+    code {
+      font-family: "Liberation Mono", "Courier New", monospace;
+      font-size: 22.5pt;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 0.8mm 2.5mm;
+      border-radius: 2mm;
+    }
+
+    /* ── TOPOLOGÍA SVG ── */
+    .topo-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .topo-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ── TABLA DE RESULTADOS ── */
     .results-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 24pt;
-      margin-top: 2mm;
     }
 
-    .results-table th, .results-table td {
-      border: 1.5mm solid var(--c-border);
-      padding: 3mm 4mm;
+    .results-table th,
+    .results-table td {
+      border: 1.2mm solid var(--c-border);
+      padding: 5.5mm 4.5mm;
       text-align: left;
       line-height: 1.25;
     }
@@ -271,30 +227,26 @@
       background: var(--c-neutral);
     }
 
-    .badge-ok {
-      font-weight: 800;
-      color: #15803d;
-    }
+    .badge-ok { font-weight: 800; color: #15803d; }
+    .badge-drop { font-weight: 800; color: #b91c1c; }
 
-    .badge-drop {
-      font-weight: 800;
-      color: #b91c1c;
-    }
-
-    /* ── KPI HIGHLIGHTS (Fuente >= 24pt) ── */
+    /* ── KPI HIGHLIGHTS ── */
     .kpi-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 3.5mm;
-      margin-top: 2mm;
+      gap: 4mm;
+      margin-top: auto;
     }
 
     .kpi-box {
       background: var(--c-neutral);
-      border: 1.5mm solid var(--c-border);
-      border-radius: 3mm;
-      padding: 3.5mm;
+      border: 1.2mm solid var(--c-border);
+      border-radius: 3.5mm;
+      padding: 6mm 2.5mm;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .kpi-box .val {
@@ -308,15 +260,15 @@
       font-size: 24pt;
       font-weight: 700;
       color: var(--c-accent);
-      margin-top: 1mm;
+      margin-top: 1.5mm;
       text-transform: uppercase;
     }
 
-    /* ── 3. PIE DE PÁGINA (Footer con QR y Datos) ── */
+    /* ── 3. PIE DE PÁGINA (QR solo abajo) ── */
     .footer {
       background: var(--c-primary);
       color: #ffffff;
-      padding: 8mm 22mm;
+      padding: 7mm 20mm;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -325,184 +277,192 @@
 
     .footer-info {
       font-size: 24pt;
-      line-height: 1.3;
+      line-height: 1.35;
       color: #cbd5e1;
     }
 
-    .footer-info strong {
-      color: #ffffff;
-    }
+    .footer-info strong { color: #ffffff; }
 
     .footer-qr-container {
+      background: #ffffff;
+      padding: 3mm;
+      border-radius: 3.5mm;
       display: flex;
       align-items: center;
-      gap: 6mm;
-      background: #ffffff;
-      padding: 3mm 5mm;
-      border-radius: 3mm;
+      justify-content: center;
     }
 
     .footer-qr-container img {
-      width: 32mm;
-      height: 32mm;
+      width: 34mm;
+      height: 34mm;
       display: block;
-    }
-
-    .footer-qr-label {
-      font-size: 24pt;
-      font-weight: 800;
-      color: var(--c-primary);
-      line-height: 1.2;
-      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
 
-  <!-- Barra superior en pantalla para imprimir (se oculta al imprimir) -->
   <div class="preview-bar no-print">
     <div>
-      <strong>Vista previa del Póster A1 (594 × 841 mm)</strong> &middot; Letra &ge; 24pt &middot; 3 Colores &middot; 1 Tipografía
+      <strong>Vista previa del Póster A1 Horizontal (841 × 594 mm)</strong> &middot; Letra &ge; 24pt &middot; Contenido esencial
     </div>
-    <div style="display: flex; gap: 10px;">
-      <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
-      <a class="btn" style="background: #334155;" href="http://192.168.133.130:8080/" target="_blank">Portal Víctima</a>
-    </div>
+    <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
   </div>
 
   <div class="poster">
 
     <!-- ══════════ ENCABEZADO ══════════ -->
     <header class="header">
-      <div class="header-subtag">
-        <span>Universidad Tecnológica Nacional &middot; Facultad Regional La Plata</span>
-        <span>Feria de Redes 2026</span>
+      <div class="header-title-row">
+        <h1>Plataforma NOC/SOC Autónoma</h1>
+        <img src="img/logo-horizontal-blanco.png" alt="Logo UTN La Plata" class="header-logo">
       </div>
-
-      <h1>Detección de Intrusiones y Respuesta Automatizada en Arquitectura NOC/SOC</h1>
-      <h2>Inspección de Tráfico con Suricata IDS &middot; Análisis Contextual con Groq LLM &middot; Filtrado en Kernel con iptables</h2>
 
       <div class="header-meta">
         <div>
-          <strong>Grupo 10:</strong> Damián Alvite, Rodrigo Capre, Emiliano Di Grappa, Benjamín Elizalde, Vicente Moscuzza
+          <strong>Grupo 10:</strong> D. Alvite &middot; R. Capre &middot; E. Di Grappa &middot; B. Elizalde &middot; V. Moscuzza
         </div>
         <div>
-          <strong>Docentes:</strong> Osvaldo Falabella, Emanuel Rodriguez Rodriguez
+          <strong>Docentes:</strong> O. Falabella &middot; E. Rodriguez
         </div>
       </div>
     </header>
 
-    <!-- ══════════ CUERPO PRINCIPAL ══════════ -->
+    <!-- ══════════ CUERPO PRINCIPAL (3 COLUMNAS HORIZONTALES) ══════════ -->
     <main class="content">
 
-      <!-- COLUMNA IZQUIERDA -->
+      <!-- COLUMNA 1: PROBLEMA Y FLUJO -->
       <div class="col">
-
-        <!-- 1. Contexto y Objetivos -->
         <section class="section-card">
-          <h3>1. Contexto y Problemática</h3>
+          <h3>1. Problema y Objetivo</h3>
           <ul>
-            <li><strong>Desconexión NOC / SOC:</strong> El monitoreo de red (NOC) y la detección de incidentes (SOC) suelen operar en silos aislados.</li>
-            <li><strong>Demora en Mitigación:</strong> El triaje y la respuesta manual ante ciberataques tardan minutos u horas, degradando la disponibilidad.</li>
-            <li><strong>Objetivo:</strong> Diseñar un laboratorio automatizado que detecte intrusiones, clasifique la gravedad técnica y aplique reglas en el kernel en menos de 1 segundo sin interrumpir a los clientes válidos.</li>
+            <li><strong>Problema:</strong> NOC y SOC aislados; respuesta manual lenta.</li>
+            <li><strong>Objetivo:</strong> Detectar, clasificar y bloquear ataques en <strong>&lt; 1 s</strong> sin cortar clientes válidos.</li>
           </ul>
         </section>
 
-        <!-- 2. Arquitectura de Red -->
-        <section class="section-card">
-          <h3>2. Topología de Red Monitoreada</h3>
-          <p>
-            Laboratorio contenerizado en Docker sobre un switch bridge virtual dedicado:
-          </p>
-
-          <div class="topo-grid">
-            <div class="topo-row">
-              <div class="topo-card">
-                <div class="card-head">Nodo Atacante</div>
-                <div class="card-ip">172.28.0.99</div>
-                <div>Inyección SQL y escaneos</div>
-              </div>
-              <div class="topo-card">
-                <div class="card-head">Clientes Legítimos</div>
-                <div class="card-ip">Red Externa / Host</div>
-                <div>Navegación normal 200 OK</div>
-              </div>
-            </div>
-
-            <div class="topo-card bridge">
-              <div class="card-head">Bridge Virtual Kernel: br-monitored (172.28.0.0/16)</div>
-              <div class="card-ip">Inspección promiscua y filtrado activo con iptables FORWARD</div>
-            </div>
-
-            <div class="topo-row">
-              <div class="topo-card">
-                <div class="card-head">Servidor Víctima</div>
-                <div class="card-ip">172.28.0.10:80 (Nginx)</div>
-                <div>Portal corporativo</div>
-              </div>
-              <div class="topo-card">
-                <div class="card-head">Sensor IDS (SOC)</div>
-                <div class="card-ip">Suricata 8.0</div>
-                <div>Sniffer + logs en eve.json</div>
-              </div>
-            </div>
-
-            <div class="topo-row">
-              <div class="topo-card">
-                <div class="card-head">Agente de Respuesta</div>
-                <div class="card-ip">Python + Groq LLM</div>
-                <div>Análisis y bloqueo dinámico</div>
-              </div>
-              <div class="topo-card">
-                <div class="card-head">Observabilidad NOC</div>
-                <div class="card-ip">Prometheus + Grafana</div>
-                <div>Métricas e incidentes</div>
-              </div>
-            </div>
-          </div>
+        <section class="section-card grow">
+          <h3>3. Flujo Automatizado</h3>
+          <ol>
+            <li><strong>Captura:</strong> Suricata analiza <code>br-monitored</code> con <code>local.rules</code>.</li>
+            <li><strong>Análisis IA:</strong> Groq (<code>qwen/qwen3.8-27b</code>) devuelve JSON.</li>
+            <li><strong>Contingencia:</strong> Fallback heurístico offline si no hay internet.</li>
+            <li><strong>Contención:</strong> <code>iptables</code> aplica <code>DROP</code> (con whitelist).</li>
+            <li><strong>NOC en Vivo:</strong> Prometheus y Grafana actualizan cada <code>2s</code>.</li>
+          </ol>
         </section>
-
       </div>
 
-      <!-- COLUMNA DERECHA -->
+      <!-- COLUMNA 2: TOPOLOGÍA DE RED (SVG NITIDO) -->
       <div class="col">
+        <section class="section-card grow">
+          <h3>2. Topología de Red</h3>
+          <div class="topo-wrap">
+            <svg viewBox="0 0 980 1100" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Liberation Sans, sans-serif">
+              <defs>
+                <marker id="arr-dark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f2942"/>
+                </marker>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#b91c1c"/>
+                </marker>
+              </defs>
 
-        <!-- 3. Flujo de Respuesta -->
-        <section class="section-card">
-          <h3>3. Flujo de Detección y Contención</h3>
-          <ul>
-            <li><strong>Inspección de Tráfico:</strong> Suricata inspecciona los paquetes en el bridge contra firmas locales en <code>local.rules</code>.</li>
-            <li><strong>Clasificación Contextual:</strong> Un worker en Python extrae el payload y consulta a Groq (<code>qwen/qwen3.8-27b</code>), obteniendo la decisión en JSON.</li>
-            <li><strong>Respaldo Heurístico Local:</strong> Si se pierde la conexión externa, conmuta de inmediato a evaluación heurística offline.</li>
-            <li><strong>Aislamiento en Firewall:</strong> Ante un dictamen de bloqueo, ejecuta <code>iptables -I FORWARD 1 -s &lt;IP&gt; -j DROP</code> en el kernel.</li>
-            <li><strong>Visualización NOC:</strong> Prometheus scrapea las métricas y Grafana refleja las IPs aisladas en tiempo real.</li>
-          </ul>
+              <!-- Fila 1: Atacante y Clientes -->
+              <rect x="15" y="15" width="415" height="175" rx="14" fill="#f8fafc" stroke="#b91c1c" stroke-width="4"/>
+              <text x="222" y="72" text-anchor="middle" font-size="31" font-weight="bold" fill="#0f2942">Nodo Atacante</text>
+              <text x="222" y="116" text-anchor="middle" font-size="29" font-weight="bold" fill="#b91c1c">172.28.0.99</text>
+              <text x="222" y="158" text-anchor="middle" font-size="25" fill="#334155">SQLi · sqlmap · LFI</text>
+
+              <rect x="505" y="15" width="415" height="175" rx="14" fill="#f8fafc" stroke="#15803d" stroke-width="4"/>
+              <text x="712" y="72" text-anchor="middle" font-size="31" font-weight="bold" fill="#0f2942">Clientes Legítimos</text>
+              <text x="712" y="116" text-anchor="middle" font-size="29" font-weight="bold" fill="#15803d">Host :8080</text>
+              <text x="712" y="158" text-anchor="middle" font-size="25" fill="#334155">Tráfico HTTP 200 OK</text>
+
+              <!-- Flechas hacia Bridge -->
+              <line x1="222" y1="190" x2="222" y2="288" stroke="#b91c1c" stroke-width="4.5" marker-end="url(#arr-red)"/>
+              <text x="240" y="250" font-size="25" font-weight="bold" fill="#b91c1c">HTTP malicioso</text>
+
+              <line x1="712" y1="190" x2="712" y2="288" stroke="#0f2942" stroke-width="4.5" marker-end="url(#arr-dark)"/>
+              <text x="515" y="250" font-size="25" font-weight="bold" fill="#0f2942">HTTP válido</text>
+
+              <!-- Fila 2: Bridge Kernel -->
+              <rect x="15" y="295" width="905" height="160" rx="14" fill="#0f2942" stroke="#0284c7" stroke-width="4.5"/>
+              <text x="467" y="362" text-anchor="middle" font-size="32" font-weight="bold" fill="#ffffff">Bridge Kernel: br-monitored (172.28.0.0/16)</text>
+              <text x="467" y="416" text-anchor="middle" font-size="26" font-weight="bold" fill="#93c5fd">iptables (FORWARD / DOCKER-USER) + br_netfilter</text>
+
+              <!-- Flechas hacia Víctima y Suricata -->
+              <line x1="222" y1="455" x2="222" y2="555" stroke="#0f2942" stroke-width="4.5" marker-end="url(#arr-dark)"/>
+              <text x="240" y="518" font-size="25" font-weight="bold" fill="#0f2942">TCP / 80</text>
+
+              <line x1="712" y1="455" x2="712" y2="555" stroke="#0284c7" stroke-width="4.5" marker-end="url(#arr-blue)"/>
+              <text x="530" y="518" font-size="25" font-weight="bold" fill="#0284c7">AF_PACKET</text>
+
+              <!-- Fila 3: Víctima y Suricata -->
+              <rect x="15" y="562" width="415" height="175" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
+              <text x="222" y="619" text-anchor="middle" font-size="31" font-weight="bold" fill="#0f2942">Servidor Víctima</text>
+              <text x="222" y="663" text-anchor="middle" font-size="29" font-weight="bold" fill="#0284c7">172.28.0.10:80</text>
+              <text x="222" y="705" text-anchor="middle" font-size="25" fill="#334155">Nginx (Alpine)</text>
+
+              <rect x="505" y="562" width="415" height="175" rx="14" fill="#f8fafc" stroke="#0284c7" stroke-width="4"/>
+              <text x="712" y="619" text-anchor="middle" font-size="31" font-weight="bold" fill="#0f2942">Sensor IDS (SOC)</text>
+              <text x="712" y="663" text-anchor="middle" font-size="29" font-weight="bold" fill="#0284c7">Suricata 8.0</text>
+              <text x="712" y="705" text-anchor="middle" font-size="25" fill="#334155">Alertas eve.json</text>
+
+              <!-- Flecha Suricata -> Agente -->
+              <line x1="712" y1="737" x2="712" y2="835" stroke="#0284c7" stroke-width="4.5" marker-end="url(#arr-blue)"/>
+              <text x="500" y="798" font-size="25" font-weight="bold" fill="#0284c7">Eventos JSON</text>
+
+              <!-- Fila 4: NOC y Agente AIOps -->
+              <rect x="15" y="842" width="415" height="235" rx="14" fill="#f8fafc" stroke="#0f2942" stroke-width="4"/>
+              <text x="222" y="914" text-anchor="middle" font-size="31" font-weight="bold" fill="#0f2942">Observabilidad NOC</text>
+              <text x="222" y="968" text-anchor="middle" font-size="27" font-weight="bold" fill="#0284c7">172.28.0.20 / .0.30</text>
+              <text x="222" y="1020" text-anchor="middle" font-size="25" fill="#334155">Prometheus + Grafana</text>
+
+              <rect x="505" y="842" width="415" height="235" rx="14" fill="#eff6ff" stroke="#0284c7" stroke-width="4"/>
+              <text x="712" y="914" text-anchor="middle" font-size="31" font-weight="bold" fill="#0f2942">Agente AIOps</text>
+              <text x="712" y="968" text-anchor="middle" font-size="27" font-weight="bold" fill="#0284c7">Python + Groq LLM</text>
+              <text x="712" y="1020" text-anchor="middle" font-size="25" fill="#334155">Dictamen + Regla DROP</text>
+
+              <!-- Flecha Agente -> NOC (Scrape 2s) -->
+              <line x1="505" y1="960" x2="435" y2="960" stroke="#0f2942" stroke-width="4.5" marker-end="url(#arr-dark)"/>
+              <text x="468" y="942" text-anchor="middle" font-size="21" font-weight="bold" fill="#0f2942">:8000</text>
+
+              <!-- Feedback loop Agente -> Bridge (DROP) -->
+              <path d="M 920 960 L 946 960 L 946 375 L 924 375" fill="none" stroke="#b91c1c" stroke-width="4.5" stroke-dasharray="11,6" marker-end="url(#arr-red)"/>
+              <text x="968" y="668" text-anchor="middle" font-size="24" font-weight="bold" fill="#b91c1c" transform="rotate(-90 968 668)">Regla DROP</text>
+            </svg>
+          </div>
         </section>
+      </div>
 
-        <!-- 4. Resultados Experimentales -->
-        <section class="section-card">
-          <h3>4. Ensayos Experimentales</h3>
+      <!-- COLUMNA 3: RESULTADOS Y CONCLUSIONES -->
+      <div class="col">
+        <section class="section-card grow">
+          <h3>4. Resultados</h3>
 
           <table class="results-table">
             <thead>
               <tr>
-                <th>Vector de Ataque</th>
-                <th>Firma IDS</th>
+                <th>Vector</th>
+                <th>Firma</th>
                 <th>Tiempo</th>
-                <th>Estado</th>
+                <th>Acción</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Tráfico Legítimo (GET /)</td>
-                <td>Ninguna</td>
-                <td>2.1 ms</td>
+                <td>Tráfico Legítimo</td>
+                <td>—</td>
+                <td>2,1 ms</td>
                 <td><span class="badge-ok">200 OK</span></td>
               </tr>
               <tr>
-                <td>SQLi (UNION SELECT)</td>
+                <td>SQLi (UNION)</td>
                 <td>SID 1000001</td>
-                <td>~880 ms</td>
+                <td>886 ms</td>
                 <td><span class="badge-drop">DROP</span></td>
               </tr>
               <tr>
@@ -512,7 +472,7 @@
                 <td><span class="badge-drop">DROP</span></td>
               </tr>
               <tr>
-                <td>Path Traversal (/etc/passwd)</td>
+                <td>Path Traversal</td>
                 <td>SID 1000004</td>
                 <td>~820 ms</td>
                 <td><span class="badge-drop">DROP</span></td>
@@ -523,45 +483,40 @@
           <div class="kpi-row">
             <div class="kpi-box">
               <div class="val">100%</div>
-              <div class="lbl">Disponibilidad Web</div>
+              <div class="lbl">Servicio OK</div>
             </div>
             <div class="kpi-box">
-              <div class="val">&lt; 1.0s</div>
-              <div class="lbl">Tiempo de Respuesta</div>
+              <div class="val">&lt; 1 s</div>
+              <div class="lbl">Mitigación</div>
             </div>
             <div class="kpi-box">
               <div class="val">0 bps</div>
-              <div class="lbl">Tráfico Post-Ban</div>
+              <div class="lbl">Post-Ban</div>
             </div>
           </div>
         </section>
 
-        <!-- 5. Conclusiones -->
         <section class="section-card">
           <h3>5. Conclusiones</h3>
           <ul>
-            <li><strong>Integración Efectiva:</strong> Se unificó el monitoreo de disponibilidad del NOC con la contención activa del SOC.</li>
-            <li><strong>Aislamiento sin Daño Colateral:</strong> Las reglas en la cadena <code>FORWARD</code> bloquean al host atacante mientras los clientes legítimos conservan acceso total con HTTP 200 OK.</li>
-            <li><strong>Resiliencia Operativa:</strong> El fallback local garantiza que la protección siga activa aun sin acceso a internet.</li>
+            <li><strong>NOC + SOC unificados:</strong> monitoreo y defensa en un solo flujo.</li>
+            <li><strong>Cero impacto válido:</strong> bloqueo en kernel sin afectar <code>200 OK</code>.</li>
+            <li><strong>Resiliencia offline:</strong> operación continua con heurística local.</li>
           </ul>
         </section>
-
       </div>
 
     </main>
 
-    <!-- ══════════ PIE DE PÁGINA (Con QR y Enlace) ══════════ -->
+    <!-- ══════════ PIE DE PÁGINA (Solo QR) ══════════ -->
     <footer class="footer">
       <div class="footer-info">
-        <strong>Gestión Operativa y Seguridad en Redes</strong> &middot; UTN Facultad Regional La Plata<br>
-        Laboratorio: Nginx &middot; Suricata 8.0 &middot; Python &middot; Groq API &middot; iptables &middot; Prometheus &middot; Grafana
+        <strong>Gestión Operativa y Seguridad en Redes</strong> &middot; UTN FRLP<br>
+        Docker &middot; Suricata 8.0 &middot; Python &middot; Groq &middot; iptables &middot; Prometheus &middot; Grafana
       </div>
 
       <div class="footer-qr-container">
-        <img src="repo-qr.svg" alt="Código QR al Repositorio GitHub">
-        <div class="footer-qr-label">
-          Código<br>GitHub
-        </div>
+        <img src="repo-qr.svg" alt="Código QR al Repositorio">
       </div>
     </footer>
 
