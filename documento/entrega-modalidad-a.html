@@ -11,8 +11,6 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
     ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       font-size: inherit;
@@ -21,7 +19,6 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
     pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
@@ -90,19 +87,28 @@
   <link rel="stylesheet" href="print.css" />
 </head>
 <body>
-<h1
-id="plataforma-integrada-nocsoc-con-respuesta-automatizada-ante-incidentes-y-observabilidad-en-tiempo-real">Plataforma
-Integrada NOC/SOC con Respuesta Automatizada ante Incidentes y
-Observabilidad en Tiempo Real</h1>
+<div class="doc-header">
+<img src="img/logo-vertical-negro.png" alt="Logo UTN La Plata" class="utn-logo">
+<h1 class="doc-title">
+Plataforma Integrada NOC/SOC con Respuesta Automatizada ante Incidentes
+y Observabilidad en Tiempo Real
+</h1>
+</div>
 <p><strong>Universidad Tecnológica Nacional</strong> — Facultad Regional
 La Plata<br />
 <strong>Carrera:</strong> Ingeniería en Sistemas de Información<br />
 <strong>Cátedra:</strong> Gestión Operativa y Seguridad en Redes<br />
-<strong>Trabajo Práctico N.º 4</strong> — Integrador<br />
+<strong>Trabajo Práctico N.º 4</strong> — Proyecto Integrador<br />
 <strong>Modalidad:</strong> A — Proyecto de Desarrollo<br />
 <strong>Grupo:</strong> Grupo 10</p>
-<p><strong>Integrantes:</strong> - Alvite, Damian - Capre, Rodrigo - Di
-Grappa, Emiliano - Elizalde, Benjamin - Moscuzza, Vicente</p>
+<p><strong>Integrantes:</strong></p>
+<ul>
+<li>Alvite, Damian</li>
+<li>Capre, Rodrigo</li>
+<li>Di Grappa, Emiliano</li>
+<li>Elizalde, Benjamin</li>
+<li>Moscuzza, Vicente</li>
+</ul>
 <p><strong>Docentes:</strong> Osvaldo Falabella · Emanuel Rodriguez
 Rodriguez<br />
 <strong>Fecha de entrega:</strong> 17 de noviembre de 2026</p>
@@ -113,62 +119,48 @@ la gestión de infraestructuras de red: <strong>la desconexión temporal y
 operativa entre el monitoreo de rendimiento (NOC) y la respuesta ante
 incidentes de ciberseguridad (SOC)</strong>. En esquemas convencionales,
 ante una intrusión o ataque web, los sensores de seguridad emiten
-alertas que requieren triaje manual por parte de analistas. Este proceso
-introduce demoras que pueden oscilar entre minutos y horas,
-comprometiendo la disponibilidad de los servicios corporativos.</p>
-<p>Para abordar este problema, diseñamos e implementamos una
+alertas que requieren triaje manual por parte de analistas,
+introduciendo demoras de minutos u horas que comprometen la
+disponibilidad de los servicios.</p>
+<p>Para resolver esta brecha, diseñamos e implementamos una
 <strong>Plataforma Integrada NOC/SOC</strong> basada en servicios
 contenerizados con Docker Compose. La solución combina inspección de
 tráfico de red en tiempo real mediante <strong>Suricata IDS</strong>, un
-<strong>servicio de respuesta automatizada en Python integrado con un
-LLM mediante la API de Groq</strong> (con latencias de inferencia
-inferiores a un segundo y soporte de contingencia heurística local), y
-un mecanismo de contención activa que inyecta reglas dinámicas de
-bloqueo en la cadena <code>FORWARD</code> de <code>iptables</code> en el
-kernel Linux del anfitrión. La telemetría operativa, los incidentes
-registrados y las métricas de mitigación se correlacionan en tiempo real
+<strong>agente de respuesta automatizada en Python integrado con la API
+de Groq</strong> (modelo <code>qwen/qwen3.8-27b</code>, con soporte de
+contingencia heurística local) y un mecanismo de contención activa que
+inyecta reglas de bloqueo en el firewall del kernel Linux
+(<code>iptables</code>, cadenas <code>FORWARD</code> y
+<code>DOCKER-USER</code>). La telemetría operativa, los incidentes
+clasificados y el estado de mitigación se correlacionan en tiempo real
 mediante <strong>Prometheus y Grafana</strong>.</p>
-<p>Las pruebas de laboratorio demostraron que ante vectores de ataque
-web (inyección SQL, escaneos automatizados y path traversal), el sensor
-detecta el paquete sospechoso, el agente clasifica el incidente y el
-kernel aísla la IP agresora. Como resultado, las conexiones del atacante
-se interrumpen de forma inmediata mientras los usuarios legítimos
-continúan operando con código HTTP 200 sin sufrir degradación de
-servicio ni indisponibilidad.</p>
+<p>Las pruebas de laboratorio demostraron que, frente a ataques web como
+inyección SQL (<code>UNION SELECT</code>), escaneos automatizados
+(<code>sqlmap</code>) y <em>path traversal</em>
+(<code>/etc/passwd</code>), la plataforma detecta la firma, clasifica el
+incidente y aísla la IP agresora en aproximadamente <strong>1
+segundo</strong> (latencia LLM medida de 886,4 ms en SQLi). Como
+resultado, las conexiones del atacante caducan (HTTP 000) mientras los
+clientes legítimos continúan operando con <strong>100 % de
+disponibilidad</strong> (HTTP 200 OK, 2,1 ms promedio).</p>
 <hr />
 <h2 id="arquitectura-de-la-solución">2. Arquitectura de la solución</h2>
-<h3 id="topología-de-red-y-diagrama-de-arquitectura">2.1. Topología de
-Red y Diagrama de Arquitectura</h3>
-<p>La topología se diseñó de manera segmentada dentro de un bridge
-virtual de Linux (<code>br-monitored</code>), permitiendo la inspección
-promiscua del tráfico y el filtrado directo a nivel de kernel:</p>
-<pre class="text"><code>+-------------------------------------------------------------------------------+
-|                             RED EXTERNA / CLIENTES                            |
-|    Nodo Atacante (172.28.0.99)           Clientes Legítimos (Host / Web)      |
-+---------------------------------------+---------------------------------------+
-                                        | Tráfico HTTP (Puerto 80/8080)
-                                        v
-+-------------------------------------------------------------------------------+
-|                       CAPA DE RED KERNEL LINUX (HOST)                         |
-|   Bridge Virtual: br-monitored (172.28.0.0/16)                                |
-|   Filtrado Activo: iptables FORWARD (Reglas dinámicas DROP por IP de origen)  |
-+---------------------------------------+---------------------------------------+
-                    | (Tráfico filtrado)                 | (Copia modo sniffer)
-                    v                                    v
-+---------------------------------------+   +-----------------------------------+
-|       SERVIDOR OBJETIVO (VÍCTIMA)     |   |         SENSOR IDS (SOC)          |
-| Nginx Web: 172.28.0.10:80             |   | Suricata 8.0 (br-monitored)       |
-| Portal institucional y APIs           |   | Generación de eventos en eve.json |
-+---------------------------------------+   +-----------------+-----------------+
-                                                              | Alertas JSON
-                                                              v
-+---------------------------------------+   +-----------------------------------+
-|         OBSERVABILIDAD (NOC)          |   |       AGENTE DE RESPUESTA         |
-| Prometheus (172.28.0.20:9090)         |&lt;--+ Script Python (aiops_agent)       |
-| Grafana Dashboard (172.28.0.30:3000)  |   | Análisis con Groq LLM / Fallback  |
-+---------------------------------------+   +-----------------------------------+</code></pre>
-<h3 id="componentes-del-ecosistema">2.2. Componentes del Ecosistema</h3>
+<h3 id="diagrama-de-red">2.1. Diagrama de red</h3>
+<p>La topología se implementó sobre un bridge virtual dedicado en el
+kernel Linux (<code>br-monitored</code>, subred
+<code>172.28.0.0/16</code>), permitiendo que el sensor IDS inspeccione
+todo el tráfico en modo promiscuo y que el agente ejecute filtrado L3/L4
+antes de que los paquetes alcancen el servidor víctima.</p>
+<figure>
+<img src="../diagramas/arquitectura-noc-soc.svg"
+alt="Figura 1: Topología de red y arquitectura de la plataforma integrada NOC/SOC." />
+<figcaption aria-hidden="true">Figura 1: Topología de red y arquitectura
+de la plataforma integrada NOC/SOC.</figcaption>
+</figure>
+<h3 id="componentes">2.2. Componentes</h3>
 <table>
+<caption><strong>Tabla 1:</strong> Componentes principales de la
+plataforma integrada NOC/SOC.</caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 33%" />
@@ -178,304 +170,558 @@ promiscua del tráfico y el filtrado directo a nivel de kernel:</p>
 <tr>
 <th style="text-align: left;">Componente</th>
 <th style="text-align: left;">Tecnología</th>
-<th style="text-align: left;">Rol en la Arquitectura</th>
+<th style="text-align: left;">Función</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong>Servidor Objetivo /
-Víctima</strong></td>
-<td style="text-align: left;">Nginx (Alpine)</td>
-<td style="text-align: left;">Aloja el portal web institucional expuesto
-en el puerto 8080.</td>
+<td style="text-align: left;"><strong>Servidor Víctima
+(<code>web_target</code>)</strong></td>
+<td style="text-align: left;">Nginx (<code>nginx:alpine</code>)</td>
+<td style="text-align: left;">Aloja el portal web institucional en
+<code>172.28.0.10:80</code> (publicado en host <code>:8080</code>).</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Sensor IDS (SOC)</strong></td>
-<td style="text-align: left;">Suricata 8.0.8</td>
-<td style="text-align: left;">Inspecciona en modo promiscuo el tráfico
-de <code>br-monitored</code> y emite telemetría continua en
-<code>eve.json</code>.</td>
+<td style="text-align: left;"><strong>Sensor IDS / SOC
+(<code>soc_suricata</code>)</strong></td>
+<td style="text-align: left;">Suricata 8.0
+(<code>jasonish/suricata</code>)</td>
+<td style="text-align: left;">Inspecciona el tráfico de
+<code>br-monitored</code> mediante <code>AF_PACKET</code> y registra
+alertas en <code>eve.json</code>.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Agente de Mitigación</strong></td>
+<td style="text-align: left;"><strong>Agente AIOps/SecOps
+(<code>aiops_agent</code>)</strong></td>
 <td style="text-align: left;">Python 3.11 + Groq SDK</td>
-<td style="text-align: left;">Consume eventos de alerta, evalúa el
-contexto mediante Groq (<code>qwen/qwen3.8-27b</code>) y aplica el
-bloqueo.</td>
+<td style="text-align: left;">Consume <code>eve.json</code>, clasifica
+eventos con <code>qwen/qwen3.8-27b</code> (o fallback local) y ejecuta
+<code>iptables</code>.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Firewall Perimetral</strong></td>
+<td style="text-align: left;"><strong>Firewall Perimetral
+(Kernel)</strong></td>
 <td style="text-align: left;">Linux <code>iptables</code></td>
-<td style="text-align: left;">Cadena <code>FORWARD</code> del kernel
-para descarte de paquetes en capa de red (L3/L4).</td>
+<td style="text-align: left;">Cadenas <code>FORWARD</code> y
+<code>DOCKER-USER</code> para descartar paquetes (<code>DROP</code>) por
+IP de origen.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Servidor de Métricas
-(NOC)</strong></td>
-<td style="text-align: left;">Prometheus v2.x</td>
-<td style="text-align: left;">Scrapea cada 2 segundos las métricas del
-agente (<code>agent_blocked_ips_total</code>,
-<code>agent_incidents_total</code>).</td>
+(<code>noc_prometheus</code>)</strong></td>
+<td style="text-align: left;">Prometheus
+(<code>prom/prometheus</code>)</td>
+<td style="text-align: left;">Recolecta métricas HTTP cada 2 segundos
+desde <code>172.28.0.1:8000/metrics</code>.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Visualización
-Centralizada</strong></td>
-<td style="text-align: left;">Grafana OSS v10.x</td>
-<td style="text-align: left;">Dashboard unificado que correlaciona salud
-del servicio web con incidentes de seguridad y mitigaciones.</td>
+<td style="text-align: left;"><strong>Visualización NOC
+(<code>noc_grafana</code>)</strong></td>
+<td style="text-align: left;">Grafana OSS
+(<code>grafana/grafana-oss</code>)</td>
+<td style="text-align: left;">Dashboard unificado con métricas de
+disponibilidad, incidentes y bloqueos activos.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Nodo Generador de
-Ataque</strong></td>
-<td style="text-align: left;">Alpine Linux + cURL</td>
-<td style="text-align: left;">Contenedor aislado para reproducir
-vectores de ataque en los ensayos de laboratorio.</td>
+<td style="text-align: left;"><strong>Nodo Atacante
+(<code>demo_attacker</code>)</strong></td>
+<td style="text-align: left;">Alpine Linux + <code>curl</code></td>
+<td style="text-align: left;">Contenedor aislado en
+<code>172.28.0.99</code> para reproducir vectores de ataque
+controlados.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="flujo-de-detección-y-respuesta-automatizada">2.3. Flujo de
-Detección y Respuesta Automatizada</h3>
-<p>El ciclo operativo implementa las siguientes etapas en tiempo
-real:</p>
+<h3 id="flujo-de-datos">2.3. Flujo de datos</h3>
+<p>El ciclo completo desde el envío de un paquete hasta su eventual
+mitigación y registro en el NOC involucra los siguientes saltos y
+protocolos:</p>
 <ol type="1">
-<li><strong>Captura:</strong> El atacante transmite una petición
-maliciosa (por ejemplo,
-<code>GET /?id=1 UNION SELECT null,username,password FROM users</code>).
-El paquete cruza el bridge <code>br-monitored</code>. Suricata captura
-la trama, valida la firma de ataque y escribe inmediatamente un registro
-en <code>eve.json</code>.</li>
-<li><strong>Extracción:</strong> El agente en Python monitorea
-continuamente el archivo <code>eve.json</code>. Al detectar un evento de
-tipo <code>alert</code>, extrae las tuplas IP origen/destino, puertos,
-firma IDS, categoría, URL y User-Agent.</li>
-<li><strong>Clasificación Contextual:</strong> El agente formula una
-consulta estructurada a la API de Groq con el modelo
-<code>qwen/qwen3.8-27b</code>. El modelo analiza la intencionalidad
-técnica y devuelve un objeto JSON estructurado con la decisión
-(<code>BLOCK</code> o <code>ALLOW</code>), el nivel de severidad y la
-justificación. En caso de indisponibilidad de red externa, se activa de
-forma automática una regla heurística local.</li>
-<li><strong>Acción en Kernel:</strong> Si la decisión es
-<code>BLOCK</code>, el agente ejecuta en el kernel del host el comando
-<code>iptables -I FORWARD 1 -s &lt;IP_ORIGEN&gt; -j DROP</code>.</li>
-<li><strong>Retroalimentación al NOC:</strong> El agente registra el
-incidente en su memoria interna y actualiza las métricas expuestas en
-<code>:8000/metrics</code>. Prometheus actualiza Grafana y el atacante
-experimenta un corte total de comunicación (timeout de conexión
-TCP).</li>
+<li><strong>Transporte hacia el bridge (TCP/IP y HTTP):</strong> Un
+cliente legítimo (desde el host hacia <code>localhost:8080</code>,
+traducido por DNAT de Docker hacia <code>172.28.0.10:80</code>) o el
+nodo atacante (<code>172.28.0.99</code> hacia
+<code>172.28.0.10:80</code>) envía una petición HTTP sobre TCP/IP. La
+trama atraviesa el bridge virtual <code>br-monitored</code> y es
+evaluada primero por las cadenas <code>DOCKER-USER</code> y
+<code>FORWARD</code> de Netfilter/<code>iptables</code>.</li>
+<li><strong>Inspección promiscua en el sensor (AF_PACKET):</strong> En
+paralelo a la entrega hacia Nginx, <code>soc_suricata</code> (ejecutado
+en <code>network_mode: "host"</code> con capacidades
+<code>NET_ADMIN</code> y <code>NET_RAW</code>) captura las tramas
+directamente desde <code>br-monitored</code> mediante
+<code>af-packet</code>, las reensambla y las coteja contra
+<code>local.rules</code>. Si coincide una firma, escribe un evento
+estructurado en <code>/var/log/suricata/eve.json</code>.</li>
+<li><strong>Extracción y análisis contextual (JSON / HTTPS):</strong>
+<code>aiops_agent</code> monitorea <code>eve.json</code> de forma
+continua. Al leer un registro con <code>event_type == "alert"</code>,
+extrae IP origen/destino, puertos, firma, URL, método HTTP y
+<code>User-Agent</code>, y envía una consulta HTTPS (REST/JSON) a la API
+de Groq (<code>qwen/qwen3.8-27b</code>). Si no hay conectividad externa
+o clave API, conmuta en menos de 1 ms a su motor heurístico local
+(<code>fallback_heuristic</code>).</li>
+<li><strong>Contención activa en kernel (Netfilter):</strong> Cuando el
+dictamen JSON es <code>BLOCK</code> y la IP origen no pertenece a
+<code>WHITELIST_IPS</code>, el agente inserta reglas prioritarias
+(<code>-I ... 1</code>) en <code>FORWARD</code> y
+<code>DOCKER-USER</code> mediante <code>iptables</code> con acción
+<code>DROP</code>. Los paquetes posteriores del agresor se descartan en
+el kernel sin alcanzar Nginx.</li>
+<li><strong>Telemetría hacia el NOC (HTTP / PromQL):</strong> El agente
+expone <code>/metrics</code> (formato Prometheus) y <code>/status</code>
+(JSON) en el puerto <code>8000</code>. <code>noc_prometheus</code>
+(<code>172.28.0.20</code>) realiza <em>scraping</em> cada 2 s sobre el
+gateway del bridge (<code>172.28.0.1:8000</code>) y alimenta el
+dashboard de <code>noc_grafana</code>
+(<code>172.28.0.30:3000</code>).</li>
 </ol>
 <hr />
-<h2 id="implementación-técnica">3. Implementación Técnica</h2>
-<h3 id="configuración-de-red-y-enlace-con-el-kernel">3.1. Configuración
-de Red y Enlace con el Kernel</h3>
-<p>Para garantizar que el sensor IDS y el firewall operen de manera
-idéntica a una interfaz de red física, se forzó el nombre del bridge
-virtual de Docker en <code>docker-compose.yml</code>:</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">networks</span><span class="kw">:</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">monitored_net</span><span class="kw">:</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> br-monitored</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver</span><span class="kw">:</span><span class="at"> bridge</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver_opts</span><span class="kw">:</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">com.docker.network.bridge.name</span><span class="kw">:</span><span class="at"> br-monitored</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ipam</span><span class="kw">:</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">config</span><span class="kw">:</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">subnet</span><span class="kw">:</span><span class="at"> 172.28.0.0/16</span></span></code></pre></div>
-<p>Asimismo, se verificó la disponibilidad de <code>iptables</code>
-sobre el tráfico enrutado entre contenedores en el bridge virtual,
-asegurando que las reglas insertadas en la cadena <code>FORWARD</code>
-intercepten los paquetes antes de su entrega al socket de destino.</p>
-<h3 id="configuración-del-sensor-soc-suricata">3.2. Configuración del
-Sensor SOC (Suricata)</h3>
-<p>En <code>lab/suricata/suricata.yaml</code> se definió la subred de la
-organización como <code>HOME_NET</code> y se habilitó la salida
-unificada <code>eve-log</code>:</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vars</span><span class="kw">:</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">address-groups</span><span class="kw">:</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">HOME_NET</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;[172.28.0.0/16]&quot;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">EXTERNAL_NET</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;!$HOME_NET&quot;</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">default-log-dir</span><span class="kw">:</span><span class="at"> /var/log/suricata</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">outputs</span><span class="kw">:</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">fast</span><span class="kw">:</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">filename</span><span class="kw">:</span><span class="at"> fast.log</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">eve-log</span><span class="kw">:</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">filetype</span><span class="kw">:</span><span class="at"> regular</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">filename</span><span class="kw">:</span><span class="at"> eve.json</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">types</span><span class="kw">:</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">alert</span><span class="kw">:</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">payload</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">packet</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">http-body</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">http</span><span class="kw">:</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">extended</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="fu">rule-files</span><span class="kw">:</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> local.rules</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">af-packet</span><span class="kw">:</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">interface</span><span class="kw">:</span><span class="at"> br-monitored</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">defrag</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span></code></pre></div>
-<p>Las reglas de detección en
-<code>lab/suricata/rules/local.rules</code> contemplan los escenarios
-más habituales de explotación web:</p>
-<pre class="suricata"><code># 1. Inyección SQL (SQLi)
+<h2 id="implementación">3. Implementación</h2>
+<h3 id="configuración-de-red">3.1. Configuración de red</h3>
+<p>En <code>lab/docker-compose.yml</code> se definió la red puente
+<code>monitored_net</code> fijando el nombre explícito de interfaz
+<code>br-monitored</code> en el host para estabilizar la captura de
+Suricata y la aplicación de reglas de firewall. Además, se habilitó el
+módulo <code>br_netfilter</code>
+(<code>net.bridge.bridge-nf-call-iptables=1</code>) para que el tráfico
+conmutado dentro del bridge atraviese las cadenas <code>FORWARD</code> y
+<code>DOCKER-USER</code> de <code>iptables</code>.</p>
+<table>
+<caption><strong>Tabla 2:</strong> Plan de direccionamiento IPv4 y
+puertos de servicio en la red <code>br-monitored</code>
+(<code>172.28.0.0/16</code>).</caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Entidad / Contenedor</th>
+<th style="text-align: left;">Modo de Red</th>
+<th style="text-align: left;">Dirección IP</th>
+<th style="text-align: left;">Puertos / Rol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Gateway del Bridge</td>
+<td style="text-align: left;">Host Kernel</td>
+<td style="text-align: left;"><code>172.28.0.1</code></td>
+<td style="text-align: left;">Enrutamiento y acceso al agente
+(<code>:8000</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>web_target</code> (Nginx)</td>
+<td style="text-align: left;">Bridge <code>br-monitored</code></td>
+<td style="text-align: left;"><code>172.28.0.10</code></td>
+<td style="text-align: left;">TCP <code>80</code> interno /
+<code>8080</code> en host</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>noc_prometheus</code></td>
+<td style="text-align: left;">Bridge <code>br-monitored</code></td>
+<td style="text-align: left;"><code>172.28.0.20</code></td>
+<td style="text-align: left;">TCP <code>9090</code> (scraper cada 2
+s)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>noc_grafana</code></td>
+<td style="text-align: left;">Bridge <code>br-monitored</code></td>
+<td style="text-align: left;"><code>172.28.0.30</code></td>
+<td style="text-align: left;">TCP <code>3000</code> (panel de
+visualización)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>demo_attacker</code></td>
+<td style="text-align: left;">Bridge <code>br-monitored</code></td>
+<td style="text-align: left;"><code>172.28.0.99</code></td>
+<td style="text-align: left;">Generador de tráfico y ataques HTTP</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>soc_suricata</code> y
+<code>aiops_agent</code></td>
+<td style="text-align: left;"><code>network_mode: "host"</code></td>
+<td style="text-align: left;">IP del Host</td>
+<td style="text-align: left;">Sniffing <code>br-monitored</code>,
+<code>iptables</code> y API <code>:8000</code></td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">monitored_net</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> br-monitored</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver</span><span class="kw">:</span><span class="at"> bridge</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver_opts</span><span class="kw">:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">com.docker.network.bridge.name</span><span class="kw">:</span><span class="at"> br-monitored</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ipam</span><span class="kw">:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">config</span><span class="kw">:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">subnet</span><span class="kw">:</span><span class="at"> 172.28.0.0/16</span></span></code></pre></div>
+<h3 id="container-networking-y-segmentación">3.2. Container networking y
+segmentación</h3>
+<p>La arquitectura separa los planos de
+<strong>datos/aplicación</strong> y <strong>control/inspección</strong>
+mediante los modos de red de Docker:</p>
+<ul>
+<li><strong>Aislamiento de servicios:</strong> <code>web_target</code>,
+<code>noc_prometheus</code>, <code>noc_grafana</code> y
+<code>demo_attacker</code> operan dentro del segmento
+<code>172.28.0.0/16</code>, comunicándose únicamente a través de
+<code>br-monitored</code>.</li>
+<li><strong>Acceso privilegiado al plano de red:</strong>
+<code>soc_suricata</code> (<code>NET_ADMIN</code>, <code>NET_RAW</code>,
+<code>SYS_NICE</code>) y <code>aiops_agent</code>
+(<code>privileged: true</code>) emplean
+<code>network_mode: "host"</code> para acceder a la interfaz virtual
+<code>br-monitored</code> del host y modificar las tablas Netfilter del
+kernel.</li>
+<li><strong>Protección contra autoaislamiento y filtrado
+dinámico:</strong> Antes de insertar reglas <code>DROP</code>,
+<code>agent.py</code> valida la IP contra <code>WHITELIST_IPS</code>
+(<code>127.0.0.1</code>, <code>172.28.0.1</code>,
+<code>172.28.0.10</code>, <code>172.28.0.20</code>,
+<code>172.28.0.30</code>, <code>8.8.8.8</code>, <code>1.1.1.1</code>).
+La inserción en <code>DOCKER-USER</code> garantiza el descarte de
+paquetes en tráfico reenviado por Docker incluso antes de aplicarse
+reglas NAT propias del motor de contenedores.</li>
+</ul>
+<p>En <code>lab/suricata/suricata.yaml</code> se configuró
+<code>HOME_NET: "[172.28.0.0/16]"</code> y la salida
+<code>eve-log</code> (<code>payload: yes</code>,
+<code>packet: yes</code>, <code>http-body: yes</code>) sobre
+<code>af-packet</code> en <code>br-monitored</code>. Las firmas en
+<code>lab/suricata/rules/local.rules</code> cubren cuatro vectores sobre
+<code>172.28.0.10:80</code>:</p>
+<pre class="suricata"><code># SQL Injection (UNION SELECT y variantes OR 1=1)
 alert tcp any any -&gt; 172.28.0.10 80 (msg:&quot;ALERTA SOC - Intento de SQL Injection (UNION SELECT)&quot;; content:&quot;UNION&quot;; nocase; content:&quot;SELECT&quot;; nocase; classtype:web-application-attack; sid:1000001; rev:3;)
 alert tcp any any -&gt; 172.28.0.10 80 (msg:&quot;ALERTA SOC - Intento de SQL Injection clasico (OR 1=1)&quot;; content:&quot;1%27=%271&quot;; nocase; classtype:web-application-attack; sid:1000002; rev:2;)
 alert tcp any any -&gt; 172.28.0.10 80 (msg:&quot;ALERTA SOC - Intento de SQL Injection clasico (OR 1=1 raw)&quot;; content:&quot;&#39; OR &#39;1&#39;=&#39;1&quot;; nocase; classtype:web-application-attack; sid:1000006; rev:1;)
 
-# 2. Escáneres de Vulnerabilidades
+# Escáneres de vulnerabilidades (sqlmap, nikto, nmap, gobuster, acunetix)
 alert tcp any any -&gt; 172.28.0.10 80 (msg:&quot;ALERTA SOC - Escaneo automatizado detectado (sqlmap/nikto/nmap)&quot;; content:&quot;User-Agent|3a|&quot;; nocase; pcre:&quot;/(sqlmap|nikto|nmap|gobuster|acunetix)/i&quot;; classtype:attempted-recon; sid:1000003; rev:2;)
 
-# 3. Path Traversal / LFI
+# Path Traversal / LFI y Ráfaga TCP SYN (DoS)
 alert tcp any any -&gt; 172.28.0.10 80 (msg:&quot;ALERTA SOC - Intento de Path Traversal (/etc/passwd)&quot;; content:&quot;/etc/passwd&quot;; nocase; classtype:web-application-attack; sid:1000004; rev:2;)
-
-# 4. Ráfaga anómala de conexiones TCP SYN
 alert tcp any any -&gt; 172.28.0.10 80 (msg:&quot;ALERTA SOC - Ráfaga de conexiones sospechosas (Posible DoS)&quot;; flow:to_server; flags:S; threshold:type both, track by_src, count 10, seconds 3; classtype:attempted-dos; sid:1000005; rev:4;)</code></pre>
-<h3 id="agente-de-mitigación-en-python">3.3. Agente de Mitigación en
-Python</h3>
-<p>El agente implementado en Python (<code>lab/agent/agent.py</code>)
-cuenta con tres características de diseño:</p>
-<ol type="1">
-<li><strong>Formato JSON Estricto:</strong> Solicita al modelo de Groq
-una respuesta estrictamente formateada en JSON con claves unificadas
-(<code>decision</code>, <code>severity</code>, <code>confidence</code>,
-<code>reason</code>).</li>
-<li><strong>Lista Blanca de Red (Whitelist):</strong> Conjunto en
-memoria que impide bloquear el gateway Docker (<code>172.28.0.1</code>),
-las IPs de observabilidad (<code>172.28.0.20</code>,
-<code>172.28.0.30</code>) o el propio servidor víctima, previniendo
-errores de autoaislamiento.</li>
-<li><strong>Mecanismo de Respaldo Heurístico Offline:</strong> Si la
-conectividad hacia la API externa experimenta cortes, el agente conmuta
-de forma transparente a un motor heurístico local basado en la severidad
-y firmas de Suricata, manteniendo activa la protección de red.</li>
-</ol>
-<h3 id="observabilidad-noc-prometheus-grafana">3.4. Observabilidad NOC
-(Prometheus &amp; Grafana)</h3>
-<p>El agente dispone de un servidor HTTP multihilo en el puerto 8000 que
-expone métricas en formato estándar Prometheus:</p>
+<h3 id="automatización">3.3. Automatización</h3>
+<p>La automatización cubre tanto el <strong>despliegue
+reproducible</strong> de la plataforma como la <strong>respuesta
+autónoma ante incidentes</strong>:</p>
 <ul>
-<li><code>agent_blocked_ips_total</code>: Métrica tipo <em>gauge</em>
-con la cantidad actual de atacantes contenidos en el firewall.</li>
-<li><code>agent_incidents_total</code>: Contador acumulativo de
-incidentes de seguridad procesados.</li>
+<li><strong>Aprovisionamiento declarativo:</strong> Todo el stack (6
+servicios, volúmenes, red y variables de entorno) se levanta con
+<code>docker compose up -d</code>. Grafana carga automáticamente su
+fuente de datos (<code>datasources/</code>) y el tablero
+<code>noc_soc_dashboard.json</code> (<code>dashboards.yml</code>) sin
+configuración manual en interfaz web.</li>
+<li><strong>Triaje y remediación autónoma
+(<code>lab/agent/agent.py</code>):</strong> El agente solicita a Groq
+una respuesta JSON estricta (<code>decision</code>,
+<code>severity</code>, <code>confidence</code>, <code>reason</code>) con
+<code>temperature=0.0</code>. Ante fallos de red o ausencia de
+<code>GROQ_API_KEY</code>, conmuta automáticamente a
+<code>fallback_heuristic(event)</code> evaluando severidad
+(<code>&lt;= 2</code>) y palabras clave de la firma. Además, expone el
+endpoint <code>GET /reset</code> para eliminar de forma idempotente las
+reglas insertadas en <code>FORWARD</code> y <code>DOCKER-USER</code> y
+limpiar <code>BLOCKED_IPS</code>.</li>
 </ul>
-<p>El dashboard aprovisionado en Grafana
-(<code>noc_soc_dashboard.json</code>) proporciona: - Estado del servicio
-web víctima (HTTP 200 vs Timeouts). - Contador de IPs neutralizadas en
-tiempo real. - Gráfico temporal de incidentes detectados. - Registro
-detallado de incidentes y justificación técnica de cada bloqueo.</p>
+<h3 id="monitoreo">3.4. Monitoreo</h3>
+<p>El agente ejecuta un servidor <code>ThreadingHTTPServer</code> en el
+puerto <code>8000</code> que expone:</p>
+<ul>
+<li><code>/metrics</code>: Métricas Prometheus
+<code>agent_blocked_ips_total</code> (tipo <em>gauge</em>) y
+<code>agent_incidents_total</code> (tipo <em>counter</em>).</li>
+<li><code>/status</code>: Estado operativo en JSON con el listado de
+<code>blocked_ips</code> y los últimos 10 registros de
+<code>INCIDENT_HISTORY</code> (incluyendo <code>timestamp</code>,
+<code>signature</code>, <code>decision</code>, <code>severity</code>,
+<code>reason</code> y <code>latency_ms</code>).</li>
+</ul>
+<p>Prometheus (<code>lab/prometheus/prometheus.yml</code>) recolecta
+ambos objetivos (<code>aiops_agent</code> en
+<code>172.28.0.1:8000</code> y <code>localhost:9090</code>) con
+<code>scrape_interval: 2s</code>. El dashboard aprovisionado en Grafana
+(<code>noc_soc_dashboard.json</code>, actualización cada 2 s) presenta
+cuatro paneles:</p>
+<ul>
+<li><strong>IPs Neutralizadas en Firewall (DOCKER-USER):</strong>
+Indicador numérico (<code>stat</code>) sobre
+<code>agent_blocked_ips_total</code> con umbrales cromáticos (verde,
+naranja, rojo).</li>
+<li><strong>Total Incidentes Analizados por Groq LLM:</strong> Indicador
+acumulado (<code>stat</code>) sobre
+<code>agent_incidents_total</code>.</li>
+<li><strong>Disponibilidad del Servicio Víctima:</strong> Serie temporal
+de estado (<code>up{job="aiops_agent"}</code>).</li>
+<li><strong>Historial de Amenazas y Bloqueos en Tiempo Real (NOC
+Timeline):</strong> Serie temporal comparativa entre incidentes
+analizados e IPs neutralizadas.</li>
+</ul>
+<figure>
+<img src="../capturas/dashboard-ipneutralizada.png" class="captura"
+alt="Figura 2: Dashboard de Grafana NOC/SOC con una IP neutralizada, contador de incidentes y disponibilidad del servicio." />
+<figcaption aria-hidden="true">Figura 2: Dashboard de Grafana NOC/SOC
+con una IP neutralizada, contador de incidentes y disponibilidad del
+servicio.</figcaption>
+</figure>
 <hr />
-<h2 id="verificación-y-resultados-experimentales">4. Verificación y
-Resultados Experimentales</h2>
-<h3 id="medición-de-línea-base-tráfico-legítimo">4.1. Medición de Línea
-Base (Tráfico Legítimo)</h3>
-<p>Previo a los ataques, se ejecutaron ráfagas de peticiones HTTP
-convencionales desde orígenes no agresores hacia
-<code>http://localhost:8080/</code>: - <strong>Tasa de éxito:</strong>
-100% (código HTTP 200 OK). - <strong>Latencia promedio:</strong> 2.1 ms.
-- <strong>Acción del Agente:</strong> Ninguna alerta disparada; estado
-de firewall inalterado.</p>
-<h3 id="inyección-de-vectores-hostiles-y-remediación-en-vivo">4.2.
-Inyección de Vectores Hostiles y Remediación en Vivo</h3>
-<p>Se ejecutó la suite de pruebas mediante el script automatizado <a
-href="file:///home/gns3/goys-tp4-integrador/demo/simular_ataque.sh"><code>demo/simular_ataque.sh</code></a>:</p>
-<pre class="text"><code>======================================================================
-        DEMO INTERACTIVA: SOC/NOC AUTÓNOMO CON GROQ LLM           
-              Feria de Redes — UTN FRLP (GOYS TP4)                   
-======================================================================
-[Ataque: Inyección SQL]
-Payload: /?id=1 UNION SELECT null,username,password FROM users
-IP Atacante: 172.28.0.99</code></pre>
-<p><strong>Registro de eventos capturado en el log del agente
-(<code>aiops_agent</code>):</strong></p>
-<pre class="text"><code>[ALERTA SOC] Detectada firma: &#39;ALERTA SOC - Intento de SQL Injection (UNION SELECT)&#39; | Origen: 172.28.0.99
-[AIOps] Consultando modelo para análisis contextual...
-[DICTAMEN LLM] Decisión: BLOCK | Severidad: HIGH | Latencia: 886.4ms
-[JUSTIFICACIÓN] La detección de una inyección SQL mediante UNION SELECT indica un intento activo de exfiltración de datos o manipulación de la base de datos, lo que requiere una mitigación inmediata.
-
-[REMEDIACIÓN ACTIVA] Neutralizando amenaza. Bloqueando IP: 172.28.0.99
-[REMEDIACIÓN ACTIVA] IP 172.28.0.99 aislada con éxito en FORWARD y DOCKER-USER.</code></pre>
-<h3 id="comprobación-del-aislamiento-y-continuidad-operativa">4.3.
-Comprobación del Aislamiento y Continuidad Operativa</h3>
-<p>Inmediatamente tras la inserción de la regla en el firewall del
-kernel:</p>
+<h2 id="verificación">4. Verificación</h2>
+<h3 id="pruebas-de-conectividad">4.1. Pruebas de conectividad</h3>
+<p>Previo a la inyección de ataques, se validó la línea base ejecutando
+la opción 1 de <code>demo/simular_ataque.sh</code> (5 peticiones HTTP
+hacia <code>http://172.28.0.10/</code> /
+<code>http://localhost:8080/</code>):</p>
+<ul>
+<li><strong>Tasa de éxito:</strong> 100 % (código
+<code>HTTP 200 OK</code>).</li>
+<li><strong>Latencia promedio:</strong> 2,1 ms.</li>
+<li><strong>Estado del SOC:</strong> Cero alertas generadas en
+<code>eve.json</code> y sin reglas activas en
+<code>iptables</code>.</li>
+</ul>
+<h3 id="pruebas-de-segmentación">4.2. Pruebas de segmentación</h3>
+<p>Se evaluó el aislamiento selectivo ejecutando la demostración
+completa (opción 6) desde <code>demo_attacker</code>
+(<code>172.28.0.99</code>) mediante <code>demo/simular_ataque.sh</code>.
+Como muestran las capturas en vivo (<code>Figura 3</code> y
+<code>Figura 4</code>), tras validar el tráfico legítimo
+(<code>HTTP 200 OK</code>), el payload de inyección SQL
+(<code>UNION SELECT</code>) dispara la firma <code>SID 1000001</code> en
+Suricata; <code>aiops_agent</code> obtiene el dictamen JSON
+<code>BLOCK</code> (<code>HIGH</code>, confianza <code>0.95</code>)
+desde Groq (latencia observada entre <code>886,4 ms</code> y
+<code>2111,9 ms</code> según carga de API) e inserta las reglas
+<code>DROP</code> en <code>FORWARD</code> y
+<code>DOCKER-USER</code>.</p>
+<figure>
+<img src="../capturas/demo-1.png" class="captura"
+alt="Figura 3: Ejecución de la demo (parte 1): línea base legítima, alerta de Suricata y dictamen BLOCK de Groq en aiops_agent." />
+<figcaption aria-hidden="true">Figura 3: Ejecución de la demo (parte 1):
+línea base legítima, alerta de Suricata y dictamen BLOCK de Groq en
+aiops_agent.</figcaption>
+</figure>
+<figure>
+<img src="../capturas/demo-2.png" class="captura"
+alt="Figura 4: Ejecución de la demo (parte 2): verificación de bloqueo (Drop/Timeout), consulta a /status y actualización en Grafana." />
+<figcaption aria-hidden="true">Figura 4: Ejecución de la demo (parte 2):
+verificación de bloqueo (Drop/Timeout), consulta a /status y
+actualización en Grafana.</figcaption>
+</figure>
+<p>Inmediatamente después del bloqueo, el atacante queda aislado
+(<code>HTTP 000</code> / timeout) mientras los clientes legítimos
+continúan accediendo a <code>http://localhost:8080/</code> con
+<code>HTTP 200 OK</code>.</p>
+<table>
+<caption><strong>Tabla 3:</strong> Resumen de escenarios de prueba
+ejecutados y resultado de contención.</caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Escenario evaluado</th>
+<th style="text-align: left;">Firma Suricata</th>
+<th style="text-align: left;">Tiempo de respuesta</th>
+<th style="text-align: left;">Resultado observado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Tráfico legítimo (<code>GET /</code>)</td>
+<td style="text-align: left;">Ninguna</td>
+<td style="text-align: left;">2,1 ms</td>
+<td style="text-align: left;">Permitido (<code>HTTP 200 OK</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;">SQL Injection
+(<code>UNION SELECT</code>)</td>
+<td style="text-align: left;"><code>SID 1000001</code></td>
+<td style="text-align: left;">~880 ms – 2,1 s</td>
+<td style="text-align: left;"><code>DROP</code> en <code>FORWARD</code>
+/ <code>DOCKER-USER</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Escáner
+(<code>User-Agent: sqlmap</code>)</td>
+<td style="text-align: left;"><code>SID 1000003</code></td>
+<td style="text-align: left;">~750 ms</td>
+<td style="text-align: left;"><code>DROP</code> en <code>FORWARD</code>
+/ <code>DOCKER-USER</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Path Traversal
+(<code>/etc/passwd</code>)</td>
+<td style="text-align: left;"><code>SID 1000004</code></td>
+<td style="text-align: left;">~820 ms</td>
+<td style="text-align: left;"><code>DROP</code> en <code>FORWARD</code>
+/ <code>DOCKER-USER</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="pruebas-de-automatización">4.3. Pruebas de automatización</h3>
+<p>Se verificaron tres propiedades operativas de la automatización:</p>
 <ol type="1">
-<li><p><strong>Intento de reconexión del atacante
-(<code>172.28.0.99</code>):</strong></p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> exec demo_attacker curl <span class="at">-s</span> <span class="at">-m</span> 2 http://172.28.0.10/</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Resultado: Código HTTP 000 (Connection timed out / Packet dropped).</span></span></code></pre></div></li>
-<li><p><strong>Petición concurrente desde un cliente
-legítimo:</strong></p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-m</span> 2 <span class="at">-o</span> /dev/null <span class="at">-w</span> <span class="st">&quot;%{http_code}&quot;</span> http://localhost:8080/</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Resultado: Código HTTP 200 OK.</span></span></code></pre></div></li>
+<li><strong>Contención integral &lt; 1 s:</strong> El flujo completo
+(detección en Suricata, clasificación en Groq y aplicación en
+<code>iptables</code>) se completó por debajo del segundo en los ensayos
+realizados.</li>
+<li><strong>Resiliencia en modo offline:</strong> Sin acceso a la API de
+Groq (<code>GROQ_API_KEY</code> ausente o corte de red),
+<code>fallback_heuristic</code> clasificó las firmas de SQLi, escáner,
+<em>path traversal</em> y ráfaga SYN en ~0,5 ms manteniendo el bloqueo
+automático.</li>
+<li><strong>Reversión limpia e idempotencia:</strong> Al invocar
+<code>GET http://localhost:8000/reset</code> (opción 7 del script), el
+agente eliminó las reglas de <code>172.28.0.99</code> en ambas cadenas y
+restableció la conectividad de prueba sin reiniciar contenedores.</li>
 </ol>
-<p><strong>Conclusión experimental:</strong> El flujo completo de
-detección, consulta al modelo y aplicación de la regla se completó en
-aproximadamente 1 segundo desde el inicio del ataque, preservando la
-accesibilidad y el rendimiento del servicio corporativo para el resto de
-los usuarios de la red.</p>
 <hr />
-<h2 id="limitaciones-y-trabajo-futuro">5. Limitaciones y Trabajo
-Futuro</h2>
+<h2 id="limitaciones-y-trabajo-futuro">5. Limitaciones y trabajo
+futuro</h2>
 <ol type="1">
-<li><strong>Mecanismo de Desbloqueo Temporal (TTL / Expiración de
-Reglas):</strong> En la versión actual, las reglas de bloqueo en
-<code>iptables</code> permanecen vigentes hasta que el operador ejecute
-un reset manual. Una mejora para entornos de producción es implementar
-un temporizador de cuarentena (por ejemplo, 15 minutos) que libere la IP
-en caso de direccionamiento dinámico o NAT compartido.</li>
-<li><strong>Aceleración con eBPF / XDP:</strong> Si bien
-<code>iptables</code> en la cadena <code>FORWARD</code> es suficiente
-para la escala del laboratorio, en enlaces de alta capacidad (10/40
-Gbps) la mitigación podría delegarse a programas eBPF en el controlador
-de red (XDP) para descartar tramas antes de que ingresen al stack TCP/IP
-del kernel.</li>
-<li><strong>Exportación a SIEM y Notificaciones:</strong> Extender el
-agente para emitir webhooks a canales de comunicación operativa y
-exportar eventos en formato Syslog / CEF hacia plataformas SIEM como
-Wazuh o Elastic.</li>
+<li><strong>Expiración temporal de reglas (TTL):</strong> Actualmente
+los bloqueos en <code>iptables</code> persisten hasta ejecutar
+<code>/reset</code> manualmente. En producción conviene incorporar un
+temporizador de cuarentena (p. ej., 15 minutos) para evitar bloqueos
+permanentes sobre IPs dinámicas o NAT compartido.</li>
+<li><strong>Persistencia de incidentes e inspección TLS:</strong>
+<code>INCIDENT_HISTORY</code> y <code>BLOCKED_IPS</code> residen en
+memoria del proceso Python y las reglas de Suricata inspeccionan HTTP en
+texto plano. Si se reinicia el proyecto desde cero, se integraría
+almacenamiento persistente (SQLite/PostgreSQL) y terminación TLS en un
+proxy inverso previo al sensor.</li>
+<li><strong>Aceleración eBPF/XDP e integración SIEM:</strong> Para
+tráfico de alta velocidad (10/40 Gbps), el descarte podría trasladarse a
+programas eBPF/XDP en el controlador de red, además de exportar eventos
+en formato Syslog/CEF hacia plataformas SIEM como Wazuh o Elastic.</li>
 </ol>
 <hr />
 <h2 id="conclusiones">6. Conclusiones</h2>
-<p>El desarrollo de este Trabajo Práctico Integrador permitió verificar
-la articulación entre las áreas centrales de la materia: -
-<strong>Redes:</strong> Configuración de topología contenerizada,
-switches virtuales tipo bridge, direccionamiento IPv4 y control de flujo
-de paquetes en interfaces virtuales. - <strong>Seguridad:</strong>
-Despliegue de un IDS de inspección profunda de paquetes (Suricata 8.0) y
-manipulación programática de tablas de filtrado del kernel
-(<code>iptables</code>). - <strong>Gestión Operativa:</strong>
-Aprovisionamiento reproducible con Docker Compose y observabilidad
-centralizada con Prometheus y Grafana para monitorizar la salud de la
-infraestructura. - <strong>Automatización de Respuesta:</strong> Empleo
-de un modelo de lenguaje (Groq LLM) como clasificador contextual para
-evaluar alertas y accionar reglas de bloqueo sin depender exclusivamente
-de operadores humanos en el bucle inicial de contención.</p>
+<p>La implementación permitió validar en un laboratorio reproducible la
+integración de las áreas centrales de la cátedra:</p>
+<ul>
+<li><strong>Redes y Container Networking:</strong> Construcción de un
+dominio de colisión controlado sobre <code>br-monitored</code>
+(<code>172.28.0.0/16</code>) con direccionamiento determinístico y
+análisis del flujo de paquetes en Linux Netfilter.</li>
+<li><strong>Seguridad:</strong> Inspección profunda de paquetes con
+Suricata 8.0, reglas personalizadas (<code>local.rules</code>) y
+mitigación automática en kernel (<code>iptables</code>).</li>
+<li><strong>Gestión Operativa y Automatización:</strong> Despliegue
+declarativo con Docker Compose, monitoreo continuo en Prometheus/Grafana
+y clasificación contextual mediante LLM con respaldo heurístico
+local.</li>
+</ul>
+<p>El desafío técnico más relevante fue asegurar que el bloqueo en
+<code>iptables</code> interceptara el tráfico entre contenedores antes
+del subsistema NAT de Docker (resuelto insertando en
+<code>DOCKER-USER</code> y <code>FORWARD</code>) y evitar el autobloqueo
+de los servicios NOC mediante <code>WHITELIST_IPS</code>.</p>
+<div style="page-break-before: always;">
+
+</div>
+<table>
+<caption><strong>Tabla 4:</strong> Distribución de tareas y
+responsabilidades del Grupo 10.</caption>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Integrante</th>
+<th style="text-align: left;">Rol</th>
+<th style="text-align: left;">Aporte principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Alvite, Damian</strong></td>
+<td style="text-align: left;">Infraestructura &amp; Red</td>
+<td style="text-align: left;">Topología Docker Compose, bridge
+<code>br-monitored</code> y portal víctima (<code>nginx</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Capre, Rodrigo</strong></td>
+<td style="text-align: left;">SOC &amp; Sensor IDS</td>
+<td style="text-align: left;">Configuración <code>suricata.yaml</code>
+(Suricata 8.0) y firmas en <code>local.rules</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Moscuzza, Vicente</strong></td>
+<td style="text-align: left;">AIOps &amp; SecOps</td>
+<td style="text-align: left;">Agente autónomo <code>agent.py</code>,
+integración Groq LLM, fallback y firewall <code>iptables</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Di Grappa, Emiliano</strong></td>
+<td style="text-align: left;">NOC &amp; Observabilidad</td>
+<td style="text-align: left;">Configuración de Prometheus y
+aprovisionamiento de <code>noc_soc_dashboard.json</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Elizalde, Benjamin</strong></td>
+<td style="text-align: left;">Demo &amp; Documentación</td>
+<td style="text-align: left;">Script <code>simular_ataque.sh</code>,
+redacción del informe técnico y diseño del póster A1.</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2 id="referencias">7. Referencias</h2>
 <ol type="1">
-<li><strong>Open Information Security Foundation (OISF).</strong>
-(2026). <em>Suricata User Guide (Release 8.0)</em>. Recuperado de
-https://docs.suricata.io/</li>
-<li><strong>Groq Inc.</strong> (2026). <em>Groq Cloud API Documentation
-and Model Catalog</em>. Recuperado de https://console.groq.com/docs</li>
-<li><strong>Docker Inc.</strong> (2026). <em>Docker Networking
-Architecture &amp; Packet Filtering Guidelines</em>. Recuperado de
-https://docs.docker.com/engine/network/</li>
-<li><strong>National Institute of Standards and Technology
-(NIST).</strong> (2012). <em>Computer Security Incident Handling
-Guide</em> (NIST Special Publication 800-61 Rev. 2). U.S. Department of
-Commerce.</li>
-<li><strong>Cátedra GOYS — UTN FRLP.</strong> (2026). <em>Guías de
-Trabajos Prácticos y material de cátedra</em>.</li>
+<li>Albin, E., &amp; Rowe, N. C. (2012). A realistic experimental
+comparison of the Suricata and Snort intrusion-detection systems. En
+<em>2012 26th International Conference on Advanced Information
+Networking and Applications Workshops (WAINA)</em> (pp. 122–127). IEEE.
+https://doi.org/10.1109/WAINA.2012.29</li>
+<li>Docker Inc. (2026). <em>Docker networking architecture &amp; packet
+filtering guidelines</em>. https://docs.docker.com/engine/network/</li>
+<li>Grafana Labs. (2026). <em>Grafana OSS documentation: Provisioning
+dashboards and data sources</em>.
+https://grafana.com/docs/grafana/latest/administration/provisioning/</li>
+<li>Groq Inc. (2026). <em>GroqCloud API documentation and model
+catalog</em>. https://console.groq.com/docs</li>
+<li>Habibzadeh, A., Feyzi, F., &amp; Ebrahimi Atani, R. (2026). Large
+language models for security operations centers: A comprehensive survey.
+<em>Journal of Electrical and Computer Engineering</em>.
+https://doi.org/10.1155/jece/3383674</li>
+<li>Ismail, R., Kurnia, R., Brata, Z. A., Nelistiani, G. A., Heo, S.,
+Kim, H., &amp; Kim, H. (2025). Toward robust security orchestration and
+automated response in security operations centers with a
+hyper-automation approach using agentic artificial intelligence.
+<em>Information</em>, <em>16</em>(5), 365.
+https://doi.org/10.3390/info16050365</li>
+<li>Lee, H., Kwon, S., &amp; Lee, J.-H. (2023). Experimental analysis of
+security attacks for Docker container communications.
+<em>Electronics</em>, <em>12</em>(4), 940.
+https://doi.org/10.3390/electronics12040940</li>
+<li>National Institute of Standards and Technology. (2012). <em>Computer
+security incident handling guide</em> (NIST Special Publication
+No. 800-61 Rev. 2). https://doi.org/10.6028/NIST.SP.800-61r2</li>
+<li>Open Information Security Foundation. (2026). <em>Suricata user
+guide (Release 8.0)</em>. https://docs.suricata.io/</li>
+<li>Prometheus Authors. (2026). <em>Prometheus documentation:
+Configuration &amp; exposition formats</em>.
+https://prometheus.io/docs/</li>
+<li>Shah, S. A. R., &amp; Issac, B. (2018). Performance comparison of
+intrusion detection systems and application of machine learning to Snort
+system. <em>Future Generation Computer Systems</em>, <em>80</em>,
+157–170. https://doi.org/10.1016/j.future.2017.10.016</li>
+<li>Xu, X., Xu, A., Jiang, Y., Wang, Z., Wang, Q., Zhang, Y., &amp; Wen,
+H. (2020). Research on security issues of Docker and container
+monitoring system in edge computing system. <em>Journal of Physics:
+Conference Series</em>, <em>1673</em>(1), 012067.
+https://doi.org/10.1088/1742-6596/1673/1/012067</li>
 </ol>
 </body>
 </html>

@@ -1,6 +1,6 @@
 @page {
   size: A4 portrait;
-  margin: 2.0cm 2.0cm 2.0cm 2.0cm;
+  margin: 1.35cm 1.6cm 1.35cm 1.6cm;
   @bottom-center {
     content: "Página " counter(page);
     font-family: Arial, "Liberation Sans", sans-serif;
@@ -11,8 +11,8 @@
 
 body {
   font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
-  font-size: 10pt;
-  line-height: 1.38;
+  font-size: 8.9pt;
+  line-height: 1.28;
   color: #1e293b;
   margin: 0;
   padding: 0;
@@ -22,34 +22,51 @@ header#title-block-header {
   display: none;
 }
 
-h1 {
-  font-size: 16pt;
+.doc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45cm;
+  border-bottom: 2pt solid #0284c7;
+  padding-bottom: 0.22cm;
+  margin-top: 0.1cm;
+  margin-bottom: 0.35cm;
+}
+
+.utn-logo {
+  height: 2.0cm;
+  width: auto;
+  flex-shrink: 0;
+}
+
+h1, .doc-title {
+  font-size: 15pt;
   font-weight: bold;
   color: #0f172a;
-  line-height: 1.25;
-  margin-top: 0.4cm;
-  margin-bottom: 0.5cm;
-  border-bottom: 2pt solid #0284c7;
-  padding-bottom: 0.25cm;
+  line-height: 1.22;
+  margin: 0;
+}
+
+.doc-header + h1 {
+  border-bottom: none;
 }
 
 h2 {
-  font-size: 12pt;
+  font-size: 11.5pt;
   font-weight: bold;
   color: #0f172a;
-  margin-top: 0.7cm;
-  margin-bottom: 0.25cm;
+  margin-top: 0.45cm;
+  margin-bottom: 0.2cm;
   border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 0.15cm;
+  padding-bottom: 0.12cm;
   page-break-after: avoid;
 }
 
 h3 {
-  font-size: 10.5pt;
+  font-size: 10pt;
   font-weight: bold;
   color: #1e293b;
-  margin-top: 0.5cm;
-  margin-bottom: 0.2cm;
+  margin-top: 0.35cm;
+  margin-bottom: 0.15cm;
   page-break-after: avoid;
 }
 
@@ -80,8 +97,18 @@ table {
 
 th, td {
   border: 1px solid #cbd5e1;
-  padding: 4.5pt 6.5pt;
+  padding: 3.5pt 5.5pt;
   text-align: left;
+}
+
+caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 9.2pt;
+  color: #1e293b;
+  margin-bottom: 4pt;
+  page-break-after: avoid;
+  break-after: avoid;
 }
 
 th {
@@ -127,5 +154,33 @@ pre code {
 hr {
   border: none;
   border-top: 1px solid #cbd5e1;
-  margin: 0.5cm 0;
+  margin: 0.45cm 0;
+}
+
+figure {
+  margin: 0.2cm 0 0.3cm 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+figure img {
+  max-width: 80%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+img.captura {
+  max-width: 86%;
+  max-height: 4.8cm;
+  width: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+figcaption {
+  font-size: 8.5pt;
+  color: #475569;
+  font-style: italic;
+  margin-top: 0.15cm;
 }
