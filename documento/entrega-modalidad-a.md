@@ -21,8 +21,6 @@
 **Docentes:** Osvaldo Falabella · Emanuel Rodriguez Rodriguez  
 **Fecha de entrega:** 17 de noviembre de 2026
 
----
-
 ## 1. Resumen ejecutivo
 
 El presente proyecto aborda una problemática operativa frecuente en la gestión de infraestructuras de red: **la desconexión temporal y operativa entre el monitoreo de rendimiento (NOC) y la respuesta ante incidentes de ciberseguridad (SOC)**. En esquemas convencionales, ante una intrusión o ataque web, los sensores de seguridad emiten alertas que requieren triaje manual por parte de analistas, introduciendo demoras de minutos u horas que comprometen la disponibilidad de los servicios.
@@ -30,8 +28,6 @@ El presente proyecto aborda una problemática operativa frecuente en la gestión
 Para resolver esta brecha, diseñamos e implementamos una **Plataforma Integrada NOC/SOC** basada en servicios contenerizados con Docker Compose. La solución combina inspección de tráfico de red en tiempo real mediante **Suricata IDS**, un **agente de respuesta automatizada en Python integrado con la API de Groq** (modelo `qwen/qwen3.8-27b`, con soporte de contingencia heurística local) y un mecanismo de contención activa que inyecta reglas de bloqueo en el firewall del kernel Linux (`iptables`, cadenas `FORWARD` y `DOCKER-USER`). La telemetría operativa, los incidentes clasificados y el estado de mitigación se correlacionan en tiempo real mediante **Prometheus y Grafana**.
 
 Las pruebas de laboratorio demostraron que, frente a ataques web como inyección SQL (`UNION SELECT`), escaneos automatizados (`sqlmap`) y *path traversal* (`/etc/passwd`), la plataforma detecta la firma, clasifica el incidente y aísla la IP agresora en aproximadamente **1 segundo** (latencia LLM medida de 886,4 ms en SQLi). Como resultado, las conexiones del atacante caducan (HTTP 000) mientras los clientes legítimos continúan operando con **100 % de disponibilidad** (HTTP 200 OK, 2,1 ms promedio).
-
----
 
 ## 2. Arquitectura de la solución
 
@@ -64,8 +60,6 @@ El ciclo completo desde el envío de un paquete hasta su eventual mitigación y 
 3. **Extracción y análisis contextual (JSON / HTTPS):** `aiops_agent` monitorea `eve.json` de forma continua. Al leer un registro con `event_type == "alert"`, extrae IP origen/destino, puertos, firma, URL, método HTTP y `User-Agent`, y envía una consulta HTTPS (REST/JSON) a la API de Groq (`qwen/qwen3.8-27b`). Si no hay conectividad externa o clave API, conmuta en menos de 1 ms a su motor heurístico local (`fallback_heuristic`).
 4. **Contención activa en kernel (Netfilter):** Cuando el dictamen JSON es `BLOCK` y la IP origen no pertenece a `WHITELIST_IPS`, el agente inserta reglas prioritarias (`-I ... 1`) en `FORWARD` y `DOCKER-USER` mediante `iptables` con acción `DROP`. Los paquetes posteriores del agresor se descartan en el kernel sin alcanzar Nginx.
 5. **Telemetría hacia el NOC (HTTP / PromQL):** El agente expone `/metrics` (formato Prometheus) y `/status` (JSON) en el puerto `8000`. `noc_prometheus` (`172.28.0.20`) realiza *scraping* cada 2 s sobre el gateway del bridge (`172.28.0.1:8000`) y alimenta el dashboard de `noc_grafana` (`172.28.0.30:3000`).
-
----
 
 ## 3. Implementación
 
@@ -104,25 +98,11 @@ La arquitectura separa los planos de **datos/aplicación** y **control/inspecci�
 - **Acceso privilegiado al plano de red:** `soc_suricata` (`NET_ADMIN`, `NET_RAW`, `SYS_NICE`) y `aiops_agent` (`privileged: true`) emplean `network_mode: "host"` para acceder a la interfaz virtual `br-monitored` del host y modificar las tablas Netfilter del kernel.
 - **Protección contra autoaislamiento y filtrado dinámico:** Antes de insertar reglas `DROP`, `agent.py` valida la IP contra `WHITELIST_IPS` (`127.0.0.1`, `172.28.0.1`, `172.28.0.10`, `172.28.0.20`, `172.28.0.30`, `8.8.8.8`, `1.1.1.1`). La inserción en `DOCKER-USER` garantiza el descarte de paquetes en tráfico reenviado por Docker incluso antes de aplicarse reglas NAT propias del motor de contenedores.
 
-En `lab/suricata/suricata.yaml` se configuró `HOME_NET: "[172.28.0.0/16]"` y la salida `eve-log` (`payload: yes`, `packet: yes`, `http-body: yes`) sobre `af-packet` en `br-monitored`. Las firmas en `lab/suricata/rules/local.rules` cubren cuatro vectores sobre `172.28.0.10:80`:
-
-```suricata
-# SQL Injection (UNION SELECT y variantes OR 1=1)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de SQL Injection (UNION SELECT)"; content:"UNION"; nocase; content:"SELECT"; nocase; classtype:web-application-attack; sid:1000001; rev:3;)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de SQL Injection clasico (OR 1=1)"; content:"1%27=%271"; nocase; classtype:web-application-attack; sid:1000002; rev:2;)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de SQL Injection clasico (OR 1=1 raw)"; content:"' OR '1'='1"; nocase; classtype:web-application-attack; sid:1000006; rev:1;)
-
-# Escáneres de vulnerabilidades (sqlmap, nikto, nmap, gobuster, acunetix)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Escaneo automatizado detectado (sqlmap/nikto/nmap)"; content:"User-Agent|3a|"; nocase; pcre:"/(sqlmap|nikto|nmap|gobuster|acunetix)/i"; classtype:attempted-recon; sid:1000003; rev:2;)
-
-# Path Traversal / LFI y Ráfaga TCP SYN (DoS)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Intento de Path Traversal (/etc/passwd)"; content:"/etc/passwd"; nocase; classtype:web-application-attack; sid:1000004; rev:2;)
-alert tcp any any -> 172.28.0.10 80 (msg:"ALERTA SOC - Ráfaga de conexiones sospechosas (Posible DoS)"; flow:to_server; flags:S; threshold:type both, track by_src, count 10, seconds 3; classtype:attempted-dos; sid:1000005; rev:4;)
-```
+En `lab/suricata/suricata.yaml` se configuró `HOME_NET: "[172.28.0.0/16]"` y la salida `eve-log` (`payload: yes`, `packet: yes`, `http-body: yes`) sobre `af-packet` en `br-monitored`. Por su parte, las reglas locales (`lab/suricata/rules/local.rules`, `SID 1000001`–`1000006`) inspeccionan tráfico dirigido a `172.28.0.10:80` para detectar cuatro familias de ataque web y de red: inyección SQL (`UNION SELECT` y variantes `OR 1=1`), escáneres automatizados por `User-Agent` (`sqlmap`, `nikto`, `nmap`, `gobuster`, `acunetix`), intentos de *Path Traversal* (`/etc/passwd`) y ráfagas anómalas de conexiones TCP SYN (posible DoS).
 
 ### 3.3. Automatización
 
-La automatización cubre tanto el **despliegue reproducible** de la plataforma como la **respuesta autónoma ante incidentes**:
+La automatización cubre tanto el despliegue reproducible de la plataforma como la respuesta autónoma ante incidentes:
 
 - **Aprovisionamiento declarativo:** Todo el stack (6 servicios, volúmenes, red y variables de entorno) se levanta con `docker compose up -d`. Grafana carga automáticamente su fuente de datos (`datasources/`) y el tablero `noc_soc_dashboard.json` (`dashboards.yml`) sin configuración manual en interfaz web.
 - **Triaje y remediación autónoma (`lab/agent/agent.py`):** El agente solicita a Groq una respuesta JSON estricta (`decision`, `severity`, `confidence`, `reason`) con `temperature=0.0`. Ante fallos de red o ausencia de `GROQ_API_KEY`, conmuta automáticamente a `fallback_heuristic(event)` evaluando severidad (`<= 2`) y palabras clave de la firma. Además, expone el endpoint `GET /reset` para eliminar de forma idempotente las reglas insertadas en `FORWARD` y `DOCKER-USER` y limpiar `BLOCKED_IPS`.
@@ -142,8 +122,6 @@ Prometheus (`lab/prometheus/prometheus.yml`) recolecta ambos objetivos (`aiops_a
 - **Historial de Amenazas y Bloqueos en Tiempo Real (NOC Timeline):** Serie temporal comparativa entre incidentes analizados e IPs neutralizadas.
 
 ![Figura 2: Dashboard de Grafana NOC/SOC con una IP neutralizada, contador de incidentes y disponibilidad del servicio.](../capturas/dashboard-ipneutralizada.png){.captura}
-
----
 
 ## 4. Verificación
 
@@ -182,15 +160,11 @@ Se verificaron tres propiedades operativas de la automatización:
 2. **Resiliencia en modo offline:** Sin acceso a la API de Groq (`GROQ_API_KEY` ausente o corte de red), `fallback_heuristic` clasificó las firmas de SQLi, escáner, *path traversal* y ráfaga SYN en ~0,5 ms manteniendo el bloqueo automático.
 3. **Reversión limpia e idempotencia:** Al invocar `GET http://localhost:8000/reset` (opción 7 del script), el agente eliminó las reglas de `172.28.0.99` en ambas cadenas y restableció la conectividad de prueba sin reiniciar contenedores.
 
----
-
 ## 5. Limitaciones y trabajo futuro
 
 1. **Expiración temporal de reglas (TTL):** Actualmente los bloqueos en `iptables` persisten hasta ejecutar `/reset` manualmente. En producción conviene incorporar un temporizador de cuarentena (p. ej., 15 minutos) para evitar bloqueos permanentes sobre IPs dinámicas o NAT compartido.
 2. **Persistencia de incidentes e inspección TLS:** `INCIDENT_HISTORY` y `BLOCKED_IPS` residen en memoria del proceso Python y las reglas de Suricata inspeccionan HTTP en texto plano. Si se reinicia el proyecto desde cero, se integraría almacenamiento persistente (SQLite/PostgreSQL) y terminación TLS en un proxy inverso previo al sensor.
 3. **Aceleración eBPF/XDP e integración SIEM:** Para tráfico de alta velocidad (10/40 Gbps), el descarte podría trasladarse a programas eBPF/XDP en el controlador de red, además de exportar eventos en formato Syslog/CEF hacia plataformas SIEM como Wazuh o Elastic.
-
----
 
 ## 6. Conclusiones
 
@@ -202,8 +176,6 @@ La implementación permitió validar en un laboratorio reproducible la integraci
 
 El desafío técnico más relevante fue asegurar que el bloqueo en `iptables` interceptara el tráfico entre contenedores antes del subsistema NAT de Docker (resuelto insertando en `DOCKER-USER` y `FORWARD`) y evitar el autobloqueo de los servicios NOC mediante `WHITELIST_IPS`.
 
-<div style="page-break-before: always;"></div>
-
 | Integrante | Rol | Aporte principal |
 | :--- | :--- | :--- |
 | **Alvite, Damian** | Infraestructura & Red | Topología Docker Compose, bridge `br-monitored` y portal víctima (`nginx`). |
@@ -213,8 +185,6 @@ El desafío técnico más relevante fue asegurar que el bloqueo en `iptables` in
 | **Elizalde, Benjamin** | Demo & Documentación | Script `simular_ataque.sh`, redacción del informe técnico y diseño del póster A1. |
 
 : **Tabla 4:** Distribución de tareas y responsabilidades del Grupo 10.
-
----
 
 ## 7. Referencias
 
