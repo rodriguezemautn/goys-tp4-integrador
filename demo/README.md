@@ -35,6 +35,10 @@ GROQ_MODEL=qwen/qwen3.8-27b
 
 ### Paso 2: Levantar los Contenedores
 ```bash
+# Habilitar filtrado de iptables sobre bridges virtuales Linux (requerido para L2->L3)
+sudo modprobe br_netfilter
+sudo sysctl -w net.bridge.bridge-nf-call-iptables=1
+
 docker compose up -d
 ```
 

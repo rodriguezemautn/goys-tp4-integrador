@@ -16,6 +16,22 @@ VICTIM_URL="http://172.28.0.10"
 HOST_URL="http://localhost:8080"
 ATTACKER_CONTAINER="demo_attacker"
 
+# Asegura que el kernel pase el tráfico del bridge br-monitored por iptables FORWARD/DOCKER-USER
+ensure_bridge_netfilter() {
+    if [ ! -f /proc/sys/net/bridge/bridge-nf-call-iptables ]; then
+        sudo modprobe br_netfilter 2>/dev/null || true
+    fi
+    if [ -f /proc/sys/net/bridge/bridge-nf-call-iptables ]; then
+        if [ "$(cat /proc/sys/net/bridge/bridge-nf-call-iptables)" != "1" ]; then
+            sudo sysctl -w net.bridge.bridge-nf-call-iptables=1 >/dev/null 2>&1 || true
+        fi
+    else
+        echo -e "${RED}⚠️  No se pudo habilitar br_netfilter (net.bridge.bridge-nf-call-iptables).${NC}"
+        echo -e "${YELLOW}   Ejecutá: sudo modprobe br_netfilter && sudo sysctl -w net.bridge.bridge-nf-call-iptables=1${NC}"
+        sleep 2
+    fi
+}
+
 # Función para verificar si el contenedor atacante está activo
 check_attacker_container() {
     if docker ps --format '{{.Names}}' | grep -q "^${ATTACKER_CONTAINER}$"; then
@@ -163,6 +179,7 @@ reset_firewall() {
 }
 
 # Menú interactivo
+ensure_bridge_netfilter
 while true; do
     banner
     echo "Seleccione una opción para la demo:"
