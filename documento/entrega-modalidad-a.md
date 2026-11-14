@@ -146,7 +146,7 @@ Inmediatamente después del bloqueo, el atacante queda aislado (`HTTP 000` / tim
 | Escenario evaluado | Firma Suricata | Tiempo de respuesta | Resultado observado |
 | :--- | :--- | :--- | :--- |
 | Tráfico legítimo (`GET /`) | Ninguna | 2,1 ms | Permitido (`HTTP 200 OK`) |
-| SQL Injection (`UNION SELECT`) | `SID 1000001` | ~880 ms – 2,1 s | `DROP` en `FORWARD` / `DOCKER-USER` |
+| SQL Injection (`UNION SELECT`) | `SID 1000001` | ~880 ms | `DROP` en `FORWARD` / `DOCKER-USER` |
 | Escáner (`User-Agent: sqlmap`) | `SID 1000003` | ~750 ms | `DROP` en `FORWARD` / `DOCKER-USER` |
 | Path Traversal (`/etc/passwd`) | `SID 1000004` | ~820 ms | `DROP` en `FORWARD` / `DOCKER-USER` |
 

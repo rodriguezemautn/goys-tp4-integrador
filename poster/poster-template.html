@@ -51,8 +51,28 @@
     }
 
     @media print {
-      body { padding: 0; background: none; }
-      .poster { box-shadow: none; width: 841mm; height: 594mm; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body {
+        display: block;
+        width: 841mm;
+        height: 594mm;
+        margin: 0;
+        padding: 0;
+        background: none;
+        overflow: hidden;
+      }
+      .poster {
+        box-shadow: none;
+        width: 841mm;
+        height: 594mm;
+        max-height: 594mm;
+        margin: 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
       .no-print { display: none !important; }
     }
 
@@ -322,7 +342,7 @@
           <strong>Grupo 10:</strong> D. Alvite &middot; R. Capre &middot; E. Di Grappa &middot; B. Elizalde &middot; V. Moscuzza
         </div>
         <div>
-          <strong>Docentes:</strong> O. Falabella &middot; E. Rodriguez
+          <strong>Docentes:</strong> O. Falabella &middot; E. Rodriguez Rodriguez
         </div>
       </div>
     </header>
