@@ -18,6 +18,9 @@
 | [D-10](#d-10) | 12/11 | Fin de línea LF forzado para scripts y configuraciones | Santiago | Vigente |
 | [D-11](#d-11) | 12/11 | Ansible corre en la estación (Linux), no en WSL | Santiago | Vigente (cambia la propuesta) |
 | [D-12](#d-12) | 12/11 | Una rama y un *pull request* por hito | Grupo | Vigente |
+| [D-13](#d-13) | 14/11 | La API-SSL usa un certificado firmado por una CA local de cada router | Juan Bautista | Vigente |
+| [D-14](#d-14) | 14/11 | mktxp fijado en 1.2.20 y limitado a interfaces, firewall y BGP | Juan Bautista | Vigente |
+| [D-15](#d-15) | 14/11 | La caída de un proveedor se detecta por el ping, no por BGP | Juan Bautista | Vigente |
 
 ---
 
@@ -150,3 +153,31 @@
   - Cada hito se trabaja en una rama (`h1-h2-laboratorio-estacion`, `h3-tablero`, …) y entra a `main` por *pull request*.
   - Lo revisa otro integrante antes del *merge*.
 - **Consecuencia:** cada PR deja registrado quién hizo qué y quién lo revisó. Eso sirve como evidencia de participación.
+
+<a id="d-13"></a>
+## D-13 — La API-SSL usa un certificado firmado por una CA local de cada router
+
+- **Contexto:** la guía de H3 creaba un certificado `tls-server` y lo autofirmaba con `/certificate sign api-ssl`. En RouterOS 7.21.5 eso falla con `failure: CA not found`.
+- **Decisión:** en cada router se crea primero una CA local (`ca-local`, `key-cert-sign,crl-sign`) y con ella se firma `api-ssl` (`/certificate sign api-ssl ca=ca-local`). Queda en [`demo/routers/H3-monitoreo.rsc`](demo/routers/H3-monitoreo.rsc).
+- **Alternativa descartada:** `no_ssl_certificate = True` en mktxp (API-SSL sin certificado). Funciona, pero el tráfico queda cifrado sin certificado y se pierde la evidencia de quién responde.
+- **Consecuencia:** mktxp no verifica el certificado (`ssl_certificate_verify = False`), porque es de una CA privada. La protección real es la restricción de origen (`10.20.0.101/32`) en el servicio, en el usuario y, en el EDGE, en el firewall.
+- **Evidencia:** `capturas/H3/H3-01` a `H3-03`. Desde la estación, `openssl s_client` muestra `CN=<router>` emitido por `CN=CA-<router>` en los 5 routers.
+
+<a id="d-14"></a>
+## D-14 — mktxp fijado en 1.2.20 y limitado a interfaces, firewall y BGP
+
+- **Contexto:** la versión más nueva de mktxp (2.x) cambió el formato y la ubicación de la configuración respecto de la que documenta la guía. Además, con todos los colectores encendidos, leer los 5 CHR emulados tardaba más de 4 s y Prometheus cortaba el *scrape* de 5 s (`context deadline exceeded`).
+- **Decisión:**
+  - Imagen `ghcr.io/akpw/mktxp:1.2.20`, la última 1.x, con la configuración montada en `/etc/mktxp`.
+  - Solo quedan encendidos `interface`, `firewall`, `address_list = bloqueados` y `bgp`, que son los que usan el tablero y las alertas. Los 5 routers se leen en paralelo.
+  - Ante una falla de conexión, mktxp reintenta a los 10 s (máximo 30 s) en lugar de 120 s, para que un router que vuelve aparezca enseguida en el tablero.
+- **Consecuencia:** el *scrape* de mktxp baja a menos de 1 s. Para agregar métricas (por ejemplo `monitor`, que consulta placa por placa), hay que medir antes el tiempo del *scrape*.
+- **Evidencia:** `capturas/H3/H3-04` (los 3 *targets* en UP).
+
+<a id="d-15"></a>
+## D-15 — La caída de un proveedor se detecta por el ping, no por BGP
+
+- **Contexto:** en la prueba de H3, al apagar ISP-2, `DestinoInalcanzable` saltó en 2 s, pero la sesión BGP siguió *established* durante el *hold time* (unos 3 minutos) hasta que el EDGE la dio por caída.
+- **Decisión:** se mantienen las dos alertas. `DestinoInalcanzable` es la que avisa la falla; `SesionBGPCaida` confirma después el estado del enrutamiento. No se acortan los *timers* de BGP del TP3 (D-01).
+- **Consecuencia:** en la demo, para mostrar `SesionBGPCaida` hay que esperar unos 3 minutos con el proveedor apagado. Es un buen ejemplo de por qué se combina el monitoreo de caja negra con el interno (propuesta §3.3).
+- **Evidencia:** `capturas/H3/H3-06` y `H3-08`.
