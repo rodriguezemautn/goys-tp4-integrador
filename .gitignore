@@ -21,3 +21,16 @@ credentials*
 *.bak
 *.log
 *.rsc.bak
+
+# Laboratorio de la demo (TP4 Propuesta A)
+demo/.vagrant/
+demo/.claves/
+demo/.descargas/
+demo/prueba-ram/.frr/
+demo/ansible/group_vars/all/vault.yml
+.vault_pass
+*.vdi
+*.vdi.zip
+*.zip
+demo/backups/*
+!demo/backups/.gitkeep

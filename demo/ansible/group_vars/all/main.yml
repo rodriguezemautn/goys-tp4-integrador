@@ -1,0 +1,57 @@
+---
+# Versiones
+k3s_version: v1.36.6+k3s1
+
+# Red
+k3s_server_ip: 10.10.10.11
+chr_ip_cluster: 10.10.10.1
+red_clientes: 192.168.56.0/24
+
+# Baja el corte ante la caída de un nodo de 43 s a 14 s (medido).
+k3s_deteccion_rapida: true
+
+# Secretos: salen de vault.yml (fuera de git), creado desde vault.example.yml
+k3s_token: "{{ vault_k3s_token }}"
+bgp_md5: "{{ vault_bgp_md5 }}"
+grafana_admin: "{{ vault_grafana_admin }}"
+
+# Unidades que Ubuntu no necesita acá: cada MiB cuenta en el perfil chico.
+# Los sockets van antes que su servicio para que no lo vuelvan a levantar.
+comun_servicios_apagar:
+  - snapd.socket
+  - snapd.service
+  - multipathd.socket
+  - multipathd.service
+  - ModemManager.service
+  - unattended-upgrades.service
+  - packagekit.service
+  - fwupd.service
+  - udisks2.service
+  - apt-daily.timer
+  - apt-daily-upgrade.timer
+  - fwupd-refresh.timer
+  - motd-news.timer
+
+comun_paquetes:
+  - curl
+  - tcpdump
+
+# Backups: quedan en la carpeta compartida con el host, sin secretos a la vista y fuera de git.
+backup_dir: "{{ playbook_dir }}/../backups"
+backup_conservar: 5
+backup_chr_usuario: backup
+backup_clave_ssh: /home/vagrant/.ssh/lab_ed25519
+backup_clave_cifrado: /home/vagrant/.vault_pass
+k3s_db_dir: /var/lib/rancher/k3s/server/db
+k3s_token_archivo: /var/lib/rancher/k3s/server/token
+
+# El día de la Feria no se baja nada: todo queda en el containerd de cada nodo.
+imagenes_precarga:
+  - quay.io/metallb/controller:v0.15.2
+  - quay.io/metallb/speaker:v0.15.2
+  - docker.io/library/nginx:1.29-alpine
+  - docker.io/traefik/whoami:v1.11.0
+  - docker.io/prom/prometheus:v3.15.1
+  - docker.io/prom/node-exporter:v1.12.1
+  - docker.io/grafana/grafana:13.2.5
+  - docker.io/rancher/mirrored-library-busybox:1.37.0

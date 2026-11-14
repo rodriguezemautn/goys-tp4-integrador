@@ -1,0 +1,25 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata: {name: servicios, namespace: metallb-system}
+spec:
+  addresses:
+    - 10.10.20.0/28
+---
+# En modo nativo no acepta keepaliveTime: usa holdTime/3.
+# El Secret bgp-md5 (tipo kubernetes.io/basic-auth, clave password) lo crea deploy.yml desde el vault.
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata: {name: chr-borde, namespace: metallb-system}
+spec:
+  myASN: 64512
+  peerASN: 65000
+  peerAddress: 10.10.10.1
+  holdTime: 9s
+  passwordSecret: {name: bgp-md5, namespace: metallb-system}
+---
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata: {name: servicios, namespace: metallb-system}
+spec:
+  ipAddressPools: [servicios]
+  aggregationLength: 32

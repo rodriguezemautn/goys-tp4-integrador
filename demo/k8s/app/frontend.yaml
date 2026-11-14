@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: frontend-nginx, namespace: web}
+data:
+  # La imagen oficial procesa /etc/nginx/templates/*.template con envsubst, solo para
+  # variables definidas: ${APP_VERSION} y ${HOSTNAME} se reemplazan y $backend no.
+  default.conf.template: |
+    resolver kube-dns.kube-system.svc.cluster.local valid=10s ipv6=off;
+    server {
+      listen 80;
+      set $backend http://backend.datos.svc.cluster.local;
+      location = /healthz { default_type text/plain; return 200 "ok\n"; }
+      location /api/ { proxy_connect_timeout 2s; proxy_pass $backend; }
+      location / { default_type text/plain; return 200 "frontend ${APP_VERSION} - pod ${HOSTNAME}\n"; }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: frontend, namespace: web, labels: {app: frontend}}
+spec:
+  replicas: 3
+  selector: {matchLabels: {app: frontend}}
+  strategy: {type: RollingUpdate, rollingUpdate: {maxSurge: 1, maxUnavailable: 0}}
+  template:
+    metadata: {labels: {app: frontend}}
+    spec:
+      terminationGracePeriodSeconds: 20
+      topologySpreadConstraints:
+        - {maxSkew: 1, topologyKey: kubernetes.io/hostname, whenUnsatisfiable: ScheduleAnyway,
+           labelSelector: {matchLabels: {app: frontend}}}
+      containers:
+        - name: nginx
+          image: nginx:1.29-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - {name: APP_VERSION, value: v1}
+          ports:
+            - {name: http, containerPort: 80}
+          # Evita perder pedidos en el rolling update: nginx sigue atendiendo mientras sale del balanceo.
+          lifecycle: {preStop: {sleep: {seconds: 5}}}
+          readinessProbe: {httpGet: {path: /healthz, port: 80}, periodSeconds: 2, failureThreshold: 2}
+          resources: {requests: {cpu: 10m, memory: 16Mi}, limits: {memory: 64Mi}}
+          volumeMounts:
+            - {name: plantilla, mountPath: /etc/nginx/templates, readOnly: true}
+      volumes:
+        - name: plantilla
+          configMap: {name: frontend-nginx}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: frontend, namespace: web}
+spec:
+  minAvailable: 2
+  selector: {matchLabels: {app: frontend}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: web
+  annotations:
+    metallb.io/loadBalancerIPs: 10.10.20.10
+spec:
+  type: LoadBalancer
+  # Cluster: los 3 nodos anuncian la IP por BGP, tengan o no una réplica.
+  externalTrafficPolicy: Cluster
+  selector: {app: frontend}
+  ports:
+    - {name: http, port: 80, targetPort: http}

@@ -1,0 +1,60 @@
+# -*- mode: ruby -*-
+# Laboratorio k3s del TP4 GOYS. Perfil de RAM: chico (por defecto) o normal.
+#   PowerShell: $env:PERFIL_RAM="normal"; vagrant up
+
+PERFILES = {
+  "chico"  => { server: 1536, agent: 768 },
+  "normal" => { server: 2048, agent: 1024 },
+}.freeze
+
+perfil = ENV.fetch("PERFIL_RAM", "chico")
+abort "PERFIL_RAM debe ser chico o normal (vino: #{perfil})" unless PERFILES.key?(perfil)
+
+clave = File.join(__dir__, ".claves", "lab_ed25519.pub")
+abort "Falta #{clave}: corré primero el script de preparación (mac/ o windows/)" unless File.exist?(clave)
+
+NODOS = [
+  { nombre: "k3s-server", ip: "10.10.10.11", cpus: 2, rol: :server },
+  { nombre: "k3s-agent1", ip: "10.10.10.12", cpus: 1, rol: :agent },
+  { nombre: "k3s-agent2", ip: "10.10.10.13", cpus: 1, rol: :agent },
+].freeze
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/ubuntu-24.04"
+  config.vm.box_check_update = false
+
+  # Vale para todos los nodos: Ansible (en el server) entra a los agents con esta clave.
+  config.vm.provision "shell", name: "clave-del-lab", inline: <<~'SHELL'
+    set -eu
+    install -d -m 700 -o vagrant -g vagrant /home/vagrant/.ssh
+    pub=/vagrant/.claves/lab_ed25519.pub
+    grep -qxF "$(cat "$pub")" /home/vagrant/.ssh/authorized_keys || cat "$pub" >> /home/vagrant/.ssh/authorized_keys
+  SHELL
+
+  NODOS.each do |nodo|
+    config.vm.define nodo[:nombre], primary: nodo[:rol] == :server do |n|
+      n.vm.hostname = nodo[:nombre]
+      n.vm.network "private_network", ip: nodo[:ip], virtualbox__intnet: "lab-cluster"
+
+      n.vm.provider "virtualbox" do |vb|
+        vb.name = "tp4-#{nodo[:nombre]}"
+        vb.memory = PERFILES[perfil][nodo[:rol]]
+        vb.cpus = nodo[:cpus]
+        vb.linked_clone = true
+        vb.gui = false
+        vb.customize ["modifyvm", :id, "--audio-driver", "none"]
+      end
+
+      next unless nodo[:rol] == :server
+
+      # La VM server es el nodo de control de Ansible: en Windows no corre y WSL2 reserva RAM.
+      n.vm.provision "shell", name: "control-ansible", inline: <<~'SHELL'
+        set -eu
+        install -m 600 -o vagrant -g vagrant /vagrant/.claves/lab_ed25519 /home/vagrant/.ssh/lab_ed25519
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -qq
+        apt-get install -y -qq ansible-core
+      SHELL
+    end
+  end
+end

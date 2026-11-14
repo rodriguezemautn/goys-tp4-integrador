@@ -1,0 +1,85 @@
+---
+# Mismo orden que prueba-ram/desplegar-replica.sh
+- name: Desplegar servicios en el clúster
+  hosts: servers
+  become: true
+  gather_facts: false
+  vars:
+    deploy_k8s: "{{ playbook_dir }}/../k8s"
+  tasks:
+    - name: Cortar si siguen los valores de ejemplo
+      ansible.builtin.assert:
+        that:
+          - "'CAMBIAR' not in bgp_md5"
+          - "'CAMBIAR' not in grafana_admin"
+        fail_msg: "Falta vault.yml o tiene los valores de ejemplo"
+
+    - name: Aplicar MetalLB
+      ansible.builtin.command: k3s kubectl apply -f {{ deploy_k8s }}/metallb/metallb-native.yaml
+      register: deploy_metallb
+      changed_when: deploy_metallb.stdout is search('created|configured')
+
+    - name: Esperar al controller de MetalLB (webhook)
+      ansible.builtin.command: k3s kubectl -n metallb-system rollout status deployment/controller --timeout=300s
+      changed_when: false
+
+    - name: Crear el Secret de la clave BGP
+      ansible.builtin.command:
+        cmd: k3s kubectl apply -f -
+        stdin: >-
+          {{ {'apiVersion': 'v1', 'kind': 'Secret', 'type': 'kubernetes.io/basic-auth',
+              'metadata': {'name': 'bgp-md5', 'namespace': 'metallb-system'},
+              'stringData': {'password': bgp_md5}} | to_json }}
+      register: deploy_secreto_bgp
+      changed_when: deploy_secreto_bgp.stdout is search('created|configured')
+      no_log: true
+
+    - name: Aplicar pool y sesión BGP (reintenta hasta que el webhook responda)
+      ansible.builtin.command: k3s kubectl apply -f {{ deploy_k8s }}/metallb/bgp.yaml
+      register: deploy_bgp
+      changed_when: deploy_bgp.stdout is search('created|configured')
+      retries: 12
+      delay: 10
+      until: deploy_bgp is succeeded
+
+    - name: Aplicar la aplicación
+      ansible.builtin.command: k3s kubectl apply -k {{ deploy_k8s }}/app
+      register: deploy_app
+      changed_when: deploy_app.stdout is search('created|configured')
+
+    - name: Crear el namespace de monitoreo
+      ansible.builtin.command: k3s kubectl apply -f {{ deploy_k8s }}/monitoring/namespace.yaml
+      register: deploy_ns
+      changed_when: deploy_ns.stdout is search('created|configured')
+
+    - name: Crear el Secret de Grafana
+      ansible.builtin.command:
+        cmd: k3s kubectl apply -f -
+        stdin: >-
+          {{ {'apiVersion': 'v1', 'kind': 'Secret', 'type': 'Opaque',
+              'metadata': {'name': 'grafana-admin', 'namespace': 'monitoring'},
+              'stringData': {'password': grafana_admin}} | to_json }}
+      register: deploy_secreto_grafana
+      changed_when: deploy_secreto_grafana.stdout is search('created|configured')
+      no_log: true
+
+    - name: Aplicar monitoreo
+      ansible.builtin.command: k3s kubectl apply -k {{ deploy_k8s }}/monitoring
+      register: deploy_monitoreo
+      changed_when: deploy_monitoreo.stdout is search('created|configured')
+
+    - name: Aplicar NetworkPolicies
+      ansible.builtin.command: k3s kubectl apply -k {{ deploy_k8s }}/netpol
+      register: deploy_netpol
+      changed_when: deploy_netpol.stdout is search('created|configured')
+
+    - name: Esperar a los Deployments
+      ansible.builtin.command: k3s kubectl -n {{ item.ns }} rollout status deployment/{{ item.nombre }} --timeout=300s
+      loop:
+        - {ns: web, nombre: frontend}
+        - {ns: datos, nombre: backend}
+        - {ns: monitoring, nombre: prometheus}
+        - {ns: monitoring, nombre: grafana}
+      loop_control:
+        label: "{{ item.ns }}/{{ item.nombre }}"
+      changed_when: false
