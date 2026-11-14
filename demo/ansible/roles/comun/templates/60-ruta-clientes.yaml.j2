@@ -1,0 +1,8 @@
+# Gestionado por Ansible. Las respuestas a la laptop vuelven por el CHR, no por el NAT de Vagrant.
+network:
+  version: 2
+  ethernets:
+    {{ comun_lan_iface }}:
+      routes:
+        - to: {{ red_clientes }}
+          via: {{ chr_ip_cluster }}

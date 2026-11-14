@@ -1,0 +1,46 @@
+---
+- name: Detectar la interfaz del clúster por su IP
+  ansible.builtin.set_fact:
+    comun_lan_iface: >-
+      {{ ansible_facts.interfaces | map('regex_replace', '-', '_')
+         | map('extract', ansible_facts) | selectattr('ipv4', 'defined')
+         | selectattr('ipv4.address', 'equalto', ansible_host)
+         | map(attribute='device') | first }}
+
+- name: Instalar paquetes
+  ansible.builtin.apt:
+    name: "{{ comun_paquetes }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+
+- name: Listar las unidades de systemd instaladas
+  ansible.builtin.command: systemctl list-unit-files --no-legend
+  register: comun_unidades
+  changed_when: false
+
+- name: Apagar lo que no se usa
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop: "{{ comun_servicios_apagar }}"
+  when: item in comun_unidades.stdout
+
+- name: Dejar persistente la ruta hacia los clientes por el CHR
+  ansible.builtin.template:
+    src: 60-ruta-clientes.yaml.j2
+    dest: /etc/netplan/60-ruta-clientes.yaml
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Ver la ruta hacia los clientes
+  ansible.builtin.command: ip route show {{ red_clientes }}
+  register: comun_ruta
+  changed_when: false
+
+- name: Agregar la ruta en caliente
+  ansible.builtin.command: ip route replace {{ red_clientes }} via {{ chr_ip_cluster }} dev {{ comun_lan_iface }}
+  when: ("via " ~ chr_ip_cluster) not in comun_ruta.stdout
+  changed_when: true

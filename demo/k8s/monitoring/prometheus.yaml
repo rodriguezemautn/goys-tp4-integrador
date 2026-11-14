@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: prometheus, namespace: monitoring}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: {name: prometheus}
+rules:
+  - apiGroups: [""]
+    resources: [nodes, nodes/proxy, nodes/metrics, pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: {name: prometheus}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: prometheus}
+subjects:
+  - {kind: ServiceAccount, name: prometheus, namespace: monitoring}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: prometheus-config, namespace: monitoring}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      evaluation_interval: 5s
+    rule_files:
+      - /etc/prometheus/alertas.yml
+    scrape_configs:
+      - job_name: nodos
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_address_InternalIP]
+            regex: (.+)
+            target_label: __address__
+            replacement: $1:9100
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: nodo
+
+      # cAdvisor por el API server: así no hace falta abrir el kubelet a la red de pods.
+      - job_name: contenedores
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        authorization:
+          credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: nodo
+        metric_relabel_configs:
+          - source_labels: [__name__]
+            regex: container_memory_working_set_bytes|container_cpu_usage_seconds_total|container_network_receive_bytes_total
+            action: keep
+
+      - job_name: metallb
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [metallb-system]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_component]
+            regex: speaker|controller
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            regex: monitoring
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: nodo
+          - source_labels: [__meta_kubernetes_pod_label_component]
+            target_label: componente
+  alertas.yml: |
+    groups:
+      - name: tp4
+        rules:
+          - alert: NodoCaido
+            expr: up{job="nodos"} == 0
+            for: 15s
+            labels: {severity: critical}
+            annotations:
+              summary: "Nodo {{ $labels.nodo }} caído"
+          - alert: SesionBGPCaida
+            expr: metallb_bgp_session_up == 0
+            for: 10s
+            labels: {severity: critical}
+            annotations:
+              summary: "Sesión BGP de {{ $labels.nodo }} caída"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: prometheus, namespace: monitoring, labels: {app: prometheus}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: prometheus}}
+  template:
+    metadata: {labels: {app: prometheus}}
+    spec:
+      serviceAccountName: prometheus
+      # Fijado al server: en la demo se apaga un agent y el gráfico tiene que seguir.
+      nodeSelector: {node-role.kubernetes.io/control-plane: "true"}
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.15.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time=1d
+          ports:
+            - {name: http, containerPort: 9090}
+          readinessProbe: {httpGet: {path: /-/ready, port: 9090}, periodSeconds: 5}
+          resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {memory: 384Mi}}
+          volumeMounts:
+            - {name: config, mountPath: /etc/prometheus, readOnly: true}
+            - {name: datos, mountPath: /prometheus}
+      volumes:
+        - name: config
+          configMap: {name: prometheus-config}
+        - name: datos
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: prometheus, namespace: monitoring}
+spec:
+  type: ClusterIP
+  selector: {app: prometheus}
+  ports:
+    - {name: http, port: 9090, targetPort: http}

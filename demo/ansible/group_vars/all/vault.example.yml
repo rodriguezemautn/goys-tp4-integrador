@@ -1,0 +1,6 @@
+---
+# Copiar a vault.yml, cambiar los valores y cifrar con ansible-vault.
+# Ansible también carga este archivo, por eso site.yml y deploy.yml cortan si queda CAMBIAR.
+vault_k3s_token: CAMBIAR-TOKEN-K3S
+vault_bgp_md5: CAMBIAR-CLAVE-BGP
+vault_grafana_admin: CAMBIAR-CLAVE-GRAFANA

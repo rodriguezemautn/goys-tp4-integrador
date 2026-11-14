@@ -1,0 +1,181 @@
+---
+# Uso: /vagrant/ansible/run.sh backup.yml
+# Deja en demo/backups/ la configuración del CHR, sin la clave BGP, y la base de k3s, cifrada.
+- name: Respaldar el CHR y el clúster
+  hosts: servers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Fijar la fecha del backup
+      ansible.builtin.set_fact:
+        backup_fecha: "{{ now(fmt='%Y%m%d-%H%M%S') }}"
+
+    - name: Exportar la configuración del CHR
+      ansible.builtin.command:
+        argv:
+          - ssh
+          - -i
+          - "{{ backup_clave_ssh }}"
+          - -o
+          - BatchMode=yes
+          - -o
+          - StrictHostKeyChecking=accept-new
+          - -o
+          - ConnectTimeout=10
+          - "{{ backup_chr_usuario }}@{{ chr_ip_cluster }}"
+          - /export terse
+      register: backup_chr
+      changed_when: false
+      failed_when: false
+      no_log: true
+
+    - name: Cortar si no se pudo exportar
+      ansible.builtin.assert:
+        that:
+          - backup_chr.rc == 0
+          - "'/routing bgp connection' in backup_chr.stdout"
+        fail_msg: >-
+          No se pudo exportar el CHR (ver "Backups" en demo/README.md): {{ backup_chr.stderr | default('') }}
+
+    - name: Quitar la clave BGP de la exportación
+      ansible.builtin.set_fact:
+        backup_chr_limpio: >-
+          {{ backup_chr.stdout | replace('\r', '')
+             | regex_replace('tcp-md5-key=("[^"]*"|[^ ]+)', 'tcp-md5-key="CAMBIAR-CLAVE-BGP"') }}
+      no_log: true
+
+    - name: Cortar si la clave BGP sigue en la exportación
+      ansible.builtin.assert:
+        that:
+          - bgp_md5 not in backup_chr_limpio
+        fail_msg: "La exportación del CHR todavía tiene la clave BGP: no se guarda"
+      no_log: true
+
+    - name: Crear una carpeta de trabajo
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: backup-
+      register: backup_tmp
+
+    - name: Armar y verificar el backup
+      block:
+        - name: Escribir la exportación del CHR
+          ansible.builtin.copy:
+            content: "{{ backup_chr_limpio }}\n"
+            dest: "{{ backup_tmp.path }}/chr.rsc"
+            owner: root
+            group: root
+            mode: "0600"
+          no_log: true
+
+        - name: Copiar la base de k3s en caliente y revisar su integridad
+          ansible.builtin.command:
+            argv:
+              - python3
+              - -c
+              - >-
+                import sqlite3, sys;
+                origen, copia = [sqlite3.connect(a) for a in sys.argv[1:3]];
+                origen.backup(copia);
+                r = copia.execute('PRAGMA integrity_check').fetchone()[0];
+                copia.close();
+                sys.exit(0 if r == 'ok' else r)
+              - "{{ k3s_db_dir }}/state.db"
+              - "{{ backup_tmp.path }}/state.db"
+          changed_when: true
+
+        - name: Copiar el token de k3s
+          ansible.builtin.copy:
+            src: "{{ k3s_token_archivo }}"
+            dest: "{{ backup_tmp.path }}/token"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0600"
+          no_log: true
+
+        - name: Empaquetar la base y el token
+          ansible.builtin.command:  # noqa: command-instead-of-module
+            cmd: tar -czf k3s.tar.gz state.db token
+            chdir: "{{ backup_tmp.path }}"
+          changed_when: true
+
+        - name: Cifrar el paquete con la clave del vault
+          ansible.builtin.command:
+            argv:
+              - openssl
+              - enc
+              - -aes-256-cbc
+              - -pbkdf2
+              - -pass
+              - "file:{{ backup_clave_cifrado }}"
+              - -in
+              - "{{ backup_tmp.path }}/k3s.tar.gz"
+              - -out
+              - "{{ backup_tmp.path }}/k3s.tar.gz.enc"
+          changed_when: true
+
+        - name: Probar que el paquete cifrado se puede abrir
+          ansible.builtin.command:
+            argv:
+              - openssl
+              - enc
+              - -d
+              - -aes-256-cbc
+              - -pbkdf2
+              - -pass
+              - "file:{{ backup_clave_cifrado }}"
+              - -in
+              - "{{ backup_tmp.path }}/k3s.tar.gz.enc"
+              - -out
+              - "{{ backup_tmp.path }}/prueba.tar.gz"
+          changed_when: false
+
+        - name: Listar el contenido del paquete descifrado
+          ansible.builtin.command:  # noqa: command-instead-of-module
+            cmd: tar -tzf {{ backup_tmp.path }}/prueba.tar.gz
+          register: backup_contenido
+          changed_when: false
+
+        - name: Cortar si al paquete le falta algo
+          ansible.builtin.assert:
+            that:
+              - "'state.db' in backup_contenido.stdout_lines"
+              - "'token' in backup_contenido.stdout_lines"
+            fail_msg: "El paquete no tiene la base y el token"
+
+        - name: Guardar los archivos en la carpeta compartida
+          ansible.builtin.command:
+            argv:
+              - cp
+              - "{{ backup_tmp.path }}/{{ item.origen }}"
+              - "{{ backup_dir }}/{{ item.destino }}"
+          loop:
+            - {origen: chr.rsc, destino: "chr-export-{{ backup_fecha }}.rsc"}
+            - {origen: k3s.tar.gz.enc, destino: "k3s-{{ backup_fecha }}.tar.gz.enc"}
+          loop_control:
+            label: "{{ item.destino }}"
+          changed_when: true
+      always:
+        - name: Borrar la carpeta de trabajo
+          ansible.builtin.file:
+            path: "{{ backup_tmp.path }}"
+            state: absent
+
+    - name: Buscar los backups guardados
+      ansible.builtin.find:
+        paths: "{{ backup_dir }}"
+        patterns:
+          - chr-export-*.rsc
+          - k3s-*.tar.gz.enc
+      register: backup_guardados
+
+    - name: Borrar los más viejos
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop: "{{ (backup_guardados.files | sort(attribute='mtime', reverse=true) | map(attribute='path') | list)[backup_conservar * 2:] }}"
+
+    - name: Informar el resultado
+      ansible.builtin.debug:
+        msg: "Backup {{ backup_fecha }} guardado en demo/backups/; se conservan los últimos {{ backup_conservar }}"
