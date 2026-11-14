@@ -27,13 +27,15 @@
 | 07/11/2026 | Propuesta del proyecto (`propuesta.md` y figura de la topología) | Santiago | `75771e9` |
 | 12/11/2026 | **H1 Laboratorio:** copia `TP4-SistemaInmune` del proyecto GNS3; el del TP3 queda intacto (mismo SHA-256) | Santiago | ver `git log` |
 | 12/11/2026 | **H2 Conectividad:** estación como VM Ubuntu + Docker conectada a SW-SERVERS por túnel UDP; un container le hace ping al EDGE (5/5). Runbook en [`demo/runbooks/preparar-estacion.md`](demo/runbooks/preparar-estacion.md) | Santiago | ver `git log` |
+| 14/11/2026 | **H3 Tablero:** usuario de solo lectura y API-SSL en los 5 routers; stack Prometheus + mktxp + blackbox + Grafana en la estación; tablero «Sistema Inmune» y 4 alertas, probadas con cortes en GNS3 (enlace, ISP-1, ISP-2). Tiempo de recuperación ante corte del enlace EDGE–CORE-1: ~1 s | Juan Bautista | ver `git log` |
 
 ## 🚧 Pendientes / decisiones
 
 - [x] Definir tema definitivo
 - [x] Elegir modalidad (A, B o C)
 - [x] Asignar roles (por hito, tabla 5 de la propuesta)
-- [ ] H3 Tablero · H4 Atacante · H5 Defensa · H6 Automatización · H7 Ensayo
+- [x] H3 Tablero
+- [ ] H4 Atacante · H5 Defensa · H6 Automatización · H7 Ensayo
 
 **Decisión (12/11, H2):** la estación no es la laptop con un nodo *Cloud* sobre una placa de loopback, como decía la propuesta. En Windows 11 25H2, Windows descarta lo que Npcap le inyecta a esa placa. Queda como **VM Ubuntu en VirtualBox** unida a GNS3 por un **túnel UDP** (nube `ESTACION`). Consecuencias:
 
