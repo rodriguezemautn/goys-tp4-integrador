@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "k3s": "k3s version v1.36.6+k3s1 (fa45d6a5)",
+  "ansible": "ansible-playbook [core 2.20.11]",
+  "node_ready": true,
+  "sha256": {
+    "deploy.yml": "80dd9174bfd91873bdeca7816eb5e4723e38a7de8935fa903d7904c643844508",
+    "apply_checked.py": "c0c2f3a7385ef3ec686300a4772012e8fadd1365d6ba7e16bdc6e77a1a741ed9",
+    "tests/test_deploy_scope_r1.py": "13c9d39c692affd302c0e774a2550417c3750bf7655689c306513b3d931242cb"
+  },
+  "control": "PDB web/frontend minAvailable 2→1 before run 3, restored to 2 by deploy.yml.",
+  "recaps": [
+    {
+      "run": 1,
+      "rc": 0,
+      "ok": 11,
+      "changed": 8,
+      "failed": 0,
+      "unreachable": 0
+    },
+    {
+      "run": 2,
+      "rc": 0,
+      "ok": 11,
+      "changed": 0,
+      "failed": 0,
+      "unreachable": 0
+    },
+    {
+      "run": 3,
+      "rc": 0,
+      "ok": 11,
+      "changed": 1,
+      "failed": 0,
+      "unreachable": 0
+    },
+    {
+      "run": 4,
+      "rc": 0,
+      "ok": 11,
+      "changed": 0,
+      "failed": 0,
+      "unreachable": 0
+    }
+  ],
+  "scope_tests_passed": 6,
+  "scope": "Disposable ARM64 K3s replica with no external NIC; no station deployment."
+}
