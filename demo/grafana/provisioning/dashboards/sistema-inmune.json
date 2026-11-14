@@ -1,0 +1,178 @@
+{
+  "uid": "sistema-inmune",
+  "title": "Sistema Inmune",
+  "description": "H3: los 5 routers, el ping a los proveedores y la defensa, en vivo.",
+  "tags": ["tp4", "sistema-inmune"],
+  "schemaVersion": 41,
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {"from": "now-5m", "to": "now"},
+  "refresh": "1s",
+  "timepicker": {"refresh_intervals": ["1s", "5s", "10s", "30s", "1m"]},
+  "panels": [
+    {
+      "id": 1,
+      "type": "state-timeline",
+      "title": "Ping de punta a punta (lo que nota el usuario)",
+      "description": "Un ping por segundo desde la estacion a la Internet de cada proveedor. El tramo rojo es el corte: su largo es el tiempo de recuperacion.",
+      "gridPos": {"x": 0, "y": 0, "w": 16, "h": 7},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "probe_success{job=\"ping\"}", "legendFormat": "{{isp}} ({{instance}})", "interval": "1s"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+          "mappings": [{"type": "value", "options": {"0": {"text": "SIN RESPUESTA", "color": "red"}, "1": {"text": "OK", "color": "green"}}}],
+          "custom": {"fillOpacity": 85, "lineWidth": 0}
+        },
+        "overrides": []
+      },
+      "options": {"showValue": "never", "rowHeight": 0.8, "mergeValues": true, "alignValue": "center", "legend": {"showLegend": false}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Alertas disparadas",
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 7},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "ALERTS{alertstate=\"firing\"}", "instant": true, "format": "table"}
+      ],
+      "transformations": [
+        {"id": "organize", "options": {
+          "excludeByName": {"Time": true, "Value": true, "__name__": true, "alertstate": true, "job": true, "instance": true, "routerboard_address": true, "routerboard_name": true, "name": true, "isp": true, "list": true},
+          "indexByName": {"alertname": 0, "detalle": 1, "severity": 2},
+          "renameByName": {"alertname": "Alerta", "detalle": "Donde", "severity": "Severidad"}
+        }}
+      ],
+      "fieldConfig": {
+        "defaults": {"noValue": "Sin alertas", "custom": {"cellOptions": {"type": "auto"}}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Alerta"}, "properties": [{"id": "custom.cellOptions", "value": {"type": "color-background"}}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]}
+        ]
+      },
+      "options": {"showHeader": true, "cellHeight": "sm"}
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Latencia del ping",
+      "gridPos": {"x": 0, "y": 7, "w": 16, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "probe_duration_seconds{job=\"ping\"} and probe_success{job=\"ping\"} == 1", "legendFormat": "{{isp}}", "interval": "1s"}
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "s", "min": 0, "custom": {"lineWidth": 2, "fillOpacity": 10, "spanNulls": false, "showPoints": "never"}},
+        "overrides": []
+      },
+      "options": {"legend": {"displayMode": "list", "placement": "right"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Segundos sin respuesta (ultimos 5 min)",
+      "description": "Suma de los segundos en que el ping no volvio. Despues de un solo corte, es el tiempo de recuperacion (propuesta 7.3).",
+      "gridPos": {"x": 16, "y": 7, "w": 8, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "sum_over_time((1 - probe_success{job=\"ping\"})[5m:1s])", "legendFormat": "{{isp}}", "instant": true}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s", "decimals": 0,
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}, {"color": "red", "value": 10}]}
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "justifyMode": "center"}
+    },
+    {
+      "id": 5,
+      "type": "state-timeline",
+      "title": "Enlaces de los 5 routers",
+      "description": "Estado running de cada placa fisica. Un corte silencioso (perdida de paquetes con la placa arriba) no se ve aca: lo muestra el ping.",
+      "gridPos": {"x": 0, "y": 13, "w": 16, "h": 13},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "mktxp_interface_running{routerboard_name=\"EDGE\", name=~\"ether[0-9]+\"}", "legendFormat": "{{routerboard_name}} {{name}}"},
+        {"refId": "B", "expr": "mktxp_interface_running{routerboard_name=\"CORE-1\", name=~\"ether[0-9]+\"}", "legendFormat": "{{routerboard_name}} {{name}}"},
+        {"refId": "C", "expr": "mktxp_interface_running{routerboard_name=\"CORE-2\", name=~\"ether[0-9]+\"}", "legendFormat": "{{routerboard_name}} {{name}}"},
+        {"refId": "D", "expr": "mktxp_interface_running{routerboard_name=\"DIST-1\", name=~\"ether[0-9]+\"}", "legendFormat": "{{routerboard_name}} {{name}}"},
+        {"refId": "E", "expr": "mktxp_interface_running{routerboard_name=\"DIST-2\", name=~\"ether[0-9]+\"}", "legendFormat": "{{routerboard_name}} {{name}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+          "mappings": [{"type": "value", "options": {"0": {"text": "CAIDO", "color": "red"}, "1": {"text": "UP", "color": "green"}}}],
+          "custom": {"fillOpacity": 85, "lineWidth": 0}
+        },
+        "overrides": []
+      },
+      "options": {"showValue": "never", "rowHeight": 0.85, "mergeValues": true, "legend": {"showLegend": false}, "tooltip": {"mode": "single"}}
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Sesiones BGP del EDGE",
+      "gridPos": {"x": 16, "y": 13, "w": 8, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "mktxp_bgp_established{routerboard_name=\"EDGE\"}", "legendFormat": "{{name}}", "instant": true}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+          "mappings": [{"type": "value", "options": {"0": {"text": "CAIDA", "color": "red"}, "1": {"text": "ESTABLECIDA", "color": "green"}}}],
+          "noValue": "Sin datos del EDGE"
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center"}
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "IPs bloqueadas por la defensa",
+      "gridPos": {"x": 16, "y": 18, "w": 8, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "mktxp_firewall_address_list_selected_count{routerboard_name=\"EDGE\", list=\"bloqueados\"}", "instant": true}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center"}
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "Trafico descartado por la defensa (regla raw)",
+      "description": "Bytes por segundo que descarta la regla raw de H5 antes del seguimiento de conexiones. Vacio hasta que se aplique H5.",
+      "gridPos": {"x": 16, "y": 21, "w": 8, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "sum(rate(mktxp_firewall_raw_total{routerboard_name=\"EDGE\", name=~\".*defensa.*\"}[15s])) or vector(0)", "legendFormat": "descartado"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps", "decimals": 0,
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "area", "textMode": "value", "justifyMode": "center"}
+    }
+  ]
+}
