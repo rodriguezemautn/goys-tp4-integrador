@@ -51,6 +51,7 @@ Ambos participan en la revisión del trabajo, el registro de avances y la defens
 | 29/10/2026 | Se incorporaron y ajustaron instrucciones de actualización, diagnóstico, validación e informes de cierre en Markdown dentro del chat. Se verificó la entrega de las instrucciones mediante la inicialización MCP y se realizaron ensayos desde ChatGPT. | Facundo | ef3da51, 4565d39, 955f52c, 3213e37, a614da7 |
 | 29/10/2026 | Se documentó F6 con las herramientas definitivas, separación de accesos, consolas, arranque, verificaciones y limitaciones. Se actualizaron los requisitos de reproducción en demo/README.md. | Facundo | 85b0f0c |
 | 29/10/2026 | Se documentó F7: introducción manual del bloqueo en EMPRESA, reproducción en GEMELO, diagnóstico mediante pings y contadores, deshabilitación de la regla únicamente en GEMELO y recuperación de respuestas. Quedó pendiente registrar la conservación del bloqueo hacia la loopback después de la corrección. | Facundo | c38d0af |
+| 13/11/2026 | Se incorporaron los proyectos portables EMPRESA y GEMELO en demo/Archivos-GNS3/ y se completó la guía de instalación: importación, red Host-only, conservación de MAC, credenciales locales, verificación SSH, configuración del túnel y conexión con ChatGPT. La reproducción en otra computadora permanece pendiente de validación. | Facundo | 206b4f0  |
 
 Las pruebas previas se registran retrospectivamente. Completar sus fechas y referencias a commits cuando se disponga de esos datos.
 
@@ -70,13 +71,15 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 - [x] Automatizar el acceso a las consolas VPCS de GEMELO mediante MCP.
 - [x] Incorporar instrucciones para presentar informes de intervención en el chat, sin agregar escritura de informes en el equipo local.
 - [x] Entregar una recomendación sin aplicar cambios automáticamente sobre EMPRESA.
+- [x] Incorporar los proyectos GNS3 portables y documentar su instalación en otra computadora.
+- [x] Entregar las credenciales de laboratorio a los integrantes autorizados por un canal privado.
 
-### Pendientes
+### Avances completados y pendientes
 
 - [x] Completar el usuario de GitHub de Irineo.
 - [x] Confirmar aceptación del reparto de tareas entre ambos.
 - [ ] Verificar colaboradores del grupo y docentes en el repositorio.
-- [x] Incorporar y revisar el README 
+- [x] Incorporar y revisar el README.
 - [x] Documentar el diseño de la demo y las fases de implementación.
 - [x] Documentar la Fase 1 e incorporar capturas de la configuración de gestión.
 - [x] Configurar el direccionamiento interno, las loopbacks y las VPCS de EMPRESA.
@@ -94,9 +97,12 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 - [x] Preparar y ensayar una falla reproducible de firewall.
 - [x] Verificar el diagnóstico mediante configuración, pings y contadores, y la recuperación de conectividad después de corregir únicamente GEMELO.
 - [x] Documentar el escenario y los resultados observados en F7.
+- [x] Incorporar EMPRESA y GEMELO como proyectos portables en `demo/Archivos-GNS3/`.
+- [x] Completar la guía de importación, red Host-only y conservación de las MAC de los proyectos.
+- [x] Documentar la instalación del MCP, configuración local de credenciales, verificación SSH, creación del túnel y conexión con ChatGPT.
+- [ ] Preparar un `.env.example` sin secretos.
+- [ ] Validar la importación y reproducción completa en otra computadora.
 - [ ] Registrar explícitamente la conservación del bloqueo hacia la loopback protegida después de la corrección.
-- [ ] Preparar un .env.example sin secretos y completar las instrucciones de instalación del MCP.
-- [ ] Validar la reproducción completa en otra computadora.
 - [ ] Ejecutar al menos tres pruebas completas y registrar resultados.
 - [ ] Preparar capturas y grabación de respaldo.
 - [x] Investigar y seleccionar las referencias bibliográficas.
@@ -107,13 +113,17 @@ Las pruebas previas se registran retrospectivamente. Completar sus fechas y refe
 ## 📝 Notas
 
 - La integración MCP está implementada y fue utilizada desde ChatGPT para consultar EMPRESA, administrar GEMELO y operar sus consolas VPCS.
-- Ambos proyectos se preparan e inician manualmente. La actualización de configuraciones en GEMELO puede realizarse mediante la IA, conservando las diferencias intencionales de gestión, identidades, MAC y credenciales.
-- No se implementó sincronización continua. Una actualización o comparación parcial no demuestra equivalencia completa de ambos escenarios.
-- El escenario ensayado consiste en una regla de firewall que bloquea ICMP entre PC y SRV. Las herramientas generales no contienen una función específica para identificarla o corregirla.
+- Ambos proyectos se preparan e inician manualmente. La IA puede actualizar GEMELO conservando las diferencias intencionales de gestión, identidades, MAC y credenciales.
+- No se implementó sincronización continua. Una comparación parcial no demuestra equivalencia completa entre ambos escenarios.
+- La falla ensayada bloquea ICMP entre PC y SRV mediante una regla de firewall. Las herramientas generales no contienen una solución predefinida para identificarla o corregirla.
 - Las pruebas desde VPCS pueden ejecutarse mediante MCP y contrastarse con los contadores del firewall.
-- La corrección se prueba exclusivamente en GEMELO. Su aplicación en EMPRESA queda a cargo del administrador.
-- Los informes se presentan en el chat mediante instrucciones del servidor. Su formato y completitud se evalúan durante los ensayos; no están garantizados por una plantilla ejecutada desde el código.
-- La interacción con ChatGPT mediante el túnel requiere Internet. Se preparará una grabación local como respaldo.
-- No se subirán contraseñas, claves, imágenes de máquinas virtuales ni archivos pesados al repositorio.
-- Cada integrante registrará sus aportes reales y realizará commits con su propia identidad.
-- El artículo y el póster deberán distinguir las funcionalidades implementadas de las propuestas como trabajo futuro.
+- Las correcciones se prueban únicamente en GEMELO. Su aplicación en EMPRESA queda a cargo del administrador.
+- Los informes se presentan en el chat mediante instrucciones del servidor; su formato y completitud se revisan durante los ensayos.
+- ChatGPT y el túnel requieren Internet. Se preparará una grabación local como respaldo.
+- Los proyectos portables incluyen MAC de gestión distintas para ambos entornos. Deben conservarse al importar y coincidir con el inventario del MCP.
+- La reproducción completa en otra computadora permanece pendiente de validación. Deben comprobarse la Cloud, las direcciones de gestión y los puertos de consola.
+- Cada instalación necesita su entorno virtual, archivo `.env` y perfil local del túnel. El acceso desde ChatGPT depende de los permisos y la disponibilidad de la cuenta utilizada.
+- EMPRESA representa una organización ficticia. Las credenciales son exclusivas del laboratorio y se entregan por un canal privado para reproducir la demo.
+- El archivo `.env` y la API key personal de OpenAI no se publican.
+- Cada integrante registra sus aportes reales y realiza commits con su propia identidad.
+- El artículo y el póster deben distinguir las funcionalidades implementadas de las propuestas como trabajo futuro.
