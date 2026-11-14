@@ -1,0 +1,34 @@
+global:
+  scrape_interval: 5s
+  scrape_timeout: 4s
+  evaluation_interval: 1s
+
+rule_files:
+  - alertas.yml
+
+scrape_configs:
+  # Metricas de los 5 routers (EDGE, CORE-1, CORE-2, DIST-1, DIST-2), via API-SSL
+  - job_name: mktxp
+    static_configs:
+      - targets: ["mktxp:49090"]
+
+  # Ping de punta a punta hacia los proveedores, una vez por segundo.
+  # En el TP3 las fallas mas cortas duraron 2-4 s: con 15 s pasarian inadvertidas.
+  - job_name: ping
+    scrape_interval: 1s
+    scrape_timeout: 1s
+    metrics_path: /probe
+    params:
+      module: [icmp]
+    static_configs:
+      - targets: ["198.51.100.1"]
+        labels: {isp: ISP-1}
+      - targets: ["198.51.100.2"]
+        labels: {isp: ISP-2}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
