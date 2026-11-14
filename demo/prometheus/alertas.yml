@@ -1,0 +1,49 @@
+# H3: las 4 alertas del Sistema Inmune (propuesta §7.1). Se ven en /alerts y en Grafana.
+groups:
+  - name: sistema-inmune
+    rules:
+      # Lo que nota el usuario: el ping de punta a punta a un proveedor no vuelve.
+      - alert: DestinoInalcanzable
+        expr: probe_success{job="ping"} == 0
+        for: 2s
+        labels:
+          severity: critical
+          detalle: "{{ $labels.isp }} ({{ $labels.instance }})"
+        annotations:
+          summary: "{{ $labels.isp }} ({{ $labels.instance }}) no responde el ping"
+
+      # Una placa fisica (etherN) de uno de los 5 routers dejo de estar running.
+      # Las vrrpN no cuentan: la del router backup esta en 0 normalmente.
+      # Un corte "silencioso" (perdida de paquetes con la placa arriba) no la dispara:
+      # lo detecta DestinoInalcanzable.
+      - alert: EnlaceCaido
+        expr: mktxp_interface_running{name=~"ether[0-9]+"} == 0
+        for: 2s
+        labels:
+          severity: warning
+          detalle: "{{ $labels.routerboard_name }} {{ $labels.name }}"
+        annotations:
+          summary: "{{ $labels.routerboard_name }} {{ $labels.name }} sin enlace"
+
+      # Sesion BGP del EDGE con un proveedor no establecida.
+      - alert: SesionBGPCaida
+        expr: mktxp_bgp_established{routerboard_name="EDGE"} == 0
+        for: 5s
+        labels:
+          severity: critical
+          detalle: "EDGE {{ $labels.name }}"
+        annotations:
+          summary: "BGP {{ $labels.name }} caida en el EDGE"
+
+      # Defensa (H5): la regla raw descarta trafico de un origen bloqueado,
+      # o hay IPs en la lista bloqueados. Se prueba junto con H5.
+      - alert: IntrusoBloqueado
+        expr: |
+          increase(mktxp_firewall_raw_total{routerboard_name="EDGE", name=~".*defensa: descarta.*"}[30s]) > 0
+          or mktxp_firewall_address_list_selected_count{routerboard_name="EDGE", list="bloqueados"} > 0
+        for: 0s
+        labels:
+          severity: warning
+          detalle: "EDGE"
+        annotations:
+          summary: "El EDGE bloqueo a un intruso"
