@@ -1,0 +1,7 @@
+modules:
+  icmp:
+    prober: icmp
+    timeout: 900ms
+    icmp:
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: false
