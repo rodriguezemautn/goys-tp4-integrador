@@ -4,3 +4,4 @@
 *.yaml  text eol=lf
 *.yml   text eol=lf
 *.rsc   text eol=lf
+*.conf  text eol=lf

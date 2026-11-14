@@ -21,3 +21,6 @@ credentials*
 *.bak
 *.log
 *.rsc.bak
+
+# H3: el mktxp.conf real lleva la clave del usuario prometheus
+demo/mktxp/mktxp.conf
