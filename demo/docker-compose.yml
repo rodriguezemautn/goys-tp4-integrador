@@ -1,0 +1,54 @@
+# H3 Tablero: stack de monitoreo de la estacion (10.20.0.101).
+# Uso, dentro de la estacion:  cd ~/goys-tp4-integrador/demo && docker compose up -d
+# Versiones fijas (D-08). Para la feria sin Internet: correr una vez "docker compose pull".
+name: sistema-inmune
+
+services:
+  mktxp:
+    image: ghcr.io/akpw/mktxp:1.2.20
+    restart: unless-stopped
+    volumes:
+      - ./mktxp:/etc/mktxp          # _mktxp.conf y mktxp.conf (este ultimo no se sube al repo)
+
+  blackbox:
+    image: prom/blackbox-exporter:v0.27.0
+    restart: unless-stopped
+    cap_add: [NET_RAW]              # permiso para mandar ICMP
+    command: --config.file=/etc/blackbox/blackbox.yml
+    volumes:
+      - ./blackbox:/etc/blackbox:ro
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=1d   # la laptop de la demo tiene 7,4 GB
+    volumes:
+      - ./prometheus:/etc/prometheus:ro
+      - prometheus-datos:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on: [mktxp, blackbox]
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?falta en .env}
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 1s     # el tablero se refresca cada 1 s
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/sistema-inmune.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-datos:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on: [prometheus]
+
+volumes:
+  prometheus-datos:
+  grafana-datos:
