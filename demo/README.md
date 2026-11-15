@@ -193,13 +193,16 @@ Tiempos medidos el 15/11 en la réplica con contenedores ([capturas](../capturas
 
 En el guion, `k` es `kubectl` en el server.
 
-| Paso | Estación QEMU (Mac de R1) | Réplica (Mac de Naim) | Laptop de respaldo (VirtualBox) |
-|---|---|---|---|
-| Medir (B) | [confirmar: la Mac no llega a 10.10.20.10; hace falta un cliente del otro lado del CHR] | `medir-corte.sh` desde el contenedor `cliente` [confirmar comando con Naim] | `windows\medir-corte.ps1 -Segundos 300` |
-| Entrar al server (C) | [confirmar] | `colima ssh --profile tp4 -- docker exec -it k3s-server sh` (`kubectl` directo) | `vagrant ssh k3s-server` (`sudo k3s kubectl`) |
-| Apagar `agent1` | Matar el proceso de QEMU de `agent1` [confirmar comando] | `./lab.sh caer-nodo agent1` | `VBoxManage controlvm tp4-k3s-agent1 poweroff` |
-| Prender `agent1` | Relanzar `agent1` [confirmar comando] | `./lab.sh levantar-nodo agent1` | `VBoxManage startvm tp4-k3s-agent1 --type headless` |
-| Segmentación | `sudo bash ~/prueba-netpol.sh` en el controlador | `./lab.sh netpol` | `sudo /vagrant/scripts/prueba-netpol.sh` en el server |
+La Mac de Naim, con la réplica, es también el equipo de respaldo de la Feria.
+
+| Paso | Estación QEMU (Mac de R1) | Réplica con contenedores (Mac de Naim, respaldo) |
+|---|---|---|
+| Medir (B) | [confirmar: la Mac no llega a 10.10.20.10; hace falta un cliente del otro lado del CHR] | `medir-corte.sh` desde el contenedor `cliente` [confirmar comando con Naim] |
+| Entrar al server (C) | [confirmar] | `colima ssh --profile tp4 -- docker exec -it k3s-server sh` (`kubectl` directo) |
+| Apagar `agent1` | Matar el proceso de QEMU de `agent1` [confirmar comando] | `./lab.sh caer-nodo agent1` |
+| Prender `agent1` | Relanzar `agent1` [confirmar comando] | `./lab.sh levantar-nodo agent1` |
+| Segmentación | `sudo bash ~/prueba-netpol.sh` en el controlador | `./lab.sh netpol` |
+| Router (sesiones BGP) | `/routing bgp session print` en el CHR | `vtysh -c 'show bgp summary'` en el FRR |
 
 ### Preflight, antes de cada tanda
 
@@ -232,7 +235,7 @@ Para quien pasa rápido. B queda corriendo todo el tiempo (con 3600 s) y Grafana
 
 1. (10 s) "El servicio corre en tres nodos y el router aprende por BGP por dónde llegar."
 2. (15 s) Rolling update y señalar B: "Actualizamos a v2 sin perder un pedido: Kubernetes levanta la réplica nueva antes de bajar la vieja." Se ve en 3 s y no deja nada para reponer.
-3. (5 s) "Y si se cae un nodo, el servicio sigue: perdemos unos pocos pedidos durante ~18 s. Lo mostramos en la demo completa."
+3. (5 s) "Y si se cae un nodo, el servicio sigue: perdemos unos pocos pedidos durante 14 a 18 s. Lo mostramos en la demo completa."
 
 Antes de la próxima persona, volver a v1 con `k -n web rollout undo deployment/frontend`.
 
@@ -247,10 +250,25 @@ No reiniciar VMs ni cambiar configuración delante del público para tapar el er
 | La caída da 0 errores | No había un frontend en `agent1` | No es una falla: explicar que el router lo sacó y que Kubernetes no tenía réplicas ahí | R3 |
 | El rolling update se traba | `rollout status` no termina en 60 s | `k -n web rollout undo deployment/frontend` | R3 |
 | `prueba-netpol.sh` no da resultado | Sale sin las 8 líneas o se queda esperando los pods | Ctrl+C y mostrar la captura del 8 de 8; explicar las políticas con `k get netpol -A` | R4 |
-| Grafana no carga | Pantalla en blanco | Mostrar `k get nodes` y `k -n web get pods -o wide` en C | R5 |
-| La estación no arranca | — | Video grabado y capturas locales; la réplica o la laptop de respaldo de Lorenzo | Todos |
+| Grafana no carga | Pantalla en blanco | Mostrar `k get nodes` y `k -n web get pods -o wide` en C y, en el router, las sesiones BGP para que se siga viendo la caída: `/routing bgp session print` en el CHR (en la réplica, `vtysh -c 'show bgp summary'` en el FRR). Si tampoco anda, pasar al video. Capturas de Grafana de respaldo en `capturas/` | R5 y R2 |
+| La estación no arranca | — | Pasar a la réplica en la Mac de Naim (segunda columna de [Comandos según la estación](#comandos-según-la-estación)). Si tampoco anda, el video y las capturas locales | Todos |
 
-El día de la Feria, Claude queda cerrado y hay plan B grabado.
+Cuando la tabla dice "pasar al video", es el de [Video del plan B](#video-del-plan-b).
+
+### Video del plan B
+
+**Pendiente: todavía no está grabado.** Va fuera de git: se sube a una carpeta compartida del grupo y el enlace queda acá.
+
+| Qué | Detalle |
+|---|---|
+| Enlace | [pendiente] |
+| Quién lo graba | R1 y R3 |
+| Cuándo | Lunes 16/11, en el ensayo con cronómetro, apenas el guion salga completo |
+| Dónde | En la estación que funcione ese día (QEMU o la réplica de Naim), con las ventanas A, B, C y D a la vista |
+| Qué tiene que mostrar | El guion completo (3 a 5 min): la caída de `agent1` con los errores sueltos y el `NotReady`, el rolling update y el rollback con `cambia de v1 a v2` en B, la segmentación 8 de 8 y el informe final de B |
+| Copias | Una en la Mac de la estación y otra en la de respaldo, para reproducirlo sin internet |
+
+El día de la Feria, Claude queda cerrado.
 
 ### Wireshark (sin probar)
 
@@ -269,7 +287,7 @@ Si el nodo se apaga de golpe no manda UPDATE, y `bgp.type == 2` no muestra nada.
 |---|---|
 | Ansible ignora `ansible.cfg` en `/vagrant` (vboxsf es world-writable) | Usar siempre `run.sh`, que exporta `ANSIBLE_CONFIG` |
 | Un pod recién creado saltea las NetworkPolicies unos segundos | `prueba-netpol.sh` ya espera 15 s |
-| Hay ~14 s de pedidos sueltos con error ante la caída de un nodo | Limitación conocida: para llegar a 0 hace falta BFD, que usa más RAM |
+| Hay 14 a 18 s de pedidos sueltos con error ante la caída de un nodo | Limitación conocida: para llegar a 0 hace falta BFD junto con `externalTrafficPolicy: Local`. BFD usa más RAM |
 | Un solo server: no hay HA del plano de control | Limitación conocida: si cae el server, no se puede administrar el clúster |
 | Hay un hipervisor activo (Hyper-V, WSL2, Integridad de memoria) | VirtualBox anda más lento; no apagar protecciones de un equipo administrado |
 
