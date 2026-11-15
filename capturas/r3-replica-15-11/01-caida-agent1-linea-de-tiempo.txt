@@ -1,0 +1,7 @@
+13:59:53 bgp-agent1=Established nodo-agent1=Ready frontends-listos=3/3
+14:00:04 bgp-agent1=Idle nodo-agent1=Ready frontends-listos=3/3
+14:00:05 bgp-agent1=Connect nodo-agent1=Ready frontends-listos=3/3
+14:00:21 bgp-agent1=Connect nodo-agent1=NotReady frontends-listos=2/3
+14:01:06 bgp-agent1=Connect nodo-agent1=Ready frontends-listos=2/3
+14:01:07 bgp-agent1=Established nodo-agent1=Ready frontends-listos=2/3
+14:01:08 bgp-agent1=Established nodo-agent1=Ready frontends-listos=3/3

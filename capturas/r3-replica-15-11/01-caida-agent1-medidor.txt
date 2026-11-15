@@ -1,0 +1,13 @@
+Midiendo http://10.10.20.10/ durante 150 s (Ctrl+C para cortar)...
+
+Pedidos: 674 | errores: 12 | duración: 150 s
+Rachas de errores:
+  a los 11 s: 1 errores en 0 s
+  a los 13 s: 1 errores en 0 s
+  a los 14 s: 1 errores en 0 s
+  a los 17 s: 1 errores en 0 s
+  a los 18 s: 4 errores en 4 s
+  a los 24 s: 1 errores en 0 s
+  a los 26 s: 1 errores en 0 s
+  a los 27 s: 1 errores en 0 s
+  a los 28 s: 1 errores en 1 s

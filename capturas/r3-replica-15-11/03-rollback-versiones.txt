@@ -1,0 +1,7 @@
+# Hora local (-03). Cada línea es un cambio en la versión que responde el VIP.
+13:55:35 responde v2
+13:55:42 responde v1
+13:55:42 responde v2
+13:55:42 responde v1
+13:55:43 responde v2
+13:55:44 responde v1
