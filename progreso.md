@@ -12,7 +12,7 @@
 |        |                   | 1. Infraestructura (levanta el laboratorio) |
 |        |                   | 2. Red |
 |        |                   | 3. Aplicación y alta disponibilidad |
-|        |                   | 4. Seguridad |
+| Guarino, Naim Hernan | naimguar | 4. Seguridad |
 | Bellomo, Lorenzo | LoLoo03 | 5. Monitoreo, comunicación y backups |
 
 El reparto y las fechas están en [PLAN.md](PLAN.md).
@@ -29,6 +29,11 @@ El reparto y las fechas están en [PLAN.md](PLAN.md).
 |-------|-------------|-------|--------|
 | 6/11 | Esqueleto de la demo y plan del grupo | Lorenzo | |
 | 6/11 | Scripts para Mac y playbooks de backup y restauración | Lorenzo | |
+| 15/11 | Secciones 3.2 (segmentación) y 4.2 (pruebas de segmentación) | Naim | 63a0090, 7557d87 |
+| 15/11 | Réplica levantada en la Mac de Naim (respaldo de la Feria); pruebas de seguridad: segmentación 8 de 8, BGP con MD5, secretos fuera de git | Naim | 6e525dc |
+| 15/11 | Pruebas de red de R2 y de alta disponibilidad de R3 corridas en la réplica, entregadas a cada uno | Naim | |
+| 15/11 | Memoria real de Grafana y de los nodos en la réplica | Naim | aeb4308 |
+| 15/11 | Revisión de los PR #2 (red) y #5 (documento, monitoreo y póster) | Naim | |
 
 ## 🚧 Pendientes / decisiones
 
