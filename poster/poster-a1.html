@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<!--
+  Editable del póster A1. El PDF (poster-a1.pdf) es vectorial en A4: en la imprenta se amplía a A1 (283 %) sin pérdida.
+  Para regenerarlo: agregar dentro de @media print las reglas `@page { size: A4 portrait; margin: 0; }` y `.poster { zoom: 0.3531; }`
+  en una copia temporal y correr: msedge --headless --disable-gpu --no-pdf-header-footer --print-to-pdf=poster-a1.pdf <copia.html>
+  Pendientes: captura de Grafana con un nodo caído y el QR al repositorio.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Póster A1 — TP4 Grupo 4 — GOYS 2026</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #1a365d;
+      --primary-light: #2b6cb0;
+      --accent: #3182ce;
+      --bg-section: #f7fafc;
+      --bg-card: #ffffff;
+      --text: #2d3748;
+      --text-light: #718096;
+      --border: #e2e8f0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    @page {
+      size: A1 portrait;
+      margin: 0;
+    }
+
+    @media print {
+      body { margin: 0; padding: 0; }
+      .poster { box-shadow: none; border-radius: 0; }
+      .placeholder { border: 1px dashed var(--border); background: #fdfdfd; }
+    }
+
+    .poster {
+      width: 594mm;
+      height: 841mm;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: #ffffff;
+      padding: 22mm 36mm 18mm;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 22pt;
+      font-weight: 400;
+      letter-spacing: 1pt;
+      text-transform: uppercase;
+      margin-bottom: 5mm;
+      opacity: 0.9;
+    }
+
+    .header h2 {
+      font-size: 46pt;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 6mm;
+    }
+
+    .header .group-info {
+      font-size: 24pt;
+      font-weight: 300;
+      opacity: 0.85;
+    }
+
+    .header .group-info strong {
+      font-weight: 600;
+      opacity: 1;
+    }
+
+    /* ── CONTENT GRID ── */
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7mm;
+      padding: 10mm 36mm;
+    }
+
+    .section {
+      background: var(--bg-section);
+      border-radius: 6mm;
+      padding: 8mm 10mm;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .section h3 {
+      font-size: 27pt;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 5mm;
+      padding-bottom: 3mm;
+      border-bottom: 3px solid var(--accent);
+    }
+
+    .section p {
+      font-size: 19pt;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .section ul {
+      font-size: 19pt;
+      padding-left: 8mm;
+      margin-top: 3mm;
+    }
+
+    .section ul li {
+      margin-bottom: 2.5mm;
+    }
+
+    .section-full { grid-column: 1 / -1; }
+    .intro { grid-column: 1 / -1; }
+    .diagram { grid-column: 1 / 2; }
+    .methodology { grid-column: 2 / 3; }
+    .results { grid-column: 1 / -1; }
+    .conclusions { grid-column: 1 / -1; }
+
+    .diagram svg {
+      width: 100%;
+      height: auto;
+      border-radius: 4mm;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      margin-top: 2mm;
+    }
+
+    .diagram .caption {
+      font-size: 15pt;
+      color: var(--text-light);
+      margin-top: 2mm;
+      text-align: center;
+    }
+
+    /* ── PLACEHOLDERS ── */
+    .placeholder {
+      background: #edf2f7;
+      border: 2px dashed var(--border);
+      border-radius: 4mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60mm;
+      font-size: 20pt;
+      color: var(--text-light);
+      text-align: center;
+      padding: 6mm;
+      margin-top: 4mm;
+    }
+
+    .placeholder-sm { min-height: 45mm; }
+    .placeholder-label { font-style: italic; }
+
+    /* ── RESULTS ── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6mm;
+      margin-top: 4mm;
+    }
+
+    .result-item {
+      background: var(--bg-card);
+      border-radius: 4mm;
+      padding: 6mm 7mm;
+      border: 1px solid var(--border);
+    }
+
+    .result-item h4 {
+      font-size: 22pt;
+      color: var(--primary);
+      margin-bottom: 2mm;
+    }
+
+    .result-item .big {
+      font-size: 34pt;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.15;
+    }
+
+    .result-item p {
+      font-size: 17pt;
+      margin-top: 2mm;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 9mm 36mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 18pt;
+    }
+
+    .footer .qr-placeholder {
+      width: 42mm;
+      height: 42mm;
+      background: #ffffff;
+      border-radius: 3mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10pt;
+      color: var(--text-light);
+      text-align: center;
+      padding: 2mm;
+      flex-shrink: 0;
+    }
+
+    .footer .info {
+      display: flex;
+      flex-direction: column;
+      gap: 1mm;
+    }
+
+    .footer .info a { color: #90cdf4; text-decoration: none; }
+
+    /* ── RESPONSIVE (vista en pantalla) ── */
+    @media screen and (max-width: 1200px) {
+      body { padding: 12px; }
+      .poster { width: 100%; height: auto; min-height: 900px; }
+      .header { padding: 24px 28px 18px; }
+      .header h1 { font-size: 14px; }
+      .header h2 { font-size: 28px; }
+      .header .group-info { font-size: 16px; }
+      .content { padding: 12px 20px; gap: 12px; grid-template-columns: 1fr; }
+      .content .section { grid-column: 1 !important; }
+      .section h3 { font-size: 18px; }
+      .section p, .section ul { font-size: 14px; }
+      .placeholder { min-height: 60px; font-size: 14px; }
+      .results-grid { grid-template-columns: 1fr; }
+      .result-item h4 { font-size: 15px; }
+      .result-item .big { font-size: 22px; }
+      .result-item p { font-size: 13px; }
+      .diagram .caption { font-size: 12px; }
+      .footer { padding: 12px 20px; font-size: 12px; flex-wrap: wrap; gap: 12px; }
+      .footer .qr-placeholder { width: 60px; height: 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="poster">
+    <!-- ══════════ HEADER ══════════ -->
+    <div class="header">
+      <h1>GOYS 2026 — Feria de Redes · UTN FRLP · TP4 Proyecto Integrador</h1>
+      <h2>Servicios en alta disponibilidad con k3s y BGP</h2>
+      <p class="group-info">
+        <strong>Grupo 4</strong> &mdash;
+        Bellomo &middot; Ferrari &middot; Guarino &middot; Kloster &middot; Siadore
+      </p>
+    </div>
+
+    <!-- ══════════ CONTENT ══════════ -->
+    <div class="content">
+      <!-- Introducción / Objetivos -->
+      <div class="section intro">
+        <h3>El problema y el objetivo</h3>
+        <p>
+          <strong>Problema:</strong> si se apaga de golpe uno de los servidores que atienden un servicio web,
+          ¿el servicio sigue? ¿Cuántos pedidos se pierden, y quién decide dejar de mandarle tráfico al servidor muerto?
+        </p>
+        <p>
+          <strong>Objetivo:</strong> publicar un servicio desde un clúster k3s de 3 nodos por BGP hacia un router MikroTik,
+          <strong>medir</strong> qué pasa ante cada falla, y que todo el laboratorio se reconstruya solo con Ansible.
+        </p>
+        <p>
+          <strong>Contexto:</strong> todo corre en una sola computadora, sin internet. La RAM fue el presupuesto que moldeó cada decisión.
+        </p>
+      </div>
+
+      <!-- Diagrama -->
+      <div class="section diagram">
+        <h3>Arquitectura</h3>
+        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 1200 720" font-family="DejaVu Sans, Arial, sans-serif">
+  <title>Topología de la estación QEMU — TP4 Grupo 4</title>
+  <desc>Un MikroTik CHR emulado y tres nodos k3s Ubuntu ARM64 unidos por un hub de QEMU dentro de la Mac de la estación, con eBGP entre el CHR (AS 65000) y MetalLB (AS 64512).</desc>
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="720" fill="#ffffff"/>
+
+  <!-- Mac -->
+  <rect x="20" y="20" width="1160" height="550" rx="14" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+  <text x="40" y="50" font-size="20" font-weight="bold" fill="#0f172a">Mac ARM64 (estación de R1)</text>
+  <text x="40" y="72" font-size="13" fill="#334155">QEMU · todas las conexiones entre VMs son sockets en 127.0.0.1: el laboratorio no sale de la Mac</text>
+
+  <!-- CHR -->
+  <rect x="50" y="110" width="330" height="300" rx="10" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text x="70" y="140" font-size="18" font-weight="bold" fill="#7c2d12">MikroTik CHR (RouterOS v7)</text>
+  <text x="70" y="164" font-size="13" fill="#431407">qemu-system-x86_64 emulado (TCG)</text>
+  <text x="70" y="182" font-size="13" fill="#431407">1 vCPU · 1 GB · -no-reboot</text>
+  <text x="70" y="212" font-size="15" font-weight="bold" fill="#7c2d12">AS 65000 · router-id 10.10.10.1</text>
+  <text x="70" y="238" font-size="13" fill="#431407">Filtro de entrada: solo /32 de 10.10.20.0/28</text>
+  <text x="70" y="256" font-size="13" fill="#431407">Filtro de salida: no anuncia nada</text>
+  <text x="70" y="274" font-size="13" fill="#431407">Consola: serial en la terminal de la Mac</text>
+  <!-- ether2 -->
+  <rect x="226" y="300" width="154" height="56" rx="6" fill="#ffedd5" stroke="#c2410c"/>
+  <text x="238" y="322" font-size="13" font-weight="bold" fill="#7c2d12">ether2 "cluster"</text>
+  <text x="238" y="342" font-size="13" fill="#431407">10.10.10.1/24</text>
+  <!-- ether1 -->
+  <rect x="50" y="300" width="150" height="56" rx="6" fill="#ffedd5" stroke="#c2410c" stroke-dasharray="5 4"/>
+  <text x="62" y="322" font-size="13" font-weight="bold" fill="#7c2d12">ether1 "clients"</text>
+  <text x="62" y="342" font-size="12" fill="#431407">IP: sin confirmar</text>
+  <!-- hub 1 vacío -->
+  <line x1="125" y1="356" x2="125" y2="460" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"/>
+  <rect x="45" y="460" width="160" height="62" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-dasharray="6 5"/>
+  <text x="58" y="484" font-size="13" fill="#334155">hub 1 de QEMU</text>
+  <text x="58" y="503" font-size="12" fill="#334155">sin otros puertos:</text>
+  <text x="58" y="518" font-size="12" fill="#334155">sin camino a la Mac</text>
+
+  <!-- Hub auxiliar -->
+  <rect x="460" y="250" width="250" height="160" rx="10" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+  <text x="478" y="280" font-size="17" font-weight="bold" fill="#312e81">Helper QEMU</text>
+  <text x="478" y="300" font-size="13" fill="#1e1b4b">proceso sin disco</text>
+  <text x="478" y="324" font-size="13" fill="#1e1b4b">hub 0: repite cada trama</text>
+  <text x="478" y="342" font-size="13" fill="#1e1b4b">a todos sus puertos</text>
+  <text x="478" y="372" font-size="12" fill="#1e1b4b">→ CHR: 127.0.0.1:41001</text>
+  <text x="478" y="390" font-size="12" fill="#1e1b4b">← nodos: :41011 · :41012 · :41013</text>
+  <line x1="380" y1="328" x2="460" y2="328" stroke="#4338ca" stroke-width="3"/>
+  <text x="388" y="318" font-size="11" fill="#312e81">socket</text>
+
+  <!-- Nodos -->
+  <g font-size="13">
+    <rect x="790" y="110" width="360" height="130" rx="10" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+    <text x="810" y="138" font-size="17" font-weight="bold" fill="#064e3b">k3s-server · 10.10.10.11</text>
+    <text x="810" y="160" fill="#022c22">Ubuntu ARM64 (HVF) · 2 vCPU · 2 GB</text>
+    <text x="810" y="180" fill="#022c22">Plano de control k3s + MetalLB speaker</text>
+    <text x="810" y="200" fill="#022c22">AS 64512 · BGP con el CHR</text>
+    <text x="810" y="222" fill="#475569">Gestión: NAT de QEMU, SSH 127.0.0.1:2223</text>
+
+    <rect x="790" y="265" width="360" height="130" rx="10" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+    <text x="810" y="293" font-size="17" font-weight="bold" fill="#064e3b">k3s-agent1 · 10.10.10.12</text>
+    <text x="810" y="315" fill="#022c22">Ubuntu ARM64 (HVF) · 1 vCPU · 768 MB</text>
+    <text x="810" y="335" fill="#022c22">Worker + MetalLB speaker</text>
+    <text x="810" y="355" fill="#022c22">AS 64512 · BGP con el CHR</text>
+    <text x="810" y="377" fill="#475569">Gestión: NAT de QEMU, SSH 127.0.0.1:2224</text>
+
+    <rect x="790" y="420" width="360" height="130" rx="10" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+    <text x="810" y="448" font-size="17" font-weight="bold" fill="#064e3b">k3s-agent2 · 10.10.10.13</text>
+    <text x="810" y="470" fill="#022c22">Ubuntu ARM64 (HVF) · 1 vCPU · 768 MB</text>
+    <text x="810" y="490" fill="#022c22">Worker + MetalLB speaker</text>
+    <text x="810" y="510" fill="#022c22">AS 64512 · BGP con el CHR</text>
+    <text x="810" y="532" fill="#475569">Gestión: NAT de QEMU, SSH 127.0.0.1:2225</text>
+  </g>
+  <g stroke="#4338ca" stroke-width="3" fill="none">
+    <path d="M710 300 C 750 300, 750 175, 790 175"/>
+    <path d="M710 330 L 790 330"/>
+    <path d="M710 360 C 750 360, 750 485, 790 485"/>
+  </g>
+  <text x="478" y="432" font-size="12" fill="#312e81">LAN del clúster 10.10.10.0/24</text>
+
+  <!-- BGP -->
+  <g stroke="#1d4ed8" stroke-width="2" stroke-dasharray="8 6" fill="none" marker-end="url(#flecha)">
+    <path d="M790 125 C 640 70, 450 70, 335 108"/>
+  </g>
+  <text x="420" y="122" font-size="13" font-weight="bold" fill="#1d4ed8">los 3 nodos anuncian 10.10.20.10/32 (frontend)</text>
+
+  <!-- Leyenda -->
+  <rect x="20" y="585" width="1160" height="120" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="40" y="613" font-size="15" font-weight="bold" fill="#0f172a">BGP</text>
+  <text x="40" y="635" font-size="13" fill="#1e293b">eBGP CHR (AS 65000) ↔ MetalLB (AS 64512) · 3 sesiones, una por nodo · TCP-MD5 · hold time 9 s, keepalive 3 s</text>
+  <text x="40" y="655" font-size="13" fill="#1e293b">Pool de servicios MetalLB: 10.10.20.0/28, anunciado como /32 · el frontend usa 10.10.20.10</text>
+  <text x="40" y="675" font-size="13" fill="#1e293b">Si cae un nodo: a los 9 s vence el hold time, el CHR cierra esa sesión y retira esa ruta; quedan las de los otros dos</text>
+  <text x="40" y="695" font-size="12" fill="#475569">Armado desde station.py, prepare_ubuntu.py y chr-bgp-qemu-r1.public.rsc. No se pudo confirmar en la estación el 15/11 (ver 2.1).</text>
+</svg>
+
+        <p class="caption">Un router de borde (AS 65000) y tres nodos k3s que anuncian la IP del servicio por eBGP (AS 64512).</p>
+      </div>
+
+      <!-- Metodología -->
+      <div class="section methodology">
+        <h3>Cómo lo hicimos</h3>
+        <ul>
+          <li><strong>Laboratorio:</strong> QEMU en una Mac — 3 VMs Ubuntu (k3s) y un MikroTik CHR; una réplica con contenedores como respaldo.</li>
+          <li><strong>Red:</strong> eBGP con autenticación MD5 entre MetalLB y el CHR; el router solo acepta /32 del pool de servicios.</li>
+          <li><strong>Plataforma:</strong> k3s, MetalLB, NetworkPolicies entre namespaces, Prometheus y Grafana.</li>
+          <li><strong>Automatización:</strong> Ansible idempotente, secretos en un vault cifrado, backups cifrados del router y del clúster.</li>
+          <li><strong>Verificación:</strong> un pedido cada 0,2 s durante cada falla, capturas de Wireshark y pruebas de segmentación automatizadas.</li>
+        </ul>
+        <div class="placeholder placeholder-sm">
+          <div class="placeholder-label">[pendiente: captura del tablero de Grafana con un nodo caído]</div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="section results">
+        <h3>Resultados medidos</h3>
+        <div class="results-grid">
+          <div class="result-item">
+            <h4>Caída abrupta de un nodo</h4>
+            <div class="big">14–18 s de errores sueltos, sin corte</div>
+            <p>Fallaron 12 de 674 pedidos. El router retira la ruta en segundos; la ventana la cierra Kubernetes al dar por muerto al nodo. Con los valores por defecto eran ~43 s.</p>
+          </div>
+          <div class="result-item">
+            <h4>Actualización y vuelta atrás</h4>
+            <div class="big">0 pedidos perdidos</div>
+            <p>Rolling update a v2 y rollback a v1 en ~3 s cada uno: Kubernetes levanta la réplica nueva antes de bajar la vieja.</p>
+          </div>
+          <div class="result-item">
+            <h4>Segmentación</h4>
+            <div class="big">8 de 8 pruebas</div>
+            <p>Solo el frontend llega al backend; el resto del tráfico entre namespaces queda bloqueado por NetworkPolicies.</p>
+          </div>
+          <div class="result-item">
+            <h4>Automatización y backups</h4>
+            <div class="big">changed=0 · restauración probada</div>
+            <p>La segunda corrida de Ansible no cambia nada. Backups cifrados del router y de k3s; se borró el frontend y volvió desde el backup.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conclusiones -->
+      <div class="section conclusions">
+        <h3>Conclusiones</h3>
+        <ul>
+          <li><strong>Medir le gana a suponer.</strong> La hipótesis era que BFD alcanzaba para no perder pedidos; la medición mostró que no: los nodos sanos siguen mandando tráfico a la réplica muerta hasta que Kubernetes la descarta.</li>
+          <li><strong>Hay dos relojes.</strong> El de la red (BGP, 9 s) y el de Kubernetes (~15–18 s): la ventana de error la cierra el más lento. Para llegar a 0 hacen falta BFD <em>y</em> <code>externalTrafficPolicy: Local</code>.</li>
+          <li><strong>Los límites enseñan.</strong> Correr todo en una PC sin internet obligó a elegir: un solo server, monitoreo con límites ajustados y todo reproducible desde el repositorio.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ══════════ FOOTER ══════════ -->
+    <div class="footer">
+      <div class="info">
+        <span><strong>GOYS 2026</strong> — Universidad Tecnológica Nacional, FRLP — Gestión Operativa y Seguridad en Redes</span>
+        <span>Repositorio: <a href="https://github.com/LoLoo03/goys-tp4-integrador">github.com/LoLoo03/goys-tp4-integrador</a></span>
+        <span>Documento completo, playbooks y mediciones en el repositorio</span>
+      </div>
+      <div class="qr-placeholder">
+        [QR al repositorio:<br>generar e insertar]
+      </div>
+    </div>
+  </div>
+</body>
+</html>
