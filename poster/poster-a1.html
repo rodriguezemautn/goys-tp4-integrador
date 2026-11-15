@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <!--
-  Editable del póster A1. El PDF (poster-a1.pdf) es vectorial en A4: en la imprenta se amplía a A1 (283 %) sin pérdida.
-  Para regenerarlo: agregar dentro de @media print las reglas `@page { size: A4 portrait; margin: 0; }` y `.poster { zoom: 0.3531; }`
-  en una copia temporal y correr: msedge --headless --disable-gpu --no-pdf-header-footer --print-to-pdf=poster-a1.pdf <copia.html>
+  Editable del póster A1. El PDF (poster-a1.pdf) es 100 % vectorial en A4: en la imprenta se amplía a A1 (283 %) sin pérdida.
+  Para regenerarlo: en una copia temporal, agregar dentro de @media print las reglas
+    @page { size: A4 portrait; margin: 0; }  .poster { zoom: 0.3531; }
+    .header { background: var(--primary); }  .poster, .section, .result-item { box-shadow: none !important; }
+  (el gradiente y las sombras rasterizan el PDF) y correr:
+    msedge --headless --disable-gpu --no-pdf-header-footer --print-to-pdf=poster-a1.pdf <copia.html>
   Pendientes: captura de Grafana con un nodo caído y el QR al repositorio.
 -->
 <html lang="es">
@@ -428,8 +431,8 @@
           </div>
           <div class="result-item">
             <h4>Automatización y backups</h4>
-            <div class="big">changed=0 · restauración probada</div>
-            <p>La segunda corrida de Ansible no cambia nada. Backups cifrados del router y de k3s; se borró el frontend y volvió desde el backup.</p>
+            <div class="big">changed=0 · backups cifrados</div>
+            <p>La segunda corrida de Ansible no cambia nada (medido en la réplica). Backups cifrados y verificados del router y de k3s; la restauración del frontend se valida en la estación.</p>
           </div>
         </div>
       </div>
