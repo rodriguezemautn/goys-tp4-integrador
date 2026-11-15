@@ -97,7 +97,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(metallb_bgp_session_up{job=\"metallb\"})",
+          "expr": "sum(metallb_bgp_session_up{job=\"metallb\",peer=~\".*:179\"})",
           "legendFormat": "sesiones",
           "refId": "A"
         }
@@ -185,7 +185,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "metallb_bgp_session_up{job=\"metallb\"}",
+          "expr": "metallb_bgp_session_up{job=\"metallb\",peer=~\".*:179\"}",
           "legendFormat": "{{nodo}}",
           "refId": "A"
         }
