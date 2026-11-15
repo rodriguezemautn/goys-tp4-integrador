@@ -29,7 +29,7 @@
   <!-- ether1 -->
   <rect x="50" y="300" width="150" height="56" rx="6" fill="#ffedd5" stroke="#c2410c" stroke-dasharray="5 4"/>
   <text x="62" y="322" font-size="13" font-weight="bold" fill="#7c2d12">ether1 "clients"</text>
-  <text x="62" y="342" font-size="12" fill="#431407">IP: [CONFIRMAR]</text>
+  <text x="62" y="342" font-size="12" fill="#431407">IP: sin confirmar</text>
   <!-- hub 1 vacío -->
   <line x1="125" y1="356" x2="125" y2="460" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"/>
   <rect x="45" y="460" width="160" height="62" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-dasharray="6 5"/>
@@ -90,5 +90,5 @@
   <text x="40" y="635" font-size="13" fill="#1e293b">eBGP CHR (AS 65000) ↔ MetalLB (AS 64512) · 3 sesiones, una por nodo · TCP-MD5 · hold time 9 s, keepalive 3 s</text>
   <text x="40" y="655" font-size="13" fill="#1e293b">Pool de servicios MetalLB: 10.10.20.0/28, anunciado como /32 · el frontend usa 10.10.20.10</text>
   <text x="40" y="675" font-size="13" fill="#1e293b">Si cae un nodo: a los 9 s vence el hold time, el CHR cierra esa sesión y retira esa ruta; quedan las de los otros dos</text>
-  <text x="40" y="695" font-size="12" fill="#b91c1c">BORRADOR: armado desde station.py, prepare_ubuntu.py y chr-bgp-qemu-r1.public.rsc. Confirmar en la estación lo marcado [CONFIRMAR].</text>
+  <text x="40" y="695" font-size="12" fill="#475569">Armado desde station.py, prepare_ubuntu.py y chr-bgp-qemu-r1.public.rsc. No se pudo confirmar en la estación el 15/11 (ver 2.1).</text>
 </svg>
