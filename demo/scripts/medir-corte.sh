@@ -1,13 +1,15 @@
 #!/bin/sh
 # Un pedido cada 0,2 s e informe de las rachas de errores. POSIX: anda en busybox.
+# Si la respuesta es "frontend <versión> ...", también avisa cuando cambia la versión
+# (rolling update y rollback): cuenta como cambio 10 respuestas seguidas (2 s) iguales.
 # Uso: medir-corte.sh [url] [segundos]   (Ctrl+C también termina e informa)
 URL=${1:-http://10.10.20.10/}
 SEGUNDOS=${2:-120}
 
 if command -v curl >/dev/null 2>&1; then
-  pedir() { curl -fsS -m 1 -o /dev/null "$URL" 2>/dev/null; }
+  pedir() { curl -fsS -m 1 "$URL" 2>/dev/null; }
 else
-  pedir() { wget -q -T 1 -O /dev/null "$URL" 2>/dev/null; }
+  pedir() { wget -q -T 1 -O - "$URL" 2>/dev/null; }
 fi
 
 total=0
@@ -16,8 +18,35 @@ rachas=""
 en_racha=0
 inicio_racha=0
 errores_racha=0
+version=""
+candidata=""
+seguidas=0
+cambios=""
 inicio=$(date +%s)
 fin=$((inicio + SEGUNDOS))
+
+seguir_version() {
+  case $1 in
+    "frontend "*) v=${1#frontend }; v=${v%% *} ;;
+    *) return 0 ;;
+  esac
+  if [ "$v" = "$candidata" ]; then
+    seguidas=$((seguidas + 1))
+  else
+    candidata=$v
+    seguidas=1
+  fi
+  [ "$seguidas" -eq 10 ] && [ "$candidata" != "$version" ] || return 0
+  t=$(($(date +%s) - inicio))
+  if [ -z "$version" ]; then
+    echo "a los $t s: responde $candidata"
+  else
+    echo "a los $t s: cambia de $version a $candidata"
+    cambios="$cambios
+  a los $t s: $version -> $candidata"
+  fi
+  version=$candidata
+}
 
 cerrar_racha() {
   [ "$en_racha" -eq 1 ] || return 0
@@ -36,6 +65,7 @@ informar() {
   else
     echo "Sin errores"
   fi
+  [ -z "$cambios" ] || echo "Cambios de versión:$cambios"
   exit 0
 }
 trap informar INT TERM
@@ -43,8 +73,9 @@ trap informar INT TERM
 echo "Midiendo $URL durante $SEGUNDOS s (Ctrl+C para cortar)..."
 while [ "$(date +%s)" -lt "$fin" ]; do
   total=$((total + 1))
-  if pedir; then
+  if cuerpo=$(pedir); then
     cerrar_racha
+    seguir_version "$cuerpo"
   else
     errores=$((errores + 1))
     if [ "$en_racha" -eq 0 ]; then

@@ -1,0 +1,13 @@
+# Antes de la caída — 13:59:53
+Frontend por nodo:
+frontend-7c8fb7b9f8-8l8rr   k3s-agent2   true
+frontend-7c8fb7b9f8-nc2ql   k3s-agent2   true
+frontend-7c8fb7b9f8-zzjf4   k3s-agent1   true
+agent1 matado de golpe (docker kill) a las 14:00:03
+agent1 prendido de nuevo a las 14:01:03 (60 s apagado)
+agent1 Ready 2 s después de prenderlo
+
+Frontend por nodo al terminar:
+frontend-7c8fb7b9f8-8l8rr   k3s-agent2   true
+frontend-7c8fb7b9f8-nc2ql   k3s-agent2   true
+frontend-7c8fb7b9f8-zzjf4   k3s-agent1   true

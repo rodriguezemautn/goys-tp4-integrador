@@ -1,0 +1,4 @@
+Midiendo http://10.10.20.10/ durante 90 s (Ctrl+C para cortar)...
+
+Pedidos: 436 | errores: 0 | duración: 90 s
+Sin errores

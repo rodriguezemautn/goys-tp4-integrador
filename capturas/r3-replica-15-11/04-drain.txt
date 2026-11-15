@@ -1,0 +1,41 @@
+# Mantenimiento: drain y uncordon de agent2 — 14:02:42
+## Frontend por nodo antes
+frontend-554cdd497f-jdp4d   k3s-agent2   true
+frontend-554cdd497f-vsx7p   k3s-server   true
+frontend-554cdd497f-xrm5c   k3s-agent2   true
+
+## Pods en agent2 antes
+metallb-system/speaker-vw9qf
+monitoring/node-exporter-hpsn7
+web/frontend-554cdd497f-jdp4d
+web/frontend-554cdd497f-xrm5c
+
+$ kubectl drain k3s-agent2 --ignore-daemonsets --delete-emptydir-data
+node/k3s-agent2 cordoned
+Warning: ignoring DaemonSet-managed Pods: metallb-system/speaker-vw9qf, monitoring/node-exporter-hpsn7
+evicting pod web/frontend-554cdd497f-xrm5c
+evicting pod web/frontend-554cdd497f-jdp4d
+error when evicting pods/"frontend-554cdd497f-jdp4d" -n "web" (will retry after 5s): Cannot evict pod as it would violate the pod's disruption budget.
+evicting pod web/frontend-554cdd497f-jdp4d
+pod/frontend-554cdd497f-xrm5c evicted
+pod/frontend-554cdd497f-jdp4d evicted
+node/k3s-agent2 drained
+drain terminado en 12 s
+
+NAME         STATUS                     ROLES           AGE    VERSION
+k3s-agent1   Ready                      <none>          117m   v1.36.6+k3s1
+k3s-agent2   Ready,SchedulingDisabled   <none>          117m   v1.36.6+k3s1
+k3s-server   Ready                      control-plane   117m   v1.36.6+k3s1
+
+## Frontend por nodo con agent2 drenado
+frontend-554cdd497f-b7d5t   k3s-agent1   true
+frontend-554cdd497f-s2whs   k3s-agent1   true
+frontend-554cdd497f-vsx7p   k3s-server   true
+
+$ kubectl uncordon k3s-agent2
+node/k3s-agent2 uncordoned
+
+NAME         STATUS   ROLES           AGE    VERSION
+k3s-agent1   Ready    <none>          117m   v1.36.6+k3s1
+k3s-agent2   Ready    <none>          117m   v1.36.6+k3s1
+k3s-server   Ready    control-plane   117m   v1.36.6+k3s1
