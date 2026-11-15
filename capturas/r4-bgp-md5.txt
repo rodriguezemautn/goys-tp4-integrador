@@ -1,0 +1,48 @@
+# BGP: autenticación TCP MD5 y filtros del router — 2026-11-15 13:09 -03
+# Réplica: FRR 8.4 en lugar del MikroTik CHR, con la misma lógica que routeros/chr-borde.rsc
+
+## Sesiones (show bgp neighbors, filtrado)
+BGP neighbor is 10.10.10.11, remote AS 64512, local AS 65000, external link
+  BGP state = Established, up for 00:30:49
+  Hold time is 9 seconds, keepalive interval is 3 seconds
+Peer Authentication Enabled
+BGP neighbor is 10.10.10.12, remote AS 64512, local AS 65000, external link
+  BGP state = Established, up for 00:13:36
+  Hold time is 9 seconds, keepalive interval is 3 seconds
+Peer Authentication Enabled
+BGP neighbor is 10.10.10.13, remote AS 64512, local AS 65000, external link
+  BGP state = Established, up for 00:30:42
+  Hold time is 9 seconds, keepalive interval is 3 seconds
+Peer Authentication Enabled
+
+## Resumen: PfxRcd = rutas aceptadas del clúster, PfxSnt = rutas anunciadas al clúster
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+10.10.10.11     4      64512       619       618        0    0    0 00:30:49            1        0 N/A
+10.10.10.12     4      64512       434       431        0    0    0 00:13:36            1        0 N/A
+10.10.10.13     4      64512       616       615        0    0    0 00:30:42            1        0 N/A
+
+## Tabla BGP: solo el /32 del pool de servicios
+   Network          Next Hop            Metric LocPrf Weight Path
+*= 10.10.20.10/32   10.10.10.12                            0 64512 i
+*=                  10.10.10.13                            0 64512 i
+*>                  10.10.10.11                            0 64512 i
+
+## Filtros configurados (route-map)
+ neighbor K3S password <oculta>
+  neighbor K3S route-map K3S-IN in
+  neighbor K3S route-map K3S-OUT out
+ip prefix-list SERVICIOS seq 10 permit 10.10.20.0/28 ge 32 le 32
+route-map K3S-IN permit 10
+ match ip address prefix-list SERVICIOS
+route-map K3S-IN deny 20
+route-map K3S-OUT deny 10
+
+## Captura de 12 s (bgp-md5-final.pcap, se guarda fuera del repo)
+paquetes TCP/179: 46
+con opción TCP MD5: 46
+pares: 10.10.10.11 10.10.10.12 10.10.10.13
+
+ejemplo:
+    10.10.10.12.37703 > 10.10.10.1.179: Flags [P.], cksum 0x2862 (incorrect -> 0xd8ca), seq 3209009794:3209009813, ack 1680951808, win 502, options [nop,nop,md5 shared secret not supplied with -M, can
+
+Filtro equivalente en Wireshark: tcp.port == 179 && tcp.option_kind == 19

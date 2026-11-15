@@ -1,0 +1,14 @@
+# prueba-netpol.sh — 2026-11-15 13:08 -03
+# Réplica Docker (k3s v1.36.6 + FRR) en Colima, Mac Apple Silicon. 3 nodos Ready.
+
+Pods de prueba listos; espero 15 s a que se apliquen las NetworkPolicies...
+OK      1. otros -> frontend:80 (servicio público)                   permitido
+OK      2. otros -> backend:80                                        bloqueado
+OK      3. web/frontend -> backend:80                                 permitido
+OK      4. web/otro pod -> backend:80                                 bloqueado
+OK      5. datos -> frontend:80 (egreso denegado)                     bloqueado
+OK      6. datos -> kube-dns:53 (único egreso)                       permitido
+OK      7. otros -> prometheus:9090                                   bloqueado
+OK      8. otros -> grafana:3000                                      permitido
+Resultado: 8 de 8
+Duración: 22 s

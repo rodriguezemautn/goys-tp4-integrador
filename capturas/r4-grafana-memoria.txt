@@ -1,0 +1,19 @@
+# Memoria del pod de Grafana — réplica en la Mac de Naim, 15/11 (hora local -03)
+# Pod recién iniciado; 1 tablero abierto, refresco 30 s, rango 15 min. Límite de Grafana 1 GiB; server 2 GiB.
+# working set = total - caché inactiva (lo que muestra kubectl top). anon = memoria propia del proceso.
+
+# límite: 1024 MiB | inicio: 16:08:51
+# hora      total  anon(propia)  caché  working-set  reinicios
+16:08:51    669           215    444          323  0
+16:09:06    675           221    444          329  0
+16:09:20    676           221    444          329  0
+16:10:24    680           225    444          334  0
+16:15:51    680           226    444          334  0
+16:18:46    680           226    444          334  0
+# máximos: anon 226 MiB | working set 334 MiB | memory.peak del cgroup 681 MiB
+# El muestreo quedó irregular (las demoras de kubectl dejaron huecos); memory.peak cubre todo el período sin huecos.
+
+# Nodos al terminar (docker stats, sin caché):
+k3s-server 1.319GiB / 2GiB
+k3s-agent1 203.2MiB / 1GiB
+k3s-agent2 400.5MiB / 1GiB

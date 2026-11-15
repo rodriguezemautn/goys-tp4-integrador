@@ -1,0 +1,16 @@
+# NetworkPolicies aplicadas — 2026-11-15 13:08 -03
+
+NAME         STATUS   ROLES           AGE   VERSION
+k3s-agent1   Ready    <none>          63m   v1.36.6+k3s1
+k3s-agent2   Ready    <none>          63m   v1.36.6+k3s1
+k3s-server   Ready    control-plane   63m   v1.36.6+k3s1
+
+NAMESPACE    NAME                       POD-SELECTOR     AGE
+datos        backend-desde-frontend     app=backend      62m
+datos        denegar-todo               <none>           62m
+datos        egreso-solo-dns            <none>           62m
+monitoring   denegar-ingreso            <none>           62m
+monitoring   grafana-3000               app=grafana      62m
+monitoring   prometheus-desde-grafana   app=prometheus   62m
+web          denegar-ingreso            <none>           62m
+web          frontend-80                app=frontend     62m
