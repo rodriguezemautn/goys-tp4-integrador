@@ -21,7 +21,7 @@ Los `.pcap` los escribe `tcpdump` en formato pcap, no pcapng. Wireshark los abre
 
 - **Caída de agent1** (`docker kill`, que equivale a matar el proceso de QEMU): la sesión pasó a `Idle` **1 s** después y quedó en `Connect` reintentando. A los 15 s, la ruta al VIP seguía solo por `.11` y `.13`.
 - **Vuelta de agent1:** la sesión volvió a `Established` **4-5 s** después de prenderlo, y la ruta volvió a pasar por los 3 nodos.
-- **Captura del lado del router:** 151 paquetes, **todos con MD5**. Se ven 11 intentos de conexión (SYN) mientras agent1 estaba caído, y **2 OPEN y 1 UPDATE** cuando vuelve.
+- **Captura del lado del router:** 151 paquetes, **todos con MD5**. Se ven **9 intentos de conexión** (SYN) del router mientras agent1 estaba caído; al volver, agent1 abre la conexión (1 SYN) y se ven **2 OPEN y 1 UPDATE**.
 - **Traceroute desde el cliente:** `192.168.56.2` (router) y después `10.10.10.13` (un nodo). El router reparte entre los 3 nodos (ECMP), así que el nodo puede cambiar entre corridas. El traceroute termina en el nodo porque el VIP no es un equipo: cada nodo lo atiende en el puerto 80.
 - **El router no se cayó nunca**, así que no hubo `autosupout` ni equivalente.
 
@@ -29,6 +29,8 @@ Los `.pcap` los escribe `tcpdump` en formato pcap, no pcapng. Wireshark los abre
 
 1. **`r2-bgp.pcap` solo muestra la sesión del server.** Capturando en el server se ve el BGP del server, no el de agent1. Por eso agregué la captura del router. En la estación puede pasar lo mismo, salvo que el helper de red reparta el tráfico como un hub.
 2. **El log de BGP está vacío.** FRR no tiene `bgp log-neighbor-changes` en esta configuración. La secuencia de la sesión está en `05-captura-router.txt`.
-3. **La caída se detectó en ~1 s.** Al matar el contenedor desaparece su interfaz de red. Con el CHR y QEMU el enlace puede seguir arriba, y entonces la detección tardaría hasta el hold time (9 s). Conviene compararlo en la estación.
+3. **La caída se detectó en ~1 s.** Al matar el contenedor, el kernel compartido de los contenedores sigue vivo y cierra la conexión TCP de agent1: en `r2-bgp-router.pcap` se ve el FIN de agent1 al router en el mismo segundo. Con QEMU, matar el proceso apaga la VM entera y nadie manda ese FIN, así que la detección tardaría hasta el hold time (9 s). Conviene compararlo en la estación.
 4. **La hora del router está en UTC** (16:51 = 13:51 en hora local).
 5. **No hay clave en ningún archivo.** Lo revisé contra la clave real, incluidos los `.pcap`: llevan la firma MD5 de cada segmento, no la clave.
+
+> **Corrección (R2, 15/11, revisada con R4):** el punto 3 decía que al matar el contenedor "desaparece su interfaz de red", y los resultados contaban 11 intentos de conexión. La captura muestra que la caída se detectó por el FIN de agent1 y que fueron 9 SYN del router. Ver sección 4.1.
