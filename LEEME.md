@@ -1,3 +1,5 @@
+> **Estación de Feria:** el laboratorio operativo usa [QEMU](demo/qemu/README.md).
+
 # Cómo levantar el laboratorio del TP4
 
 Este proyecto corre en una sola PC, y es la tuya: tenés el rol 1 (Infraestructura). Los demás integrantes trabajan por git y prueban con vos por pantalla compartida.

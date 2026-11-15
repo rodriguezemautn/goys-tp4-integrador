@@ -34,3 +34,14 @@ demo/ansible/group_vars/all/vault.yml
 *.zip
 demo/backups/*
 !demo/backups/.gitkeep
+
+# QEMU images and local state
+*.qcow2
+*.img
+*.iso
+*.tar.gpg
+demo/.qemu/
+
+# Python bytecode
+__pycache__/
+*.pyc

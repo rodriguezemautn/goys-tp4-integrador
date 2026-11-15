@@ -81,3 +81,7 @@ Pendiente: `windows\medir-ram.ps1 -Minutos 10` con todo levantado.
 | Fecha | Qué falló | Causa | Corrección | Quién |
 |---|---|---|---|---|
 | | | | | |
+
+## Medición R1 — estación QEMU
+
+La prueba de diez minutos con monitoreo en el Mac de 24 GiB estimó un pico de 79,76 % de RAM y observó aumento de swap. No demuestra que la estación sustituya el perfil de 8 GiB. El primer ensayo de aislamiento no demostró el bloqueo completo; el ensayo posterior con el helper nftables corregido sí pasó en los tres Ubuntu.

@@ -1,3 +1,5 @@
+> **Estación de Feria:** el laboratorio operativo usa [QEMU](qemu/README.md).
+
 # Demo: servicios en alta disponibilidad con k3s
 
 Un servicio web corre en un clúster k3s de 3 nodos y se publica por BGP hacia un router MikroTik CHR. Si se cae un nodo, el router deja de usarlo a los 9 s y el servicio sigue atendiendo. El tráfico entre namespaces está segmentado con NetworkPolicies y todo se ve en Grafana.
