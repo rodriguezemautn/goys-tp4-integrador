@@ -1,0 +1,11 @@
+# Traceroute al VIP (equivale a /tool traceroute 10.10.20.10) — 14:04:07
+# Se corta en el salto donde llega a un nodo: el VIP no es un equipo, cada nodo lo atiende con kube-proxy en el puerto 80.
+
+## Desde el router
+traceroute to 10.10.20.10 (10.10.20.10), 1 hops max, 46 byte packets
+ 1  10.10.10.11  0.003 ms
+
+## Desde el cliente, del otro lado del router
+traceroute to 10.10.20.10 (10.10.20.10), 2 hops max, 46 byte packets
+ 1  192.168.56.2  0.004 ms
+ 2  10.10.10.13  0.001 ms
