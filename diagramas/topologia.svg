@@ -89,6 +89,6 @@
   <text x="40" y="613" font-size="15" font-weight="bold" fill="#0f172a">BGP</text>
   <text x="40" y="635" font-size="13" fill="#1e293b">eBGP CHR (AS 65000) ↔ MetalLB (AS 64512) · 3 sesiones, una por nodo · TCP-MD5 · hold time 9 s, keepalive 3 s</text>
   <text x="40" y="655" font-size="13" fill="#1e293b">Pool de servicios MetalLB: 10.10.20.0/28, anunciado como /32 · el frontend usa 10.10.20.10</text>
-  <text x="40" y="675" font-size="13" fill="#1e293b">Si cae un nodo: a los 9 s vence el hold time, el CHR cierra esa sesión y retira esa ruta; quedan las de los otros dos</text>
+  <text x="40" y="675" font-size="13" fill="#1e293b">Si cae un nodo: el hold time vence en hasta 9 s, el CHR cierra esa sesión y retira esa ruta; quedan las de los otros dos</text>
   <text x="40" y="695" font-size="12" fill="#475569">Armado desde station.py, prepare_ubuntu.py y chr-bgp-qemu-r1.public.rsc. No se pudo confirmar en la estación el 15/11 (ver 2.1).</text>
 </svg>
