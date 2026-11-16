@@ -9,7 +9,7 @@
 
 | Nombre | Usuario de GitHub | Rol en el grupo |
 |--------|-------------------|-----------------|
-|        |                   | 1. Infraestructura (levanta el laboratorio) |
+| Ferrari, Agustín Nicolás | FerrariAgustinNicolas | 1. Infraestructura (levanta el laboratorio) |
 | Siadore, Valentino | valentinosiadore | 2. Red |
 |        |                   | 3. Aplicación y alta disponibilidad |
 |        |                   | 4. Seguridad |
