@@ -114,10 +114,10 @@ Tabla 3: Alertas configuradas
 
 | Alerta | Condición | Espera | Qué significa |
 |---|---|---|---|
-| `NodoCaido` | `up{job="nodos"} == 0` | 15 s | Un nodo dejó de responder al raspado |
-| `SesionBGPCaida` | `count(metallb_bgp_session_up{peer=~".*:179"} == 1) < 3` | 10 s | Quedan menos de 3 sesiones BGP establecidas |
+| `NodoCaido` | `up{job="nodos"} == 0` | 15 s | Un nodo no responde al raspado |
+| `SesionBGPCaida` | `(count(metallb_bgp_session_up{peer=~".*:179"} == 1) or vector(0)) < 3` | 10 s | Menos de 3 sesiones BGP establecidas |
 
-La alerta de BGP cuenta sesiones establecidas en lugar de buscar sesiones en 0, por dos particularidades de MetalLB halladas al probar en la réplica (hallazgo de R4): cada speaker publica la métrica dos veces —la sesión real con `peer="...:179"` y una serie que queda siempre en 0— y, al morir un speaker, sus series desaparecen en lugar de pasar a 0. Mirar `== 0` disparaba la alerta con los tres nodos sanos y no la disparaba con un nodo caído; contar las sesiones reales cubre los dos casos. La réplica donde se probó es ahora la estación principal; queda confirmarla en la de respaldo, que usa los mismos manifiestos. Las esperas (15 y 10 s) hacen que las alertas se disparen durante la ventana de la caída y no por un raspado perdido.
+La alerta de BGP cuenta sesiones establecidas en lugar de buscar sesiones en 0, por dos particularidades de MetalLB halladas al probar en la réplica (hallazgo de R4): cada speaker publica la métrica dos veces —la sesión real con `peer="...:179"` y una serie que queda siempre en 0— y, al morir un speaker, sus series desaparecen en lugar de pasar a 0. Mirar `== 0` disparaba la alerta con los tres nodos sanos y no la disparaba con un nodo caído; contar las sesiones reales cubre los dos casos, y el `or vector(0)` mantiene la alerta viva si mueren los tres speakers. Queda confirmarla en la estación de respaldo, que usa los mismos manifiestos. Las esperas (15 y 10 s) hacen que las alertas se disparen durante la ventana de la caída y no por un raspado perdido.
 
 El tablero muestra el estado en vivo (nodos, sesiones BGP, réplicas por nodo), la línea de tiempo de la caída y los recursos. Durante la caída, la sesión BGP cae primero y el contador de nodos pasa de 3 a 2; las réplicas del nodo caído no se recrean durante la demo (Kubernetes espera ~5 min de `tolerationSeconds`), pero a los ~18 s el clúster deja de mandarle pedidos.
 
@@ -195,7 +195,7 @@ Tabla 7: Limitaciones conocidas
 | Limitación | Consecuencia | Cómo se resolvería |
 |---|---|---|
 | **Un solo server de k3s** | Si cae el server, los pods siguen atendiendo pero no se puede administrar el clúster | Tres servers con etcd. Quedó afuera por RAM (~1,1 GiB el server) |
-| **14–18 s de pedidos sueltos con error al caer un nodo** | Falla una parte de los pedidos (12 de 674 el 15/11), solo si el nodo tenía réplica del frontend. Por defecto eran ~43 s | **BFD + `externalTrafficPolicy: Local`**: BFD solo no alcanza (sección 6); pide el modo FRR de MetalLB, más RAM de la que había |
+| **14–18 s de pedidos sueltos con error al caer un nodo** | Falla una parte de los pedidos (12 de 674 el 15/11), solo si el nodo tenía réplica del frontend. Por defecto eran ~43 s | **BFD + `externalTrafficPolicy: Local`**: BFD solo no alcanza (sección 2.3); pide el modo FRR de MetalLB, más RAM de la que había |
 | **Pruebas de HA y de red sin repetir con el CHR real** | Se midió en la réplica, hoy estación principal; el CHR real (respaldo) sigue sin verificar | Repetir las pruebas en la estación de respaldo si se la usa |
 | **Las estaciones son Macs, no la laptop de 8 GB del planteo** | La demo va en la Mac de R4 con la réplica (FRR), con nodos del perfil `normal` (server 2 GiB, agents 1 GiB): con el `chico`, el server no entra con margen (sección 4.2). La de 24 GiB con QEMU y CHR queda de respaldo (pico estimado 79,76 % de RAM, con swap) | Medir el perfil `chico` en una laptop de 8 GB, o asumir el `normal`, que pide 16 GB |
 | Bajar los tiempos de detección tiene costo | Un `node-monitor-grace-period` corto puede dar por caído un nodo que solo estaba lento | En producción: valores por defecto de Kubernetes junto con BFD y `Local` |
