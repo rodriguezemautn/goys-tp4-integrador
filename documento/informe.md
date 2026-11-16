@@ -4,11 +4,11 @@
 
 **Cátedra:** Gestión Operativa y Seguridad en Redes — **Trabajo Práctico N.º 4**, Proyecto Integrador
 
-**Modalidad:** A — Desarrollo · **Grupo:** 4
+**Modalidad:** A — Desarrollo · **Grupo:** 4 · **Fecha de entrega:** 16/11/2026
 
 **Integrantes:** Bellomo, Lorenzo · Ferrari, Agustín Nicolás · Guarino, Naim Hernan · Kloster, Agustín Ignacio · Siadore, Valentino
 
-**Fecha de entrega:** 16/11/2026 · **Repositorio:** https://github.com/LoLoo03/goys-tp4-integrador
+**Repositorio:** https://github.com/LoLoo03/goys-tp4-integrador
 
 *Este informe condensa las secciones completas de `documento/secciones/`, donde está el detalle de cada configuración y de cada prueba, con sus salidas en `capturas/`.*
 
@@ -30,7 +30,7 @@ La estación principal de la Feria es la Mac de R4 con la réplica con contenedo
 
 *Figura 1: Topología de la estación QEMU de R1, que en la Feria queda de respaldo.*
 
-**Estaciones de la Feria.** La estación **principal** es la Mac de R4, con la réplica con contenedores (`demo/prueba-ram/`): los nodos son contenedores con k3s y MetalLB y el router es **FRR en lugar del MikroTik CHR**, con la misma configuración lógica (sección 3.1) y una red hacia los clientes (192.168.56.2/24) por donde entran los pedidos. La estación **de respaldo** es la Mac de R1, con QEMU y el CHR real, que es la que muestra el diagrama: el CHR (RouterOS v7, imagen x86_64 **emulada** con TCG, 1 vCPU y 1 GB), tres nodos Ubuntu ARM64 con k3s acelerados con HVF —cada uno con un *speaker* de MetalLB— y un proceso auxiliar de QEMU que une las placas en 10.10.10.0/24 como un *hub*. Todo son sockets en `127.0.0.1`: el laboratorio no sale de la Mac y funciona sin internet. Ahí la Mac no tendría camino de datos hacia el CHR; no se pudo confirmar, porque el 15/11 la estación no estaba funcionando.
+**Estaciones de la Feria.** La estación **principal** es la Mac de R4, con la réplica con contenedores (`demo/prueba-ram/`): los nodos son contenedores con k3s y MetalLB y el router es **FRR en lugar del MikroTik CHR**, con la misma configuración lógica (sección 3.1) y una red hacia los clientes (192.168.56.2/24) por donde entran los pedidos. La estación **de respaldo** es la Mac de R1, con QEMU y el CHR real, que es la que muestra el diagrama: el CHR (RouterOS v7, **emulado** con TCG, 1 vCPU y 1 GB), tres nodos Ubuntu ARM64 con k3s acelerados con HVF —cada uno con un *speaker* de MetalLB— y un proceso auxiliar de QEMU que une las placas en 10.10.10.0/24 como un *hub*. Todo son sockets en `127.0.0.1`: el laboratorio no sale de la Mac y funciona sin internet. Ahí la Mac no tendría camino de datos hacia el CHR; no se pudo confirmar, porque el 15/11 la estación no estaba funcionando.
 
 Tabla 1: Direcciones y sistemas autónomos
 
@@ -44,15 +44,15 @@ Tabla 1: Direcciones y sistemas autónomos
 
 ### 2.2. Componentes
 
-Seis piezas arman el laboratorio: el **MikroTik CHR**, router virtual de borde, que establece las sesiones BGP y aprende la ruta a la IP del frontend; **K3s** (un nodo de control y dos agentes); **MetalLB**, que asigna la IP virtual al servicio `LoadBalancer` y la anuncia por BGP; **Prometheus** y **Grafana**, que recolectan y muestran las métricas de nodos, contenedores y MetalLB; y **Ansible**, que automatiza la preparación de los nodos, la instalación de K3s y el despliegue.
+Seis piezas arman el laboratorio: el **MikroTik CHR**, router virtual de borde BGP; **K3s** (un nodo de control, dos agentes); **MetalLB**, que asigna la IP virtual al servicio `LoadBalancer` y la anuncia por BGP; **Prometheus** y **Grafana**, métricas y tableros de nodos, contenedores y MetalLB; y **Ansible**, que automatiza la preparación de los nodos, la instalación de K3s y el despliegue.
 
 ### 2.3. Flujo de datos
 
-Un pedido de un cliente a `http://10.10.20.10/api/` recorre cinco saltos. (1) El cliente llega al CHR por su ruta hacia 10.10.20.0/28. (2) El CHR lo reenvía a uno de los tres nodos por la ruta 10.10.20.10/32 aprendida por eBGP: esa IP no pertenece a ninguna máquina, es la del Service `frontend`, que MetalLB anuncia desde los tres nodos. (3) En el nodo, kube-proxy lo lleva a una de las 3 réplicas del frontend —por la VXLAN de flannel si está en otro nodo—: con `externalTrafficPolicy: Cluster` cualquier nodo acepta y reparte. (4) nginx resuelve `backend.datos.svc` en CoreDNS y hace `proxy_pass` al ClusterIP. (5) kube-proxy elige una de las 2 réplicas del backend; la NetworkPolicy solo admite pods `app=frontend` de `web`. La respuesta vuelve por el mismo camino; como puede entrar por un nodo y atenderse en otro, kube-proxy aplica SNAT y el pod ve la IP del nodo de entrada, no la del cliente.
+Un pedido de un cliente a `http://10.10.20.10/api/` recorre cinco saltos. (1) El cliente llega al CHR por su ruta hacia 10.10.20.0/28. (2) El CHR lo reenvía a uno de los tres nodos por la ruta 10.10.20.10/32 aprendida por eBGP: esa IP no pertenece a ninguna máquina, es la del Service `frontend`, que MetalLB anuncia desde los tres nodos. (3) En el nodo, kube-proxy lo lleva a una de las 3 réplicas del frontend (por la VXLAN de flannel si está en otro nodo): con `externalTrafficPolicy: Cluster` cualquier nodo acepta y reparte. (4) nginx resuelve `backend.datos.svc` en CoreDNS y hace `proxy_pass` al ClusterIP. (5) kube-proxy elige una de las 2 réplicas del backend; la NetworkPolicy solo admite pods `app=frontend` de `web`. La respuesta vuelve por el mismo camino; como puede entrar por un nodo y atenderse en otro, kube-proxy aplica SNAT y el pod ve la IP del nodo de entrada, no la del cliente.
 
 **Qué pasa durante la caída de un nodo.** Hay dos relojes: **BGP (9 s)** —hasta que vence el hold time, el CHR puede seguir mandando pedidos al nodo apagado— y **Kubernetes (~15–18 s)** —los demás nodos creen vivas las réplicas del caído y les siguen mandando pedidos hasta que queda `NotReady`—. La ventana termina cuando vence el más lento, el de Kubernetes: eso explica los 14 a 18 s con pedidos sueltos con error (sección 5), sin corte total. Si el nodo caído no tenía réplicas del frontend no hay errores: el 15/11 el router retiró la ruta al segundo y no falló ninguno de 732 pedidos.
 
-**Actualización (rolling update).** Kubernetes crea una réplica nueva por vez (`maxSurge: 1`) y no baja ninguna hasta que la nueva pasa la readiness probe (`maxUnavailable: 0`); la vieja recibe `preStop: sleep 5` y sigue atendiendo mientras kube-proxy la saca del balanceo. Así ningún pedido llega a un pod que ya cerró.
+**Actualización (rolling update).** Kubernetes crea una réplica nueva por vez (`maxSurge: 1`) y no baja ninguna hasta que la nueva pasa la readiness probe (`maxUnavailable: 0`); la vieja recibe `preStop: sleep 5` y sigue atendiendo mientras kube-proxy la saca del balanceo: ningún pedido llega a un pod que ya cerró.
 
 ## 3. Implementación
 
@@ -70,10 +70,10 @@ BGPAdvertisement: aggregationLength: 32
 
 Decisiones y por qué:
 
-- **Hold time de 9 s, keepalive de 3 s.** Con los valores por defecto (180/60 s), el router tardaría tres minutos en notar un nodo muerto; con 9 s la ruta se retira en hasta 9 s. Más bajo pide BFD, que detecta en menos de un segundo, pero BFD solo no alcanza: tiene que ir junto con `externalTrafficPolicy: Local` (sección 5). Además, MetalLB en modo nativo no soporta BFD; el modo FRR sí, pero suma ~100 MB por nodo y se descartó por el presupuesto de RAM.
-- **Filtros de prefijos.** El CHR solo acepta del clúster rutas /32 dentro de 10.10.20.0/28 y no anuncia nada: si un nodo comprometido anunciara otra red, el router la descarta.
-- **Autenticación TCP-MD5.** Cada sesión lleva una clave compartida que no está en el repositorio: el `.rsc` tiene un marcador y en el clúster la crea Ansible desde el vault cifrado.
-- **Una sesión por nodo, sin route reflector.** Con tres nodos alcanza, y cada sesión cae sola cuando cae su nodo, que es lo que queremos mostrar.
+- **Hold time de 9 s, keepalive de 3 s.** Con los valores por defecto (180/60 s), el router tardaría tres minutos en notar un nodo muerto; con 9 s la ruta se retira en hasta 9 s. Más bajo pide BFD, que detecta en menos de un segundo, pero solo sirve junto con `externalTrafficPolicy: Local` (sección 5), y en MetalLB exige el modo FRR (~100 MB por nodo): se descartó por RAM.
+- **Filtros de prefijos.** El CHR solo acepta del clúster rutas /32 dentro de 10.10.20.0/28 y no anuncia nada: otra red anunciada por un nodo comprometido se descarta.
+- **Autenticación TCP-MD5.** La clave no está en el repositorio: el `.rsc` tiene un marcador y en el clúster la crea Ansible desde el vault cifrado.
+- **Una sesión por nodo, sin route reflector.** Con tres nodos alcanza, y cada sesión cae sola con su nodo, que es lo que queremos mostrar.
 
 **Lo que no pudimos comparar.** El `.rsc` público es una reconstrucción y el 15/11 la estación no estaba funcionando: **no está verificado contra el router real**. Sí revisamos el router de la réplica —la estación principal—: FRR 8.4 con la misma lógica (AS, timers, MD5, filtros), con una diferencia: por `maximum-paths 3` instala las **tres** rutas activas y reparte el tráfico; no sabemos si el CHR hace lo mismo o deja una sola.
 
@@ -96,9 +96,9 @@ Tabla 2: Resultados medidos en la réplica con contenedores (router FRR en lugar
 | Caída de un agent sin réplicas del frontend | — | 0 de 732 |
 | Caída de un agent (detección por defecto) | 31 de 475 con error en ~43 s | No se midió |
 
-El 15/11 la estación QEMU no estaba funcionando y las pruebas se hicieron en la réplica, que después quedó como estación principal de la Feria; con el CHR real no están repetidas (sección 5). La salida completa está en `capturas/r3-pruebas-aplicacion.md`. En la réplica, la ventana de errores la marcó Kubernetes y no BGP (ver 2.3).
+Las pruebas se hicieron el 15/11 en la réplica —hoy estación principal—; con el CHR real no están repetidas (sección 5). Salida completa: `capturas/r3-pruebas-aplicacion.md`. La ventana de errores la marcó Kubernetes y no BGP (ver 2.3).
 
-**Segmentación.** La red del clúster se divide en zonas, una por namespace, y cada zona arranca con la política de **denegar todo** (`demo/k8s/netpol/`): `web` solo admite ingreso TCP 80 a los pods del frontend; en `monitoring`, Grafana atiende en el 3000 y Prometheus solo acepta conexiones de Grafana. La zona más restringida es `datos`: su política de ingreso combina `namespaceSelector` y `podSelector` **en el mismo elemento**, así que el único que entra es el pod `app=frontend` del namespace `web`, por el puerto 80 —un pod cualquiera de `web` tampoco entra—, y su egreso permite únicamente DNS: si el backend se compromete, no puede abrir conexiones hacia otros pods ni hacia afuera. En una red plana, comprometer el servicio expuesto da acceso directo a los datos; acá el frontend es el único camino. **Límite:** `web` y `monitoring` solo restringen el ingreso (sección 5). La segmentación se complementa con los filtros y la autenticación BGP (3.1), los secretos en el vault (3.3), los backups cifrados (4.3) y el firewall del CHR, diseñado pero no cargado en la estación (4.2).
+**Segmentación.** La red del clúster se divide en zonas, una por namespace, y cada zona arranca con la política de **denegar todo** (`demo/k8s/netpol/`): `web` solo admite ingreso TCP 80 a los pods del frontend; en `monitoring`, Grafana atiende en el 3000 y Prometheus solo acepta conexiones de Grafana. La zona más restringida es `datos`: su política de ingreso combina `namespaceSelector` y `podSelector` **en el mismo elemento**, así que el único que entra es el pod `app=frontend` del namespace `web`, por el puerto 80 —un pod cualquiera de `web` tampoco entra—, y su egreso permite únicamente DNS: si el backend se compromete, no puede abrir conexiones hacia otros pods ni hacia afuera. **Límite:** `web` y `monitoring` solo restringen el ingreso (sección 5). La segmentación se complementa con los filtros y la autenticación BGP (3.1), los secretos en el vault (3.3), los backups cifrados (4.3) y el firewall del CHR, diseñado pero no cargado en la estación (4.2).
 
 ### 3.3. Automatización
 
@@ -121,13 +121,15 @@ La alerta de BGP cuenta sesiones establecidas en lugar de buscar sesiones en 0, 
 
 El tablero muestra el estado en vivo (nodos, sesiones BGP, réplicas por nodo), la línea de tiempo de la caída y los recursos. Durante la caída, la sesión BGP cae primero y el contador de nodos pasa de 3 a 2; las réplicas del nodo caído no se recrean durante la demo (Kubernetes espera ~5 min de `tolerationSeconds`), pero a los ~18 s el clúster deja de mandarle pedidos.
 
-*[Pendiente: Figura 2 — captura del tablero con `agent1` caído, tomada en la estación principal.]*
+![Tablero de Grafana durante la caída de agent1: el nodo figura caído, quedan 2 sesiones BGP establecidas y la réplica de agent1 ya se recreó en agent2](../capturas/r4-tablero-agent1-caido.png)
+
+*Figura 2: Tablero con `agent1` caído, en la estación principal: quedan 2 de 3 sesiones BGP y, pasados los ~5 min de tolerancia, su réplica ya se recreó en agent2.*
 
 ## 4. Verificación
 
 ### 4.1. Pruebas de conectividad
 
-La consigna pedía validar la red en la estación QEMU, pero el 15/11 no estaba funcionando: las pruebas las corrió R4 en la réplica con contenedores —que después quedó como **estación principal de la Feria**—, traduciendo cada comando de RouterOS a su equivalente en FRR; R2 armó la lista de pruebas y revisó las salidas y las capturas (en `capturas/`, prefijo `r2-`). Los resultados corresponden, entonces, a la estación que se muestra en la Feria.
+La consigna pedía validar la red en la estación QEMU, pero el 15/11 no estaba funcionando: las pruebas las corrió R4 en la réplica con contenedores —que después quedó como **estación principal de la Feria**—, traduciendo cada comando de RouterOS a su equivalente en FRR; R2 armó la lista de pruebas y revisó las salidas y las capturas (`capturas/`, prefijo `r2-`). Los resultados corresponden a la estación que se muestra en la Feria.
 
 Tabla 4: Pruebas de conectividad en la estación principal (réplica, 15/11)
 
@@ -138,7 +140,7 @@ Tabla 4: Pruebas de conectividad en la estación principal (réplica, 15/11)
 | Caída de agent1 (`docker kill`) | Sesión `Idle` **1 s** después (el kernel manda FIN); la ruta queda por .11 y .13 |
 | Vuelta de agent1 | Sesión `Established` y ruta por los 3 nodos **4–5 s** después |
 | Captura en el server (puerto 179) | 56 paquetes, **todos con TCP-MD5** |
-| Captura en el router | 151 paquetes con MD5: keepalives de las 3 sesiones, **9 reintentos** con agent1 caído y, a la vuelta, 2 OPEN y 1 UPDATE |
+| Captura en el router | 151 paquetes con MD5: keepalives de las 3 sesiones y **9 reintentos** con agent1 caído |
 | `traceroute` desde un cliente | Primer salto el router (192.168.56.2), segundo un nodo |
 
 Las capturas se abren en Wireshark con el filtro `bgp` (o `tcp.option_kind == 19` para la firma MD5) y **no contienen la clave**: la opción MD5 lleva un resumen de cada segmento, no la clave; lo revisamos en los dos archivos.
@@ -147,7 +149,7 @@ Las capturas se abren en Wireshark con el filtro `bgp` (o `tcp.option_kind == 19
 
 ### 4.2. Pruebas de segmentación
 
-Las pruebas del 15/11 se corrieron en la réplica (k3s v1.36.6, FRR 8.4, dentro de una VM Ubuntu porque el kernel de Docker Desktop no soporta TCP MD5) **y también en la estación QEMU con el CHR real**, corridas por R1 con R4 validando (`capturas/r4-estacion-qemu.txt`). El script `demo/scripts/prueba-netpol.sh` crea pods de prueba en `otros`, `web` y `datos` e intenta conexiones HTTP y DNS, esperando 15 s a que las políticas estén programadas; antes de cada corrida se verificó que las 8 políticas estuvieran aplicadas y los 3 nodos `Ready`.
+Las pruebas del 15/11 se corrieron en la réplica (k3s v1.36.6, FRR 8.4, dentro de una VM Ubuntu porque el kernel de Docker Desktop no soporta TCP MD5) **y también en la estación QEMU con el CHR real**, corridas por R1 con R4 validando (`capturas/r4-estacion-qemu.txt`). El script `demo/scripts/prueba-netpol.sh` crea pods de prueba en `otros`, `web` y `datos` e intenta conexiones HTTP y DNS, espera 15 s a que las políticas estén programadas, y antes de cada corrida se verificó que estuvieran las 8 aplicadas y los 3 nodos `Ready`.
 
 Tabla 5: Pruebas de segmentación
 
@@ -163,9 +165,9 @@ Tabla 5: Pruebas de segmentación
 | 8 | `otros` → Grafana:3000 | Permitido | Permitido | Permitido |
 | | **Total** | | **8 de 8**, en 22 s | **8 de 8** |
 
-En la réplica el resultado se repitió en cuatro corridas. Las pruebas 3 y 4 son las más importantes: muestran que la política no habilita a un namespace entero sino a un pod concreto. Una corrida del ensayo dio 7 de 8 por un **falso negativo**: Grafana estaba reiniciándose por falta de memoria justo cuando corrió la prueba 8 —cuando el destino no responde, el script no distingue un bloqueo de un servicio caído—. Ese episodio llevó a medir la memoria de Grafana: con 384 MiB y con 512 MiB se quedó sin memoria al abrir el tablero —el 16/11, con 512 MiB, el OOM se repitió apenas abierto; con 1 GiB no se cayó—, así que el límite quedó en **1 GiB** (sección 3.4). Y subirlo sin arrastrar al resto del server pide un server de 2 GB: con 1280 MB, Grafana ocupó la RAM libre del nodo y cayó hasta la sesión BGP del server (`capturas/r4-grafana-memoria.txt`).
+En la réplica el resultado se repitió en cuatro corridas. Las pruebas 3 y 4 son las más importantes: muestran que la política no habilita a un namespace entero sino a un pod concreto. Una corrida dio 7 de 8 por un **falso negativo**: Grafana estaba reiniciándose sin memoria durante la prueba 8; si el destino no responde, el script no distingue bloqueo de servicio caído. Ese episodio llevó a subir el límite de Grafana a 1 GiB (sección 3.4; `capturas/r4-grafana-memoria.txt`).
 
-**BGP y filtros** (`capturas/r4-bgp-md5.txt`): autenticación activa en las 3 sesiones, 46 de 46 paquetes al puerto 179 con la opción TCP MD5, el router solo acepta `10.10.20.10/32` (1 ruta por nodo) y no anuncia nada (`PfxSnt = 0`). **Secretos fuera de git** (`capturas/r4-secretos.txt`): no hay claves privadas en los archivos versionados ni en el historial; solo está `vault.example.yml` con marcadores, y los archivos de secretos están ignorados por git.
+**BGP y filtros** (`capturas/r4-bgp-md5.txt`): autenticación activa en las 3 sesiones, 46 de 46 paquetes al puerto 179 con la opción TCP MD5, el router solo acepta `10.10.20.10/32` (1 ruta por nodo) y no anuncia nada (`PfxSnt = 0`). **Secretos fuera de git** (`capturas/r4-secretos.txt`): sin claves privadas en los archivos versionados ni en el historial; solo `vault.example.yml` con marcadores, y los archivos de secretos ignorados por git.
 
 **Firewall del CHR.** Solo se pudo revisar en la estación QEMU (FRR no tiene el firewall de RouterOS). **`chr-borde.rsc` no está cargado**: hay un firewall mínimo en `input` con la regla final de descarte **deshabilitada**; habilitada temporalmente, el SSH desde el server dio timeout y la regla contó 3 paquetes, confirmando que bloquea. Hoy el CHR acepta cualquier conexión desde el clúster; el grupo tiene que decidir si habilita la regla antes de la demo.
 
@@ -184,7 +186,7 @@ Tabla 6: Corridas de `deploy.yml`
 
 Las cuatro ejecuciones terminaron con código 0, `failed=0` y `unreachable=0`. La secuencia **8 / 0 / 1 / 0** demuestra que el despliegue no vuelve a registrar cambios sobre el mismo estado y corrige el desvío introducido; el resultado se limita a `deploy.yml` en esa réplica y no demuestra la idempotencia de `site.yml` ni de la estación. Evidencia con recaps, versiones y hashes: `capturas/r1-idempotencia-replica.json`.
 
-**Backups y restauración.** `backup.yml` guarda dos piezas en una carpeta del host, fuera de git, que sobrevive a la destrucción de las VMs: la exportación del CHR **sin la clave BGP** (el playbook se corta si la clave sigue presente) y un paquete con la base y el token de k3s, **cifrado** con la clave del vault, que se guarda fuera de la estación. Conserva los últimos cinco de cada uno, verifica cada backup al generarlo y en el CHR usa un usuario `backup` de solo lectura. La restauración tiene una prueba definida —backup, borrar el Deployment del frontend, `restore.yml`, y el servicio tiene que volver—, que no se llegó a ejecutar; lo verificado son las restauraciones de monitoreo en réplicas aisladas (`capturas/r1-evidencias-estacion.md`). Para el CHR no se restaura desde la exportación: la fuente de verdad es el archivo versionado en git, y la exportación sirve para detectar desvíos. Las VMs y las imágenes se reconstruyen desde el repositorio.
+**Backups y restauración.** `backup.yml` guarda dos piezas en una carpeta del host, fuera de git, que sobrevive a la destrucción de las VMs: la exportación del CHR **sin la clave BGP** (el playbook se corta si la clave sigue presente) y un paquete con la base y el token de k3s, **cifrado** con la clave del vault, que se guarda fuera de la estación. Conserva los últimos cinco, verifica cada backup al generarlo y en el CHR usa un usuario `backup` de solo lectura. La restauración tiene una prueba definida —backup, borrar el Deployment del frontend, `restore.yml`, y el servicio tiene que volver— que no se llegó a ejecutar; lo verificado: las restauraciones de monitoreo en réplicas aisladas (`capturas/r1-evidencias-estacion.md`). Para el CHR no se restaura desde la exportación: la fuente de verdad es el archivo versionado en git, y la exportación sirve para detectar desvíos. Las VMs y las imágenes se reconstruyen desde el repositorio.
 
 ## 5. Limitaciones y trabajo futuro
 
@@ -199,15 +201,15 @@ Tabla 7: Limitaciones conocidas
 | Bajar los tiempos de detección tiene costo | Un `node-monitor-grace-period` corto puede dar por caído un nodo que solo estaba lento | En producción: valores por defecto de Kubernetes junto con BFD y `Local` |
 | SNAT por `externalTrafficPolicy: Cluster` | El backend no ve la IP real del cliente | `Local` evita el SNAT, pero solo anuncian los nodos con réplica |
 
-A esto se suman los límites de seguridad de 3.2 y 4.2: el firewall completo del CHR está diseñado pero no cargado y su regla de descarte está deshabilitada; `web` y `monitoring` no restringen el egreso; la autenticación BGP usa TCP MD5 —lo que soportan MetalLB y RouterOS—, cuyo reemplazo moderno es TCP-AO (RFC 5925); y no hay mTLS entre frontend y backend. **Trabajo futuro:** un Ingress con TLS delante del frontend, una base de datos con réplicas en el backend y probar la restauración completa de la estación desde el respaldo.
+A esto se suman los límites de seguridad de 3.2 y 4.2 (firewall del CHR sin cargar, sin restricción de egreso en `web` y `monitoring`, TCP MD5 en lugar de TCP-AO, sin mTLS). **Trabajo futuro:** Ingress con TLS, un backend con estado replicado y ejecutar la prueba de restauración.
 
 ## 6. Conclusiones
 
-La lección más grande del proyecto es que medir le gana a suponer. La hipótesis inicial era que para no perder pedidos ante la caída de un nodo alcanzaba con BFD, que detecta la caída en menos de un segundo. La medición mostró otra cosa: el router retiró la ruta al segundo y los errores siguieron, porque los propios nodos sanos reparten pedidos hacia la réplica muerta hasta que Kubernetes la da por caída. Hay dos relojes corriendo a la vez —el de la red y el de Kubernetes— y la ventana de error la cierra el más lento. Entender eso cambió la respuesta: no es una herramienta, es la combinación de BFD con `externalTrafficPolicy: Local`. A ese entendimiento se llegó midiendo: de ~43 s con los valores por defecto a 14–18 s con los parámetros ajustados.
+La lección más grande del proyecto es que medir le gana a suponer. La hipótesis era que con BFD, que detecta la caída en menos de un segundo, no se perdían pedidos. La medición mostró otra cosa: el router retiró la ruta al segundo y los errores siguieron, porque los nodos sanos reparten pedidos hacia la réplica muerta. Hay dos relojes —el de la red y el de Kubernetes— y la ventana la cierra el más lento: la respuesta no es una herramienta, es BFD junto con `externalTrafficPolicy: Local`.
 
-Lo más difícil fue el presupuesto de RAM: cada decisión técnica —un solo server, sin BFD, límites ajustados en el monitoreo, perfiles de memoria por laptop— salió de que todo tenía que correr en una sola computadora. La estación cambió de VirtualBox a QEMU en el camino, y la réplica con contenedores, que nació para probar en equipos chicos, terminó siendo la estación principal de la Feria, con la QEMU y el CHR real como respaldo. Trabajar sin internet hizo pensar por adelantado qué imágenes, paquetes y claves tenían que estar antes.
+Lo más difícil fue el presupuesto de RAM: cada decisión técnica —un solo server, sin BFD, límites ajustados en el monitoreo, perfiles de memoria por laptop— salió de que todo tenía que correr en una sola computadora. La réplica con contenedores, que nació para probar en equipos chicos, terminó siendo la estación principal de la Feria.
 
-El trabajo se repartió por capas, una por integrante: estación y automatización (R1), red y BGP (R2), aplicación y alta disponibilidad (R3), segmentación y secretos (R4), y monitoreo, backups y este documento (R5). Todo entró por pull requests revisados por otro integrante, con la regla de que al repositorio no entran claves ni rutas personales; esa revisión cruzada atajó errores y obligó a que cada parte quedara reproducible desde el repositorio.
+El trabajo se repartió por capas, una por integrante: estación y automatización (R1), red y BGP (R2), aplicación y alta disponibilidad (R3), segmentación y secretos (R4), y monitoreo, backups y este documento (R5). Todo entró por pull requests revisados por otro integrante, con la regla de que al repositorio no entran claves ni rutas personales; esa revisión cruzada atajó errores y mantuvo todo reproducible desde el repositorio.
 
 ## 7. Referencias
 
