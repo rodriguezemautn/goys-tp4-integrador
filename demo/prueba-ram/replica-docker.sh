@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Réplica del laboratorio con contenedores, para medir RAM sin VirtualBox: cada nodo tiene
-# de límite la RAM de su VM menos unos 256 MB de Ubuntu. FRR hace de CHR.
+# Réplica del laboratorio con contenedores; es la estación principal de la demo. FRR hace de CHR.
+# Server de 2048 MB y agents de 1024 MB: con Grafana en 1 GiB, un server de 1280 MB se quedaba
+# sin RAM y se caía la sesión BGP (sección 4.2 del documento).
 # No usar en la laptop de 8 GB con el laboratorio levantado.
 #
 # Uso: replica-docker.sh [up|down]
@@ -80,7 +81,7 @@ nodo_base() { # nombre ip memoria
     "${montajes[@]}" "$K3S_IMAGE" "${@:4}" >/dev/null
 }
 
-nodo_base k3s-server 10.10.10.11 1280m server \
+nodo_base k3s-server 10.10.10.11 2048m server \
   --token "$K3S_TOKEN" --node-ip 10.10.10.11 --advertise-address 10.10.10.11 \
   --flannel-iface eth0 --tls-san 10.10.10.11 --write-kubeconfig-mode 0600 \
   --disable servicelb --disable traefik \
@@ -88,7 +89,7 @@ nodo_base k3s-server 10.10.10.11 1280m server \
   --kubelet-arg node-status-update-frequency=4s "${extra[@]}"
 
 for n in 1 2; do
-  nodo_base "k3s-agent$n" "10.10.10.1$((n + 1))" 512m agent \
+  nodo_base "k3s-agent$n" "10.10.10.1$((n + 1))" 1024m agent \
     --server https://10.10.10.11:6443 --token "$K3S_TOKEN" --node-ip "10.10.10.1$((n + 1))" \
     --flannel-iface eth0 --kubelet-arg node-status-update-frequency=4s "${extra[@]}"
 done
