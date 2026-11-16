@@ -1,4 +1,4 @@
-> **Estación de Feria:** el laboratorio operativo usa [QEMU](qemu/README.md).
+> **Estación de Feria:** la principal es la Mac de Naim (R4), con la réplica con contenedores y FRR en lugar del MikroTik ([`prueba-ram/`](prueba-ram/)). La de respaldo es la Mac de Ferrari (R1), con [QEMU](qemu/README.md) y el CHR real.
 
 # Demo: servicios en alta disponibilidad con k3s
 
@@ -187,22 +187,22 @@ Si el CHR no arranca en Apple Silicon, no sigas probando variantes: avisale al g
 
 ## Guion de la demo (3 a 5 minutos)
 
-Tiempos medidos el 15/11 en la réplica con contenedores ([capturas](../capturas/r3-pruebas-aplicacion.md)), porque la estación QEMU no estaba funcionando. Lo marcado [confirmar] depende de la estación que se use el 17/11.
+Tiempos medidos el 15/11 en la réplica con contenedores ([capturas](../capturas/r3-pruebas-aplicacion.md)), que es la estación principal de la Feria. Lo marcado [confirmar] es de la estación QEMU de respaldo.
 
 ### Comandos según la estación
 
 En el guion, `k` es `kubectl` en el server.
 
-La Mac de Naim, con la réplica, es también el equipo de respaldo de la Feria.
+La estación principal es la réplica en la Mac de Naim (R4). La de respaldo es la estación QEMU en la Mac de Ferrari (R1).
 
-| Paso | Estación QEMU (Mac de R1) | Réplica con contenedores (Mac de Naim, respaldo) |
+| Paso | Principal: réplica con contenedores (Mac de Naim) | Respaldo: QEMU (Mac de Ferrari) |
 |---|---|---|
-| Medir (B) | [confirmar: la Mac no llega a 10.10.20.10; hace falta un cliente del otro lado del CHR] | `medir-corte.sh` desde el contenedor `cliente` [confirmar comando con Naim] |
-| Entrar al server (C) | [confirmar] | `colima ssh --profile tp4 -- docker exec -it k3s-server sh` (`kubectl` directo) |
-| Apagar `agent1` | Matar el proceso de QEMU de `agent1` [confirmar comando] | `./lab.sh caer-nodo agent1` |
-| Prender `agent1` | Relanzar `agent1` [confirmar comando] | `./lab.sh levantar-nodo agent1` |
-| Segmentación | `sudo bash ~/prueba-netpol.sh` en el controlador | `./lab.sh netpol` |
-| Router (sesiones BGP) | `/routing bgp session print` en el CHR | `vtysh -c 'show bgp summary'` en el FRR |
+| Medir (B) | `./lab.sh medir 30` | [confirmar: la Mac no llega a 10.10.20.10; hace falta un cliente del otro lado del CHR] |
+| Entrar al server (C) | `colima ssh --profile tp4 -- docker exec -it k3s-server sh` (`kubectl` directo) | [confirmar] |
+| Apagar `agent1` | `./lab.sh caer-nodo agent1` | Matar el proceso de QEMU de `agent1` [confirmar comando] |
+| Prender `agent1` | `./lab.sh levantar-nodo agent1` | Relanzar `agent1` [confirmar comando] |
+| Segmentación | `./lab.sh netpol` | `sudo bash ~/prueba-netpol.sh` en el controlador |
+| Router (sesiones BGP) | `vtysh -c 'show bgp summary'` en el FRR | `/routing bgp session print` en el CHR |
 
 ### Preflight, antes de cada tanda
 
@@ -245,13 +245,13 @@ No reiniciar VMs ni cambiar configuración delante del público para tapar el er
 
 | Falla | Señal | Qué hacer | Quién |
 |---|---|---|---|
-| Se cierra o se cuelga el CHR | B da errores en todos los pedidos; A: 0 sesiones BGP | Decir "esto es justamente un punto único de falla: el router de borde" y pasar al video. Al terminar la tanda, R1 y R2 lo recuperan según [confirmar con R2] | R2 |
-| `agent1` no vuelve | Sigue `NotReady` después de 30 s (lo normal es 2–5 s) | Seguir con dos nodos: el servicio anda igual (PDB mínimo 2). Avisar a R1 | R1 |
+| Se cae el router de borde (FRR en la principal, CHR en la de respaldo) | B da errores en todos los pedidos; A: 0 sesiones BGP | Decir "esto es justamente un punto único de falla: el router de borde" y pasar al video. Al terminar la tanda, quien opera la estación y R2 lo recuperan según [confirmar con R2] | R2 |
+| `agent1` no vuelve | Sigue `NotReady` después de 30 s (lo normal es 2–5 s) | Seguir con dos nodos: el servicio anda igual (PDB mínimo 2). Avisar a quien opera la estación (Naim en la principal, Ferrari en la de respaldo) | Quien opera |
 | La caída da 0 errores | No había un frontend en `agent1` | No es una falla: explicar que el router lo sacó y que Kubernetes no tenía réplicas ahí | R3 |
 | El rolling update se traba | `rollout status` no termina en 60 s | `k -n web rollout undo deployment/frontend` | R3 |
 | `prueba-netpol.sh` no da resultado | Sale sin las 8 líneas o se queda esperando los pods | Ctrl+C y mostrar la captura del 8 de 8; explicar las políticas con `k get netpol -A` | R4 |
-| Grafana no carga | Pantalla en blanco | Mostrar `k get nodes` y `k -n web get pods -o wide` en C y, en el router, las sesiones BGP para que se siga viendo la caída: `/routing bgp session print` en el CHR (en la réplica, `vtysh -c 'show bgp summary'` en el FRR). Si tampoco anda, pasar al video. Capturas de Grafana de respaldo en `capturas/` | R5 y R2 |
-| La estación no arranca | — | Pasar a la réplica en la Mac de Naim (segunda columna de [Comandos según la estación](#comandos-según-la-estación)). Si tampoco anda, el video y las capturas locales | Todos |
+| Grafana no carga | Pantalla en blanco | Mostrar `k get nodes` y `k -n web get pods -o wide` en C y, en el router, las sesiones BGP para que se siga viendo la caída: `vtysh -c 'show bgp summary'` en el FRR (en la de respaldo, `/routing bgp session print` en el CHR). Si tampoco anda, pasar al video. Capturas de Grafana de respaldo en `capturas/` | R5 y R2 |
+| La estación principal no arranca | — | Pasar a la de respaldo: QEMU en la Mac de Ferrari (segunda columna de [Comandos según la estación](#comandos-según-la-estación)). Si tampoco anda, el video y las capturas locales | Todos |
 
 Cuando la tabla dice "pasar al video", es el de [Video del plan B](#video-del-plan-b).
 
@@ -264,7 +264,7 @@ Cuando la tabla dice "pasar al video", es el de [Video del plan B](#video-del-pl
 | Enlace | [pendiente] |
 | Quién lo graba | R1 y R3 |
 | Cuándo | Lunes 16/11, en el ensayo con cronómetro, apenas el guion salga completo |
-| Dónde | En la estación que funcione ese día (QEMU o la réplica de Naim), con las ventanas A, B, C y D a la vista |
+| Dónde | En la estación principal (la réplica en la Mac de Naim) o, si no anda, en la de respaldo, con las ventanas A, B, C y D a la vista |
 | Qué tiene que mostrar | El guion completo (3 a 5 min): la caída de `agent1` con los errores sueltos y el `NotReady`, el rolling update y el rollback con `cambia de v1 a v2` en B, la segmentación 8 de 8 y el informe final de B |
 | Copias | Una en la Mac de la estación y otra en la de respaldo, para reproducirlo sin internet |
 
