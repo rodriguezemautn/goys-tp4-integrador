@@ -11,7 +11,7 @@
 |--------|-------------------|-----------------|
 | Ferrari, Agustín Nicolás | FerrariAgustinNicolas | 1. Infraestructura (levanta el laboratorio) |
 | Siadore, Valentino | valentinosiadore | 2. Red |
-|        |                   | 3. Aplicación y alta disponibilidad |
+| Kloster, Agustín Ignacio | AgusKlos | 3. Aplicación y alta disponibilidad |
 | Guarino, Naim Hernan | naimguar | 4. Seguridad |
 | Bellomo, Lorenzo | LoLoo03 | 5. Monitoreo, comunicación y backups |
 
@@ -35,13 +35,14 @@ El reparto y las fechas están en [PLAN.md](PLAN.md).
 | 15/11 | Pruebas de red de R2 y de alta disponibilidad de R3 corridas en la réplica, entregadas a cada uno | Naim | |
 | 15/11 | Memoria real de Grafana y de los nodos en la réplica | Naim | aeb4308 |
 | 15/11 | Revisión de los PR #2 (red) y #5 (documento, monitoreo y póster) | Naim | |
+| 15/11 | Alta disponibilidad: análisis de la caída, rolling update, rollback y drain; guion de la Feria; `medir-corte.sh` informa el cambio de versión; secciones 2.3, 3.2 y 5 (PR #4) | Agustín | fb29922, 772e9cf |
 
 ## 🚧 Pendientes / decisiones
 
 - [x] Definir tema definitivo
 - [x] Elegir modalidad: A
 - [x] Asignar roles (ver [PLAN.md](PLAN.md))
-- [ ] Completar nombres y usuarios de GitHub
+- [x] Completar nombres y usuarios de GitHub
 - [x] Elegir la estación: la PC del compañero con el rol 1
 - [x] Elegir la laptop de respaldo: la de Lorenzo, con Windows
 - [ ] Confirmar con los docentes las fechas (informe 10/11, Feria 17/11; el README dice 5/11) y el grupo de 5 (el README dice 3-4)
