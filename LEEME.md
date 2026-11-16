@@ -1,4 +1,4 @@
-> **Estación de Feria:** el laboratorio operativo usa [QEMU](demo/qemu/README.md).
+> **Estación de Feria:** la principal es la Mac de Naim (R4), con la réplica con contenedores y FRR en lugar del MikroTik ([`demo/prueba-ram/`](demo/prueba-ram/)). La de respaldo es la Mac de Ferrari (R1), con [QEMU](demo/qemu/README.md) y el CHR real.
 
 # Cómo levantar el laboratorio del TP4
 
