@@ -1,0 +1,40 @@
+# Pruebas de R4 en la estación QEMU (Mac de R1), 15/11
+# Las corrió R1 (Ferrari) en la estación; las salidas se transcriben tal como las pasó.
+
+## 1. Grafana antes de la prueba (sin reinicios nuevos durante la prueba)
+$ sudo k3s kubectl -n monitoring get pods
+NAME                       READY   STATUS    RESTARTS     AGE
+grafana-5565fb55bc-t7q8q   1/1     Running   9 (9h ago)   6d6h
+
+## 2. Segmentación, en k3s-server (código de salida 0; los pods temporales se borraron)
+$ sudo bash ./prueba-netpol.sh
+Pods de prueba listos; espero 15 s a que se apliquen las NetworkPolicies...
+OK      1. otros -> frontend:80 (servicio público)    permitido
+OK      2. otros -> backend:80                        bloqueado
+OK      3. web/frontend -> backend:80                 permitido
+OK      4. web/otro pod -> backend:80                  bloqueado
+OK      5. datos -> frontend:80 (egreso denegado)      bloqueado
+OK      6. datos -> kube-dns:53 (único egreso)         permitido
+OK      7. otros -> prometheus:9090                   bloqueado
+OK      8. otros -> grafana:3000                      permitido
+Resultado: 8 de 8
+
+## 3. Firewall del CHR
+# chr-borde.rsc no está cargado completo. La estación tiene cinco reglas IPv4 en input.
+# Prueba: TCP/22 desde k3s-server al CHR. Conectó con el descarte deshabilitado, dio timeout
+# al habilitarlo temporalmente y volvió a conectar al deshabilitarlo. El descarte registró
+# 3 paquetes (180 bytes) y quedó deshabilitado (X).
+[admin@CHR] > /ip firewall filter print stats
+Flags: X - DISABLED
+Columns: CHAIN, ACTION, BYTES, PACKETS
+#   CHAIN  ACTION    BYTES  PACKETS
+;;; TP4-R1-QEMU input established
+0   input  accept  142 563    2 052
+;;; TP4-R1-QEMU input BGP server
+1   input  accept        0        0
+;;; TP4-R1-QEMU input BGP agent1
+2   input  accept        0        0
+;;; TP4-R1-QEMU input BGP agent2
+3   input  accept        0        0
+;;; TP4-R1-QEMU input cierre pendiente
+4 X input  drop        180        3
