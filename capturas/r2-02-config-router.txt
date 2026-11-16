@@ -1,0 +1,40 @@
+Building configuration...
+
+Current configuration:
+!
+frr version 8.4_git
+frr defaults traditional
+hostname chr-replica
+log stdout
+no ipv6 forwarding
+!
+router bgp 65000
+ bgp router-id 10.10.10.1
+ neighbor K3S peer-group
+ neighbor K3S remote-as 64512
+ neighbor K3S password <borrada>
+ neighbor K3S timers 3 9
+ neighbor 10.10.10.11 peer-group K3S
+ neighbor 10.10.10.12 peer-group K3S
+ neighbor 10.10.10.13 peer-group K3S
+ !
+ address-family ipv4 unicast
+  neighbor K3S route-map K3S-IN in
+  neighbor K3S route-map K3S-OUT out
+  maximum-paths 3
+ exit-address-family
+exit
+!
+ip prefix-list SERVICIOS seq 10 permit 10.10.20.0/28 ge 32 le 32
+!
+route-map K3S-IN permit 10
+ match ip address prefix-list SERVICIOS
+exit
+!
+route-map K3S-IN deny 20
+exit
+!
+route-map K3S-OUT deny 10
+exit
+!
+end

@@ -1,0 +1,35 @@
+# Caída de agent1 (docker kill = matar el proceso de golpe, como kill a QEMU)
+Hora del router antes de matar agent1 (equivale a /system clock print): 16:51:09 UTC (el contenedor del router está en UTC; en hora local -03 es la línea siguiente)
+agent1 matado a las 13:51:09
+
+## 15 s después de matar agent1 — 13:51:24
+
+### Sesiones BGP (equivale a /routing bgp session print)
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+10.10.10.11     4      64512       916       914        0    0    0 00:03:45            1        0 N/A
+10.10.10.12     4      64512       760       756        0    0    0 00:00:15      Connect        0 N/A
+10.10.10.13     4      64512       947       946        0    0    0 00:47:12            1        0 N/A
+
+### Rutas BGP (equivale a /ip route print where bgp)
+B>* 10.10.20.10/32 [20/0] via 10.10.10.11, eth1, weight 1, 00:00:16
+  *                       via 10.10.10.13, eth1, weight 1, 00:00:16
+
+### Log del router (equivale a /log print where topics~"bgp")
+FRR no registra los cambios de vecino en su log con la configuración actual (no tiene "bgp log-neighbor-changes"), así que no hay líneas. La secuencia de la sesión de agent1 está en 05-captura-router.txt y en la línea de tiempo de R3.
+agent1 prendido de nuevo a las 13:52:10
+
+Sesión BGP de agent1 Established 5 s después de prenderlo
+Nodo agent1 Ready 5 s después de prenderlo
+
+## Después de volver a prender agent1 — 13:52:14
+
+### Sesiones BGP (equivale a /routing bgp session print)
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+10.10.10.11     4      64512       932       930        0    0    0 00:04:35            1        0 N/A
+10.10.10.12     4      64512       763       758        0    0    0 00:00:01            1        0 N/A
+10.10.10.13     4      64512       963       962        0    0    0 00:48:02            1        0 N/A
+
+### Rutas BGP (equivale a /ip route print where bgp)
+B>* 10.10.20.10/32 [20/0] via 10.10.10.11, eth1, weight 1, 00:00:01
+  *                       via 10.10.10.12, eth1, weight 1, 00:00:01
+  *                       via 10.10.10.13, eth1, weight 1, 00:00:01
