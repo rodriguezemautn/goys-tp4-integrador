@@ -48,8 +48,9 @@ spec:
           ports:
             - {name: http, containerPort: 3000}
           readinessProbe: {httpGet: {path: /api/health, port: 3000}, periodSeconds: 5}
-          # Con 384Mi se quedó sin memoria con el tablero abierto (capturas/r4-grafana-memoria.txt).
-          resources: {requests: {cpu: 50m, memory: 192Mi}, limits: {memory: 512Mi}}
+          # Con 384Mi y con 512Mi se quedó sin memoria al abrir el tablero (sección 4.2).
+          # 1Gi pide un server de 2 GB: ver demo/prueba-ram/replica-docker.sh.
+          resources: {requests: {cpu: 50m, memory: 192Mi}, limits: {memory: 1Gi}}
           volumeMounts:
             - {name: datos, mountPath: /var/lib/grafana}
             - {name: provisioning, mountPath: /etc/grafana/provisioning/datasources/datasources.yml, subPath: datasources.yml, readOnly: true}
