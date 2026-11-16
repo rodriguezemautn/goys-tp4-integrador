@@ -1,0 +1,16 @@
+# Captura del lado del router (eth1), con caída y vuelta de agent1 — 14:05:06
+14:05:06 agent1 matado (docker kill)
+14:05:07 sesión agent1: Idle
+14:05:08 sesión agent1: Connect
+14:05:33 agent1 prendido
+14:05:37 sesión agent1: 1
+
+paquetes: 151, con opción MD5: 151
+pares: 10.10.10.11 10.10.10.12 10.10.10.13
+mensajes BGP:
+     67 Keepalive Message
+      2 Open Message
+      1 Update Message
+
+intentos de conexión de/a agent1 (SYN):
+11
