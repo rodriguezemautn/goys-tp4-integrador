@@ -197,7 +197,7 @@ La estación principal es la réplica en la Mac de Naim (R4). La de respaldo es 
 
 | Paso | Principal: réplica con contenedores (Mac de Naim) | Respaldo: QEMU (Mac de Ferrari) |
 |---|---|---|
-| Medir (B) | `medir-corte.sh` desde el contenedor `cliente` [confirmar comando con Naim] | [confirmar: la Mac no llega a 10.10.20.10; hace falta un cliente del otro lado del CHR] |
+| Medir (B) | `./lab.sh medir 30` | [confirmar: la Mac no llega a 10.10.20.10; hace falta un cliente del otro lado del CHR] |
 | Entrar al server (C) | `colima ssh --profile tp4 -- docker exec -it k3s-server sh` (`kubectl` directo) | [confirmar] |
 | Apagar `agent1` | `./lab.sh caer-nodo agent1` | Matar el proceso de QEMU de `agent1` [confirmar comando] |
 | Prender `agent1` | `./lab.sh levantar-nodo agent1` | Relanzar `agent1` [confirmar comando] |

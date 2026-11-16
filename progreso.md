@@ -43,8 +43,8 @@ El reparto y las fechas están en [PLAN.md](PLAN.md).
 - [x] Elegir modalidad: A
 - [x] Asignar roles (ver [PLAN.md](PLAN.md))
 - [x] Completar nombres y usuarios de GitHub
-- [x] Elegir la estación: la PC del compañero con el rol 1
-- [x] Elegir la laptop de respaldo: la de Lorenzo, con Windows
+- [x] Elegir la estación: la Mac de Naim (R4), con la réplica con contenedores
+- [x] Elegir la estación de respaldo: la Mac de Ferrari (R1), con QEMU y el CHR
 - [ ] Confirmar con los docentes las fechas (informe 10/11, Feria 17/11; el README dice 5/11) y el grupo de 5 (el README dice 3-4)
 - [ ] Cada integrante configura su identidad de git ("Apellido, Nombre")
 
