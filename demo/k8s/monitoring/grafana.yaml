@@ -48,7 +48,8 @@ spec:
           ports:
             - {name: http, containerPort: 3000}
           readinessProbe: {httpGet: {path: /api/health, port: 3000}, periodSeconds: 5}
-          resources: {requests: {cpu: 50m, memory: 192Mi}, limits: {memory: 384Mi}}
+          # Con 384Mi se quedó sin memoria con el tablero abierto (capturas/r4-grafana-memoria.txt).
+          resources: {requests: {cpu: 50m, memory: 192Mi}, limits: {memory: 512Mi}}
           volumeMounts:
             - {name: datos, mountPath: /var/lib/grafana}
             - {name: provisioning, mountPath: /etc/grafana/provisioning/datasources/datasources.yml, subPath: datasources.yml, readOnly: true}

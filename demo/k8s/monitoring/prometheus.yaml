@@ -88,12 +88,15 @@ data:
             labels: {severity: critical}
             annotations:
               summary: "Nodo {{ $labels.nodo }} caído"
+          # Cada speaker publica metallb_bgp_session_up dos veces: peer "10.10.10.1:179" (la sesión
+          # real) y peer "10.10.10.1", que vale 0 siempre. Y al morir un speaker sus series
+          # desaparecen en lugar de valer 0. Por eso se cuentan las establecidas en vez de mirar == 0.
           - alert: SesionBGPCaida
-            expr: metallb_bgp_session_up == 0
+            expr: (count(metallb_bgp_session_up{peer=~".*:179"} == 1) or vector(0)) < 3
             for: 10s
             labels: {severity: critical}
             annotations:
-              summary: "Sesión BGP de {{ $labels.nodo }} caída"
+              summary: "Hay {{ $value }} de 3 sesiones BGP establecidas con el CHR"
 ---
 apiVersion: apps/v1
 kind: Deployment
